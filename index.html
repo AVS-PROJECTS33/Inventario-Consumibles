@@ -548,17 +548,17 @@
                                     for(let i=0; i<10; i++) {
                                         document.write(`
                                             <tr class="bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
-                                                <td class="p-2"><input type="text" class="excel-input w-full min-w-[120px]"></td>
-                                                <td class="p-2"><input type="date" class="excel-input w-full min-w-[130px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="text" class="excel-input w-full min-w-[100px]"></td>
-                                                <td class="p-2"><input type="text" class="excel-input w-full min-w-[150px]"></td>
+                                                <td class="p-2"><input type="text" id="descarga-nombre-${i}" class="excel-input w-full min-w-[120px]"></td>
+                                                <td class="p-2"><input type="date" id="descarga-fecha-${i}" class="excel-input w-full min-w-[130px]"></td>
+                                                <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-mediana-woman', this)"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-grande-man', this)"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-woman', this)"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-man', this)"></td>
+                                                <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-tapeta', this)"></td>
+                                                <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]"></td>
+                                                <td class="p-2"><input type="text" id="descarga-palets-${i}" class="excel-input w-full min-w-[100px]"></td>
+                                                <td class="p-2"><input type="text" id="descarga-obs-${i}" class="excel-input w-full min-w-[150px]"></td>
                                             </tr>
                                         `);
                                     }
