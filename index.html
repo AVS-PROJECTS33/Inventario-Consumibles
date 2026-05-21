@@ -682,22 +682,22 @@
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
-                                    <!-- FIX: Añadido oninput con divideBy 1 (por defecto) -->
+                                    <!-- FIX: Gasto manual resta 1 a 1 del stock -->
                                     <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
-                                    <!-- FIX: Añadido oninput con divideBy 1 (por defecto) -->
+                                    <!-- FIX: Gasto manual resta 1 a 1 del stock -->
                                     <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
-                                    <!-- FIX: Añadido oninput con divideBy 1 (por defecto) -->
+                                    <!-- FIX: Gasto manual resta 1 a 1 del stock -->
                                     <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-grande-man', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
-                                    <!-- FIX: Añadido oninput con divideBy 1 (por defecto) -->
+                                    <!-- FIX: Gasto manual resta 1 a 1 del stock -->
                                     <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-man', this)">
                                 </div>
                             </div>
@@ -1209,18 +1209,22 @@
                     const newStockVal = currentStock - delta;
                     stockEl.value = newStockVal; // Actualiza visualmente el Stock
                     
-                    // FIX: Sincronizar también con Confección si es aplicable y recalcular gasto en tiempo real
+                    // FIX: Sincronizar también con Confección SOLO para los campos de Cajas/Tapeta que reflejan inventario
                     const itemRawName = stockId.replace('stock-', '');
-                    const confEl = document.getElementById(`confeccion-${itemRawName}`);
-                    if (confEl) {
-                        confEl.value = newStockVal;
-                        if(typeof window.calculateGastadoConfeccion === 'function') {
-                            window.calculateGastadoConfeccion();
+                    const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                    
+                    if (inventoryItems.includes(itemRawName)) {
+                        const confEl = document.getElementById(`confeccion-${itemRawName}`);
+                        if (confEl) {
+                            confEl.value = newStockVal;
+                            if(typeof window.calculateGastadoConfeccion === 'function') {
+                                window.calculateGastadoConfeccion();
+                            }
+                            if(window.saveTab) window.saveTab('Confeccion', true);
                         }
                     }
 
                     if(window.saveTab) window.saveTab('Stock', true);
-                    if(window.saveTab && confEl) window.saveTab('Confeccion', true);
                 }
             } else {
                 if (window.db && window.doc && window.getDoc && window.setDoc && window.DB_COLLECTION) {
