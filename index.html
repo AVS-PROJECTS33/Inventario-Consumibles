@@ -99,8 +99,20 @@
         }
 
         /* --- NUEVOS ESTILOS MODERNOS (DASHBOARD) --- */
+        :root {
+            --main-alpha: 0.95;
+            --card-alpha: 1;
+        }
+        
+        .main-dashboard-bg {
+            background-color: rgba(255, 255, 255, var(--main-alpha));
+        }
+        .dark .main-dashboard-bg {
+            background-color: rgba(31, 41, 55, var(--main-alpha));
+        }
+
         .modern-card {
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, var(--card-alpha));
             border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: 1px solid #e5e7eb;
@@ -108,7 +120,7 @@
             transition: all 0.3s ease;
         }
         .dark .modern-card {
-            background-color: #1f2937;
+            background-color: rgba(31, 41, 55, var(--card-alpha));
             border-color: #374151;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
@@ -184,7 +196,7 @@
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 text-center">
             <div class="text-5xl mb-4">🔒</div>
-            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Acceso AVS</h2>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-6">INVENTARIO/CONSUMIBLES</h2>
             <input type="password" id="login-password" class="modern-input mb-4 w-full text-center tracking-widest text-lg" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') checkLogin()">
             <button onclick="checkLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">Entrar al Panel</button>
             <p id="login-error" class="text-red-500 text-sm font-bold mt-4 opacity-0 transition-opacity">Contraseña incorrecta</p>
@@ -192,7 +204,7 @@
     </div>
 
     <!-- Contenedor ultra-ancho (w-[98%] max-w-full) Oculto al inicio -->
-    <div id="main-dashboard" class="w-[98%] max-w-full mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700 hidden">
+    <div id="main-dashboard" class="w-[98%] max-w-full mx-auto main-dashboard-bg backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700 hidden">
         
         <!-- Navegación de Pestañas (Modo oscuro movido a la izquierda) -->
         <div class="flex items-center border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
@@ -221,6 +233,9 @@
                 </button>
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'GastoPromedio')">
                     6. Gasto Promedio
+                </button>
+                <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'Ajustes')">
+                    7. Ajustes
                 </button>
             </div>
         </div>
@@ -952,6 +967,45 @@
                 </div>
             </div>
 
+            <!-- ================= PESTAÑA 7: AJUSTES ================= -->
+            <div id="Ajustes" class="tabcontent">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
+                        <span class="text-gray-500">⚙️</span> Ajustes de Apariencia
+                    </h2>
+                </div>
+
+                <div class="modern-card border-t-4 border-t-gray-500 p-8 max-w-2xl mx-auto">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">Personalización del Entorno</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Opacidad del Panel Principal (Fondo)</span>
+                                <span id="val-main-opacity" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">95%</span>
+                            </label>
+                            <input type="range" id="slider-main-opacity" min="40" max="100" value="95" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta cómo de transparente es la caja gigante que engloba toda la aplicación para ver la imagen de fondo.</p>
+                        </div>
+                        
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Opacidad de las Tarjetas Internas</span>
+                                <span id="val-card-opacity" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">100%</span>
+                            </label>
+                            <input type="range" id="slider-card-opacity" min="20" max="100" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta la transparencia de las tarjetas blancas/oscuras individuales dentro de cada pestaña.</p>
+                        </div>
+                        
+                        <div class="pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                             <button onclick="resetOpacities()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                 <span>🔄</span> Restaurar Valores por Defecto
+                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1444,6 +1498,14 @@
         }
 
         // --- FUNCIONES DE AJUSTE DE OPACIDAD ---
+        function resetOpacities() {
+            const mainSlider = document.getElementById('slider-main-opacity');
+            const cardSlider = document.getElementById('slider-card-opacity');
+            if (mainSlider) mainSlider.value = 95;
+            if (cardSlider) cardSlider.value = 100;
+            updateOpacities();
+        }
+
         function updateOpacities() {
             const mainSlider = document.getElementById('slider-main-opacity');
             const cardSlider = document.getElementById('slider-card-opacity');
@@ -1543,19 +1605,7 @@
             "Cola": ["Todos", "Cola"]
         };
 
-        function updateTypeDropdown() {
-            const cat = document.getElementById('filter-category').value;
-            const typeSelect = document.getElementById('filter-type');
-            
-            typeSelect.innerHTML = '';
-            subtipos[cat].forEach(tipo => {
-                let opt = document.createElement('option');
-                opt.value = tipo;
-                opt.textContent = tipo;
-                typeSelect.appendChild(opt);
-            });
-            updateChart();
-        }
+        let gastoChartInstance = null;
 
         function initChart() {
             const ctx = document.getElementById('gastoChart');
@@ -1570,7 +1620,7 @@
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                     datasets: [{
                         label: 'Gasto Promedio',
-                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Inicia a 0
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         backgroundColor: 'rgba(99, 102, 241, 0.85)',
                         borderColor: 'rgb(79, 70, 229)',
                         borderWidth: 1,
@@ -1589,6 +1639,80 @@
             });
         }
 
+        function updateTypeDropdown() {
+            const cat = document.getElementById('filter-category').value;
+            const typeSelect = document.getElementById('filter-type');
+            
+            typeSelect.innerHTML = '';
+            subtipos[cat].forEach(tipo => {
+                let opt = document.createElement('option');
+                opt.value = tipo;
+                opt.textContent = tipo;
+                typeSelect.appendChild(opt);
+            });
+            updateChart();
+        }
+
+        function getAmountForCategory(cat, type, data, docSection) {
+            let amt = 0;
+            if (docSection === 'Paqueteria') {
+                if (cat === 'Precinto') {
+                    if (type === 'Todos' || type === 'Precinto Logo') amt += Number(data['paqueteria-precinto-plataforma'] || 0);
+                    if (type === 'Todos' || type === 'Precinto Blanco') amt += Number(data['paqueteria-precinto-blanco'] || 0);
+                }
+                if (cat === 'Etiquetas') {
+                    if (type === 'Todos' || type === 'Etiquetas Tienda') amt += Number(data['paqueteria-etiqueta-tienda'] || 0);
+                }
+                if (cat === 'Matriculas') {
+                    if (type === 'Todos' || type === 'Matricula CS8') amt += Number(data['paqueteria-matricula-cs8'] || 0);
+                }
+                if (cat === 'Bobina') {
+                    if (type === 'Todos' || type === 'Bobina 800') amt += Number(data['paqueteria-bobina-800'] || 0);
+                    if (type === 'Todos' || type === 'Bobina 1200') amt += Number(data['paqueteria-bobina-1200'] || 0);
+                }
+            }
+            if (docSection === 'Confeccion') {
+                if (cat === 'Precinto') {
+                    if (type === 'Todos' || type === 'Precinto Logo') amt += Number(data['confeccion-precinto-logo'] || 0);
+                    if (type === 'Todos' || type === 'Precinto Blanco') amt += Number(data['confeccion-precinto-blanco'] || 0);
+                }
+                if (cat === 'Etiquetas') {
+                    if (type === 'Todos' || type === 'Etiquetas Tienda') amt += Number(data['confeccion-etiqueta-tienda'] || 0);
+                }
+                if (cat === 'Matriculas') {
+                    if (type === 'Todos' || type === 'Matriculas CVC1') amt += Number(data['confeccion-matricula-cvc1'] || 0);
+                }
+                if (cat === 'Cola') {
+                    if (type === 'Todos' || type === 'Cola') amt += Number(data['confeccion-cola'] || 0);
+                }
+            }
+            if (docSection === 'Formadoras') {
+                if (cat === 'Caja') {
+                    let valMedianaWoman = 0, valGpWoman = 0, valGrandeMan = 0, valGpMan = 0;
+                    
+                    valMedianaWoman += Number(data['formadora-antigua-caja-mediana-woman'] || 0) / 100;
+                    valGpWoman += Number(data['formadora-nueva-caja-gp-woman'] || 0) / 100;
+                    valGpMan += Number(data['formadora-nueva-caja-gp-man'] || 0) / 100;
+                    valMedianaWoman += Number(data['formadora-nueva-caja-mediana-woman'] || 0) / 100;
+                    valGrandeMan += Number(data['formadora-nueva-caja-grande-man'] || 0) / 100;
+                    
+                    valMedianaWoman += Number(data['formadora-manual-caja-mediana-woman'] || 0);
+                    valGpWoman += Number(data['formadora-manual-caja-gp-woman'] || 0);
+                    valGrandeMan += Number(data['formadora-manual-caja-grande-man'] || 0);
+                    valGpMan += Number(data['formadora-manual-caja-gp-man'] || 0);
+                    
+                    if (type === 'Todos' || type === 'Caja Mediana Woman') amt += valMedianaWoman;
+                    if (type === 'Todos' || type === 'Caja GP Woman') amt += valGpWoman;
+                    if (type === 'Todos' || type === 'Caja Grande Man') amt += valGrandeMan;
+                    if (type === 'Todos' || type === 'Caja GP Man') amt += valGpMan;
+                }
+                if (cat === 'Cola') {
+                    if (type === 'Todos' || type === 'Cola') amt += Number(data['formadora-manual-cola'] || 0);
+                }
+            }
+            return amt;
+        }
+
         async function updateChart() {
             if (!gastoChartInstance) return;
             const month = document.getElementById('filter-month').value;
@@ -1598,18 +1722,22 @@
             const section = document.getElementById('filter-section').value;
             
             let newLabels = [];
-            let dataArray = [];
             if (month !== 'Todos') {
                 newLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5'];
-                dataArray = [0, 0, 0, 0, 0];
             } else {
                 newLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-                dataArray = [0,0,0,0,0,0,0,0,0,0,0,0];
             }
             
-            // Si la categoría está soportada y estamos conectados a Firebase, buscar datos
             const validCategories = ['Caja', 'Precinto', 'Etiquetas', 'Matriculas', 'Bobina', 'Cola'];
-            if (validCategories.includes(category) && window.db && window.getDocs) {
+            let isAll = category === 'Todas';
+            let categoriesToProcess = isAll ? validCategories : [category];
+            
+            let catDataArrays = {};
+            categoriesToProcess.forEach(c => {
+                catDataArrays[c] = (month !== 'Todos') ? [0,0,0,0,0] : [0,0,0,0,0,0,0,0,0,0,0,0];
+            });
+            
+            if (window.db && window.getDocs && window.DB_COLLECTION) {
                 try {
                     const querySnapshot = await window.getDocs(window.collection(window.db, window.DB_COLLECTION));
                     querySnapshot.forEach((doc) => {
@@ -1623,82 +1751,24 @@
                                 if (section !== 'Todas' && docSection !== section) return;
                                 
                                 const data = doc.data();
-                                let amount = 0;
+                                const d = new Date(parseInt(docYear), 0, 1 + (docWeek - 1) * 7);
+                                const docMonth = d.getMonth();
 
-                                if (docSection === 'Paqueteria') {
-                                    if (category === 'Precinto') {
-                                        if (type === 'Todos' || type === 'Precinto Logo') amount += Number(data['paqueteria-precinto-plataforma'] || 0);
-                                        if (type === 'Todos' || type === 'Precinto Blanco') amount += Number(data['paqueteria-precinto-blanco'] || 0);
-                                    }
-                                    if (category === 'Etiquetas') {
-                                        if (type === 'Todos' || type === 'Etiquetas Tienda') amount += Number(data['paqueteria-etiqueta-tienda'] || 0);
-                                    }
-                                    if (category === 'Matriculas') {
-                                        if (type === 'Todos' || type === 'Matricula CS8') amount += Number(data['paqueteria-matricula-cs8'] || 0);
-                                    }
-                                    if (category === 'Bobina') {
-                                        if (type === 'Todos' || type === 'Bobina 800') amount += Number(data['paqueteria-bobina-800'] || 0);
-                                        if (type === 'Todos' || type === 'Bobina 1200') amount += Number(data['paqueteria-bobina-1200'] || 0);
-                                    }
-                                }
-                                if (docSection === 'Confeccion') {
-                                    if (category === 'Precinto') {
-                                        if (type === 'Todos' || type === 'Precinto Logo') amount += Number(data['confeccion-precinto-logo'] || 0);
-                                        if (type === 'Todos' || type === 'Precinto Blanco') amount += Number(data['confeccion-precinto-blanco'] || 0);
-                                    }
-                                    if (category === 'Etiquetas') {
-                                        if (type === 'Todos' || type === 'Etiquetas Tienda') amount += Number(data['confeccion-etiqueta-tienda'] || 0);
-                                    }
-                                    if (category === 'Matriculas') {
-                                        if (type === 'Todos' || type === 'Matriculas CVC1') amount += Number(data['confeccion-matricula-cvc1'] || 0);
-                                    }
-                                    if (category === 'Cola') {
-                                        if (type === 'Todos' || type === 'Cola') amount += Number(data['confeccion-cola'] || 0);
-                                    }
-                                }
-                                if (docSection === 'Formadoras') {
-                                    if (category === 'Caja') {
-                                        let valMedianaWoman = 0;
-                                        let valGpWoman = 0;
-                                        let valGrandeMan = 0;
-                                        let valGpMan = 0;
-                                        
-                                        // Formadora Antigua (Dividido por 100)
-                                        valMedianaWoman += Number(data['formadora-antigua-caja-mediana-woman'] || 0) / 100;
-                                        
-                                        // Formadora Nueva (Dividido por 100)
-                                        valGpWoman += Number(data['formadora-nueva-caja-gp-woman'] || 0) / 100;
-                                        valGpMan += Number(data['formadora-nueva-caja-gp-man'] || 0) / 100;
-                                        valMedianaWoman += Number(data['formadora-nueva-caja-mediana-woman'] || 0) / 100;
-                                        valGrandeMan += Number(data['formadora-nueva-caja-grande-man'] || 0) / 100;
-                                        
-                                        // Gasto Manual (Suma directa, sin dividir)
-                                        valMedianaWoman += Number(data['formadora-manual-caja-mediana-woman'] || 0);
-                                        valGpWoman += Number(data['formadora-manual-caja-gp-woman'] || 0);
-                                        valGrandeMan += Number(data['formadora-manual-caja-grande-man'] || 0);
-                                        valGpMan += Number(data['formadora-manual-caja-gp-man'] || 0);
-                                        
-                                        if (type === 'Todos' || type === 'Caja Mediana Woman') amount += valMedianaWoman;
-                                        if (type === 'Todos' || type === 'Caja GP Woman') amount += valGpWoman;
-                                        if (type === 'Todos' || type === 'Caja Grande Man') amount += valGrandeMan;
-                                        if (type === 'Todos' || type === 'Caja GP Man') amount += valGpMan;
-                                    }
-                                    if (category === 'Cola') {
-                                        if (type === 'Todos' || type === 'Cola') amount += Number(data['formadora-manual-cola'] || 0);
-                                    }
+                                let targetIndex = -1;
+                                if (month === 'Todos') {
+                                    targetIndex = docMonth;
+                                } else if (docMonth.toString() === month) {
+                                    const weekOfMonth = Math.floor(d.getDate() / 7);
+                                    if (weekOfMonth >= 0 && weekOfMonth < 5) targetIndex = weekOfMonth;
                                 }
 
-                                if (amount > 0) {
-                                    // Calcular el mes a partir de la semana (aproximación visual)
-                                    const d = new Date(parseInt(docYear), 0, 1 + (docWeek - 1) * 7);
-                                    const docMonth = d.getMonth();
-
-                                    if (month === 'Todos') {
-                                        dataArray[docMonth] += amount;
-                                    } else if (docMonth.toString() === month) {
-                                        const weekOfMonth = Math.floor(d.getDate() / 7);
-                                        if (weekOfMonth >= 0 && weekOfMonth < 5) dataArray[weekOfMonth] += amount;
-                                    }
+                                if (targetIndex !== -1) {
+                                    categoriesToProcess.forEach(cat => {
+                                        let amount = getAmountForCategory(cat, (isAll ? 'Todos' : type), data, docSection);
+                                        if (amount > 0) {
+                                            catDataArrays[cat][targetIndex] += amount;
+                                        }
+                                    });
                                 }
                             }
                         }
@@ -1708,7 +1778,37 @@
                 }
             }
             
-            gastoChartInstance.data.datasets[0].data = dataArray;
+            const bgColors = {
+                'Caja': 'rgba(234, 88, 12, 0.85)',
+                'Precinto': 'rgba(22, 163, 74, 0.85)',
+                'Etiquetas': 'rgba(37, 99, 235, 0.85)',
+                'Matriculas': 'rgba(147, 51, 234, 0.85)',
+                'Bobina': 'rgba(234, 179, 8, 0.85)',
+                'Cola': 'rgba(75, 85, 99, 0.85)'
+            };
+            
+            const borderColors = {
+                'Caja': 'rgb(234, 88, 12)',
+                'Precinto': 'rgb(22, 163, 74)',
+                'Etiquetas': 'rgb(37, 99, 235)',
+                'Matriculas': 'rgb(147, 51, 234)',
+                'Bobina': 'rgb(234, 179, 8)',
+                'Cola': 'rgb(75, 85, 99)'
+            };
+
+            let datasets = [];
+            categoriesToProcess.forEach(c => {
+                datasets.push({
+                    label: isAll ? `Gasto ${c}` : (type === 'Todos' ? `Total ${c}` : type),
+                    data: catDataArrays[c],
+                    backgroundColor: bgColors[c] || 'rgba(99, 102, 241, 0.85)',
+                    borderColor: borderColors[c] || 'rgb(79, 70, 229)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                });
+            });
+            
+            gastoChartInstance.data.datasets = datasets;
             gastoChartInstance.data.labels = newLabels;
             gastoChartInstance.update();
         }
