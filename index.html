@@ -98,8 +98,13 @@
         :root {
             --main-alpha: 0.95;
             --card-alpha: 1;
+            --app-brightness: 1;
         }
         
+        #main-dashboard {
+            filter: brightness(var(--app-brightness));
+        }
+
         .main-dashboard-bg {
             background-color: rgba(255, 255, 255, var(--main-alpha));
         }
@@ -206,7 +211,6 @@
             <button onclick="toggleDarkMode()" class="p-2 ml-4 mr-2 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition shadow shrink-0" title="Alternar modo oscuro">
                 <span id="theme-icon" class="text-xl leading-none block">☀️</span>
             </button>
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-4 shrink-0 tracking-wider">AVS v.1.0</span>
             
             <div class="flex flex-grow">
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap" onclick="openTab(event, 'Paqueteria')" id="defaultOpen">
@@ -981,6 +985,15 @@
                             <p class="text-xs text-gray-500 mt-2">Ajusta la transparencia de las tarjetas blancas/oscuras individuales dentro de cada pestaña.</p>
                         </div>
                         
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Brillo General (Claro / Oscuro)</span>
+                                <span id="val-brightness" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">100%</span>
+                            </label>
+                            <input type="range" id="slider-brightness" min="50" max="150" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta el brillo del panel para encontrar un punto medio perfecto entre el modo claro y oscuro.</p>
+                        </div>
+
                         <div class="pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
                              <button onclick="resetOpacities()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
                                  <span>🔄</span> Restaurar Valores por Defecto
@@ -1467,36 +1480,50 @@
         function resetOpacities() {
             const mainSlider = document.getElementById('slider-main-opacity');
             const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
+            
             if (mainSlider) mainSlider.value = 95;
             if (cardSlider) cardSlider.value = 100;
+            if (brightnessSlider) brightnessSlider.value = 100;
+            
             updateOpacities();
         }
 
         function updateOpacities() {
             const mainSlider = document.getElementById('slider-main-opacity');
             const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
             
-            if (!mainSlider || !cardSlider) return;
+            if (mainSlider && cardSlider) {
+                const mainOp = mainSlider.value / 100;
+                const cardOp = cardSlider.value / 100;
+                
+                document.documentElement.style.setProperty('--main-alpha', mainOp);
+                document.documentElement.style.setProperty('--card-alpha', cardOp);
+                
+                document.getElementById('val-main-opacity').textContent = mainSlider.value + '%';
+                document.getElementById('val-card-opacity').textContent = cardSlider.value + '%';
 
-            const mainOp = mainSlider.value / 100;
-            const cardOp = cardSlider.value / 100;
-            
-            document.documentElement.style.setProperty('--main-alpha', mainOp);
-            document.documentElement.style.setProperty('--card-alpha', cardOp);
-            
-            document.getElementById('val-main-opacity').textContent = mainSlider.value + '%';
-            document.getElementById('val-card-opacity').textContent = cardSlider.value + '%';
+                localStorage.setItem('mainOpacity', mainSlider.value);
+                localStorage.setItem('cardOpacity', cardSlider.value);
+            }
 
-            localStorage.setItem('mainOpacity', mainSlider.value);
-            localStorage.setItem('cardOpacity', cardSlider.value);
+            if (brightnessSlider) {
+                const brightness = brightnessSlider.value / 100;
+                document.documentElement.style.setProperty('--app-brightness', brightness);
+                document.getElementById('val-brightness').textContent = brightnessSlider.value + '%';
+                localStorage.setItem('appBrightness', brightnessSlider.value);
+            }
         }
 
         function initOpacities() {
             const savedMain = localStorage.getItem('mainOpacity');
             const savedCard = localStorage.getItem('cardOpacity');
+            const savedBrightness = localStorage.getItem('appBrightness');
             
             const mainSlider = document.getElementById('slider-main-opacity');
             const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
             
             if (savedMain && mainSlider) {
                 mainSlider.value = savedMain;
@@ -1507,6 +1534,11 @@
                 cardSlider.value = savedCard;
                 document.documentElement.style.setProperty('--card-alpha', savedCard / 100);
                 document.getElementById('val-card-opacity').textContent = savedCard + '%';
+            }
+            if (savedBrightness && brightnessSlider) {
+                brightnessSlider.value = savedBrightness;
+                document.documentElement.style.setProperty('--app-brightness', savedBrightness / 100);
+                document.getElementById('val-brightness').textContent = savedBrightness + '%';
             }
         }
 
