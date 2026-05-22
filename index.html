@@ -180,8 +180,19 @@
 </head>
 <body class="text-gray-900 dark:text-gray-100 min-h-screen p-4 transition-colors duration-200">
 
-    <!-- Contenedor ultra-ancho (w-[98%] max-w-full) -->
-    <div id="main-dashboard" class="w-[98%] max-w-full mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700">
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div class="text-5xl mb-4">🔒</div>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Acceso AVS</h2>
+            <input type="password" id="login-password" class="modern-input mb-4 w-full text-center tracking-widest text-lg" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <button onclick="checkLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">Entrar al Panel</button>
+            <p id="login-error" class="text-red-500 text-sm font-bold mt-4 opacity-0 transition-opacity">Contraseña incorrecta</p>
+        </div>
+    </div>
+
+    <!-- Contenedor ultra-ancho (w-[98%] max-w-full) Oculto al inicio -->
+    <div id="main-dashboard" class="w-[98%] max-w-full mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700 hidden">
         
         <!-- Navegación de Pestañas (Modo oscuro movido a la izquierda) -->
         <div class="flex items-center border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
@@ -222,9 +233,6 @@
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                         <span class="text-[#7CB342]">📦</span> Panel de Paquetería
                     </h2>
-                    <button onclick="saveTab('Paqueteria')" id="btn-save-Paqueteria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center gap-2">
-                        <span>💾</span> Guardar Datos
-                    </button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -360,10 +368,6 @@
                             <select id="week-Confeccion" class="modern-input week-selector cursor-pointer text-sm w-48" onchange="loadTab('Confeccion'); updateRangoSemana(this.value)"></select>
                             <select id="year-Confeccion" class="modern-input year-selector cursor-pointer text-sm w-28" onchange="loadTab('Confeccion')"></select>
                         </div>
-                        
-                        <button onclick="saveTab('Confeccion')" id="btn-save-Confeccion" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                            <span>💾</span> Guardar
-                        </button>
                     </div>
                 </div>
 
@@ -518,9 +522,6 @@
                             <select id="week-Descarga" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Descarga')"></select>
                             <select id="year-Descarga" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Descarga')"></select>
                         </div>
-                        <button onclick="saveTab('Descarga')" id="btn-save-Descarga" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                            <span>💾</span> Guardar
-                        </button>
                     </div>
                 </div>
 
@@ -550,13 +551,13 @@
                                             <tr class="bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
                                                 <td class="p-2"><input type="text" id="descarga-nombre-${i}" class="excel-input w-full min-w-[120px]"></td>
                                                 <td class="p-2"><input type="date" id="descarga-fecha-${i}" class="excel-input w-full min-w-[130px]"></td>
-                                                <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-mediana-woman', this)"></td>
-                                                <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-grande-man', this)"></td>
-                                                <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-woman', this)"></td>
-                                                <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-man', this)"></td>
-                                                <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-tapeta', this)"></td>
-                                                <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]"></td>
-                                                <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]"></td>
+                                                <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-mediana-woman', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-grande-man', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-woman', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-man', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-tapeta', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
                                                 <td class="p-2"><input type="text" id="descarga-palets-${i}" class="excel-input w-full min-w-[100px]"></td>
                                                 <td class="p-2"><input type="text" id="descarga-obs-${i}" class="excel-input w-full min-w-[150px]"></td>
                                             </tr>
@@ -579,38 +580,38 @@
                             <tbody class="text-sm">
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">MEDIANA</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-mediana-woman" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-mediana-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-mediana" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">GRANDE</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-grande-man" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-grande-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-grande" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">G/P/W</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-gp-woman" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-gp-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-gpw" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">G/P</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-gp-man" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-gp-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-gp" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">TAPETA</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-tapeta" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-tapeta" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-tapeta" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">Mini PAQ</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-minipaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-minipaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">Grande PAQ</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" class="excel-input" value=""></td>
-                                    <td class="text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-grandepaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-grandepaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -629,9 +630,6 @@
                             <select id="week-Formadoras" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Formadoras')"></select>
                             <select id="year-Formadoras" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Formadoras')"></select>
                         </div>
-                        <button onclick="saveTab('Formadoras')" id="btn-save-Formadoras" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                            <span>💾</span> Guardar
-                        </button>
                     </div>
                 </div>
 
@@ -758,13 +756,13 @@
                         <span class="text-[#ED7D31]">📋</span> Stock Inventario
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button id="btn-unlock-stock" onclick="toggleStockLock()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
+                            <span id="lock-icon">🔒</span> Bloqueado
+                        </button>
                         <div class="flex gap-2 w-full sm:w-auto">
                             <select id="week-Stock" class="modern-input week-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 w-48" onchange="loadTab('Stock')"></select>
                             <select id="year-Stock" class="modern-input year-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 w-28" onchange="loadTab('Stock')"></select>
                         </div>
-                        <button onclick="saveTab('Stock')" id="btn-save-Stock" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                            <span>💾</span> Guardar
-                        </button>
                     </div>
                 </div>
 
@@ -776,9 +774,7 @@
                                     <th class="text-left w-64">Nombre Artículo</th>
                                     <th class="w-32">SECCIÓN</th>
                                     <th class="w-32">Referencia</th>
-                                    <th class="w-40">
-                                        Stock Actual
-                                    </th>
+                                    <th class="w-40">Stock Actual</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -787,31 +783,31 @@
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA MEDIANA WOMAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260853</td>
-                                    <td><input type="number" id="stock-caja-mediana-woman" data-old-id="val_10" class="modern-input" value="" oninput="syncToConfeccion('caja-mediana-woman', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-mediana-woman" data-old-id="val_10" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-mediana-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA G/P/W (WOMAN)</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260852</td>
-                                    <td><input type="number" id="stock-caja-gp-woman" data-old-id="val_4" class="modern-input" value="" oninput="syncToConfeccion('caja-gp-woman', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-gp-woman" data-old-id="val_4" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GRANDE MAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260856</td>
-                                    <td><input type="number" id="stock-caja-grande-man" data-old-id="val_7" class="modern-input" value="" oninput="syncToConfeccion('caja-grande-man', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-grande-man" data-old-id="val_7" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-grande-man', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GP MAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260855</td>
-                                    <td><input type="number" id="stock-caja-gp-man" data-old-id="val_1" class="modern-input" value="" oninput="syncToConfeccion('caja-gp-man', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-gp-man" data-old-id="val_1" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-man', this.value)"></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">TAPETA</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260862</td>
-                                    <td><input type="number" id="stock-tapeta" class="modern-input" value="" oninput="syncToConfeccion('tapeta', this.value)"></td>
+                                    <td><input type="number" id="stock-tapeta" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('tapeta', this.value)"></td>
                                 </tr>
 
                                 <!-- PRECINTOS -->
@@ -819,13 +815,13 @@
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO BLANCO</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150022299</td>
-                                    <td><input type="number" id="stock-precinto-blanco" data-old-id="val_13" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-precinto-blanco" data-old-id="val_13" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO CARRUSEL PLATAFORMA LOGO</td>
                                     <td><span class="bg-blue-200 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">CONFE. PAQ.</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">700288</td>
-                                    <td><input type="number" id="stock-precinto-logo" data-old-id="val_16" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-precinto-logo" data-old-id="val_16" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- ETIQUETAS Y MATRICULAS -->
@@ -833,19 +829,19 @@
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">ETIQUETAS BLANCAS (120X70)</td>
                                     <td><span class="bg-blue-200 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">CONFE. PAQ.</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">700292</td>
-                                    <td><input type="number" id="stock-etiqueta-tienda" data-old-id="val_19" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-etiqueta-tienda" data-old-id="val_19" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">ETIQUETAS MATRICULAS CVC1 CONF.</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">734659</td>
-                                    <td><input type="number" id="stock-matricula-cvc1" data-old-id="val_22" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-matricula-cvc1" data-old-id="val_22" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">MATRICULA CS8</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150027886</td>
-                                    <td><input type="number" id="stock-matricula-cs8" data-old-id="val_25" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-matricula-cs8" data-old-id="val_25" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- BOBINAS -->
@@ -853,13 +849,13 @@
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">BOBINA 800</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">740437</td>
-                                    <td><input type="number" id="stock-bobina-800" data-old-id="val_28" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-bobina-800" data-old-id="val_28" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">BOBINA 1200</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">736423</td>
-                                    <td><input type="number" id="stock-bobina-1200" data-old-id="val_31" class="modern-input" value=""></td>
+                                    <td><input type="number" id="stock-bobina-1200" data-old-id="val_31" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- OTROS (COLA) -->
@@ -867,7 +863,7 @@
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200 border-b-0">COLA</td>
                                     <td class="border-b-0"><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white border-b-0">736438</td>
-                                    <td class="border-b-0"><input type="number" id="stock-cola" data-old-id="val_34" class="modern-input" value=""></td>
+                                    <td class="border-b-0"><input type="number" id="stock-cola" data-old-id="val_34" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1113,6 +1109,9 @@
 
                 if (tabId === 'Confeccion') {
                     if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
+                }
+                if (tabId === 'Descarga') {
+                    if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
                 }
 
                 // Sincronización entre Stock y Confección al cargar
@@ -1758,6 +1757,99 @@
             const eqMultiselect = document.querySelector('.custom-multiselect-equipo');
             if (eqDropdown && !eqDropdown.classList.contains('hidden') && eqMultiselect && !eqMultiselect.contains(event.target)) eqDropdown.classList.add('hidden');
         });
+
+        // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
+        function checkLogin() {
+            const pwd = document.getElementById('login-password').value;
+            const errorMsg = document.getElementById('login-error');
+            if (pwd === 'APS') {
+                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-dashboard').classList.remove('hidden');
+                    document.getElementById('main-dashboard').classList.add('animate-[fadeEffect_0.5s]');
+                }, 300);
+            } else {
+                errorMsg.classList.remove('opacity-0');
+                setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+            }
+        }
+
+        let isStockLocked = true;
+        function toggleStockLock() {
+            const btn = document.getElementById('btn-unlock-stock');
+            const icon = document.getElementById('lock-icon');
+            const inputs = document.querySelectorAll('.locked-stock-input');
+            
+            if (isStockLocked) {
+                const pwd = prompt("Introduce la contraseña para editar el stock:");
+                if (pwd === 'patron') {
+                    isStockLocked = false;
+                    icon.textContent = '🔓';
+                    btn.innerHTML = '<span id="lock-icon">🔓</span> Desbloqueado';
+                    btn.classList.replace('bg-gray-200', 'bg-green-100');
+                    btn.classList.replace('dark:bg-gray-700', 'dark:bg-green-900/50');
+                    btn.classList.replace('text-gray-800', 'text-green-800');
+                    
+                    inputs.forEach(el => {
+                        el.removeAttribute('readonly');
+                        el.classList.remove('cursor-not-allowed');
+                    });
+                } else if (pwd !== null) {
+                    alert("Contraseña incorrecta");
+                }
+            } else {
+                isStockLocked = true;
+                icon.textContent = '🔒';
+                btn.innerHTML = '<span id="lock-icon">🔒</span> Bloqueado';
+                btn.classList.replace('bg-green-100', 'bg-gray-200');
+                btn.classList.replace('dark:bg-green-900/50', 'dark:bg-gray-700');
+                btn.classList.replace('text-green-800', 'text-gray-800');
+                
+                inputs.forEach(el => {
+                    el.setAttribute('readonly', 'true');
+                    el.classList.add('cursor-not-allowed');
+                });
+                
+                if(window.saveTab) window.saveTab('Stock', true);
+            }
+        }
+
+        // --- CÁLCULO DESCARGA DE CAMIONES (FALTA POR LLEGAR) ---
+        window.calculateFaltaPorLlegar = function() {
+            const types = [
+                { id: 'mediana', pedidoId: 'descarga-pedido-mediana-woman' },
+                { id: 'grande', pedidoId: 'descarga-pedido-grande-man' },
+                { id: 'gpw', pedidoId: 'descarga-pedido-gp-woman' },
+                { id: 'gp', pedidoId: 'descarga-pedido-gp-man' },
+                { id: 'tapeta', pedidoId: 'descarga-pedido-tapeta' },
+                { id: 'minipaq', pedidoId: 'descarga-pedido-minipaq' },
+                { id: 'grandepaq', pedidoId: 'descarga-pedido-grandepaq' }
+            ];
+
+            types.forEach(type => {
+                let pedido = Number(document.getElementById(type.pedidoId)?.value) || 0;
+                let sumLlegado = 0;
+                
+                for (let i = 0; i < 10; i++) {
+                    sumLlegado += Number(document.getElementById(`descarga-${type.id}-${i}`)?.value) || 0;
+                }
+                
+                let falta = pedido - sumLlegado;
+                const faltaEl = document.getElementById(`descarga-falta-${type.id}`);
+                
+                if (faltaEl) {
+                    faltaEl.textContent = falta;
+                    if(falta > 0) {
+                        faltaEl.className = "text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    } else if(falta === 0) {
+                        faltaEl.className = "text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    } else {
+                        faltaEl.className = "text-blue-500 dark:text-blue-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
