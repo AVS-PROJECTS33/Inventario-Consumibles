@@ -1605,54 +1605,6 @@
             "Cola": ["Todos", "Cola"]
         };
 
-        let gastoChartInstance = null;
-
-        function initChart() {
-            const ctx = document.getElementById('gastoChart');
-            if(!ctx) return;
-            const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#9ca3af' : '#4b5563';
-            const gridColor = isDark ? '#374151' : '#e5e7eb';
-
-            gastoChartInstance = new Chart(ctx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                    datasets: [{
-                        label: 'Gasto Promedio',
-                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                        borderColor: 'rgb(79, 70, 229)',
-                        borderWidth: 1,
-                        borderRadius: 6,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor, font: { weight: 'bold' } } } },
-                    scales: {
-                        x: { ticks: { color: textColor, font: { weight: '600' } }, grid: { display: false } },
-                        y: { ticks: { color: textColor }, grid: { color: gridColor, borderDash: [4, 4] }, beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        function updateTypeDropdown() {
-            const cat = document.getElementById('filter-category').value;
-            const typeSelect = document.getElementById('filter-type');
-            
-            typeSelect.innerHTML = '';
-            subtipos[cat].forEach(tipo => {
-                let opt = document.createElement('option');
-                opt.value = tipo;
-                opt.textContent = tipo;
-                typeSelect.appendChild(opt);
-            });
-            updateChart();
-        }
-
         function getAmountForCategory(cat, type, data, docSection) {
             let amt = 0;
             if (docSection === 'Paqueteria') {
@@ -1713,6 +1665,52 @@
             return amt;
         }
 
+        function updateTypeDropdown() {
+            const cat = document.getElementById('filter-category').value;
+            const typeSelect = document.getElementById('filter-type');
+            
+            typeSelect.innerHTML = '';
+            subtipos[cat].forEach(tipo => {
+                let opt = document.createElement('option');
+                opt.value = tipo;
+                opt.textContent = tipo;
+                typeSelect.appendChild(opt);
+            });
+            updateChart();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('gastoChart');
+            if(!ctx) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const gridColor = isDark ? '#374151' : '#e5e7eb';
+
+            gastoChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Cargando datos...',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor, font: { weight: 'bold' } } } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { weight: '600' } }, grid: { display: false } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor, borderDash: [4, 4] }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
         async function updateChart() {
             if (!gastoChartInstance) return;
             const month = document.getElementById('filter-month').value;
@@ -1737,9 +1735,10 @@
                 catDataArrays[c] = (month !== 'Todos') ? [0,0,0,0,0] : [0,0,0,0,0,0,0,0,0,0,0,0];
             });
             
-            if (window.db && window.getDocs && window.DB_COLLECTION) {
+            if (window.db && window.getDocs) {
                 try {
-                    const querySnapshot = await window.getDocs(window.collection(window.db, window.DB_COLLECTION));
+                    // FIX: Uso de la colección correcta 'registros_semanales'
+                    const querySnapshot = await window.getDocs(window.collection(window.db, 'registros_semanales'));
                     querySnapshot.forEach((doc) => {
                         const parts = doc.id.split('_');
                         if (parts.length === 3) {
