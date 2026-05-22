@@ -759,6 +759,9 @@
                         <span class="text-[#ED7D31]">📋</span> Stock Inventario
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button id="btn-copy-report" onclick="copyStockReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
+                            <span>📋</span> Copiar Resumen
+                        </button>
                         <button id="btn-unlock-stock" onclick="toggleStockLock()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
                             <span id="lock-icon">🔒</span> Bloqueado
                         </button>
@@ -1940,6 +1943,55 @@
                 }
             });
         }
+
+        window.copyStockReport = function() {
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el && el.value !== '' ? el.value : "0";
+            };
+            
+            const semana = document.getElementById('week-Stock') ? document.getElementById('week-Stock').value : '';
+
+            let report = "📦 GASTO CONSUMIBLES PAQUETERÍA (Semana " + semana + "):\n";
+            report += "• Precinto Plataforma/Logo: " + getVal('paqueteria-precinto-plataforma') + "\n";
+            report += "• Precinto Blanco: " + getVal('paqueteria-precinto-blanco') + "\n";
+            report += "• Etiquetas Tienda: " + getVal('paqueteria-etiqueta-tienda') + "\n";
+            report += "• Matrícula CS8: " + getVal('paqueteria-matricula-cs8') + "\n";
+            report += "• Bobina 800: " + getVal('paqueteria-bobina-800') + "\n";
+            report += "• Bobina 1200: " + getVal('paqueteria-bobina-1200') + "\n\n";
+
+            report += "📦 GASTO CONSUMIBLES CONFECCIÓN (Semana " + semana + "):\n";
+            report += "• Precinto Plataforma/Logo: " + getVal('confeccion-precinto-logo') + "\n";
+            report += "• Precinto Blanco: " + getVal('confeccion-precinto-blanco') + "\n";
+            report += "• Etiquetas Tienda: " + getVal('confeccion-etiqueta-tienda') + "\n";
+            report += "• Matrículas CVC1: " + getVal('confeccion-matricula-cvc1') + "\n";
+            report += "• Cola: " + getVal('confeccion-cola') + "\n\n";
+
+            report += "📦 GASTO CAJAS (Semana " + semana + "):\n";
+            report += "• Caja Mediana Woman: " + getVal('confeccion-gastado-mediana-woman') + "\n";
+            report += "• Caja GP Woman: " + getVal('confeccion-gastado-gp-woman') + "\n";
+            report += "• Caja Grande Man: " + getVal('confeccion-gastado-grande-man') + "\n";
+            report += "• Caja GP Man: " + getVal('confeccion-gastado-gp-man') + "\n";
+            report += "• Tapeta: " + getVal('confeccion-gastado-tapeta') + "\n";
+
+            navigator.clipboard.writeText(report).then(() => {
+                const btn = document.getElementById('btn-copy-report');
+                if(btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<span>✅</span> ¡Copiado!';
+                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                        btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+                alert("No se pudo copiar al portapapeles.");
+            });
+        };
     </script>
 </body>
 </html>
