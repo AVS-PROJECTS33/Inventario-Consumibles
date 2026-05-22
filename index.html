@@ -1018,6 +1018,40 @@
         window.collection = collection;
         window.getDocs = getDocs;
         window.isDataLoaded = {};
+        window.hasShownLowStockAlert = false;
+
+        window.checkLowStockAlert = function() {
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen && !loginScreen.classList.contains('hidden')) {
+                return;
+            }
+
+            let lowStockItems = [];
+            const stockInputs = document.querySelectorAll('#Stock .locked-stock-input');
+            
+            stockInputs.forEach(input => {
+                if (input.value !== '') {
+                    const val = Number(input.value);
+                    if (val < 5) {
+                        const tr = input.closest('tr');
+                        if (tr) {
+                            const nameTd = tr.querySelector('td:first-child');
+                            if (nameTd) {
+                                lowStockItems.push(nameTd.textContent.trim());
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (lowStockItems.length > 0) {
+                let msg = "⚠️ AVISO DE STOCK BAJO ⚠️\n\nLos siguientes artículos están a punto de agotarse (menos de 5 unidades en stock):\n\n";
+                lowStockItems.forEach(item => msg += `• ${item}\n`);
+                
+                setTimeout(() => alert(msg), 500);
+            }
+            window.hasShownLowStockAlert = true;
+        };
         
         try {
             const auth = getAuth(app);
@@ -1135,6 +1169,10 @@
                 }
                 
                 window.isDataLoaded[tabId] = true;
+
+                if (tabId === 'Stock' && !window.hasShownLowStockAlert) {
+                    window.checkLowStockAlert();
+                }
             } catch(e) {
                 console.error("Error al cargar la pestaña:", e);
                 window.isDataLoaded[tabId] = true;
@@ -1785,6 +1823,10 @@
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('main-dashboard').classList.remove('hidden');
                     document.getElementById('main-dashboard').classList.add('animate-[fadeEffect_0.5s]');
+                    
+                    if (!window.hasShownLowStockAlert && window.isDataLoaded && window.isDataLoaded['Stock']) {
+                        window.checkLowStockAlert();
+                    }
                 }, 300);
             } else {
                 errorMsg.classList.remove('opacity-0');
