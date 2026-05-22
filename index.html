@@ -759,8 +759,8 @@
                         <span class="text-[#ED7D31]">📋</span> Stock Inventario
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                        <button id="btn-copy-report" onclick="copyStockReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
-                            <span>📋</span> Copiar Resumen
+                        <button id="btn-download-csv" onclick="downloadCSVReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
+                            <span>📥</span> Descargar CSV
                         </button>
                         <button id="btn-unlock-stock" onclick="toggleStockLock()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
                             <span id="lock-icon">🔒</span> Bloqueado
@@ -1944,53 +1944,71 @@
             });
         }
 
-        window.copyStockReport = function() {
+        window.downloadCSVReport = function() {
             const getVal = (id) => {
                 const el = document.getElementById(id);
                 return el && el.value !== '' ? el.value : "0";
             };
             
             const semana = document.getElementById('week-Stock') ? document.getElementById('week-Stock').value : '';
+            const ano = document.getElementById('year-Stock') ? document.getElementById('year-Stock').value : new Date().getFullYear();
+            
+            const ahora = new Date();
+            const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
 
-            let report = "📦 GASTO CONSUMIBLES PAQUETERÍA (Semana " + semana + "):\n";
-            report += "• Precinto Plataforma/Logo: " + getVal('paqueteria-precinto-plataforma') + "\n";
-            report += "• Precinto Blanco: " + getVal('paqueteria-precinto-blanco') + "\n";
-            report += "• Etiquetas Tienda: " + getVal('paqueteria-etiqueta-tienda') + "\n";
-            report += "• Matrícula CS8: " + getVal('paqueteria-matricula-cs8') + "\n";
-            report += "• Bobina 800: " + getVal('paqueteria-bobina-800') + "\n";
-            report += "• Bobina 1200: " + getVal('paqueteria-bobina-1200') + "\n\n";
+            const data = [
+                // Paquetería
+                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('paqueteria-precinto-plataforma'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('paqueteria-precinto-blanco'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('paqueteria-etiqueta-tienda'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS MATRICULAS CS8", ref: "150027886", cant: getVal('paqueteria-matricula-cs8'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "BOBINA FILM HORNOS 800", ref: "740437", cant: getVal('paqueteria-bobina-800'), sec: "Paquetería", agrupado: "UNIDAD" },
+                { nombre: "BOBINA FILM HORNOS 1200", ref: "736423", cant: getVal('paqueteria-bobina-1200'), sec: "Paquetería", agrupado: "UNIDAD" },
+                // Confección (Consumibles)
+                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('confeccion-precinto-logo'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('confeccion-precinto-blanco'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('confeccion-etiqueta-tienda'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS MATRICULAS CVC1 CONF.", ref: "734659", cant: getVal('confeccion-matricula-cvc1'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "COLA FORMADORAS", ref: "736438", cant: getVal('confeccion-cola'), sec: "Confección", agrupado: "UNIDAD" },
+                // Confección (Cajas)
+                { nombre: "CAJA MEDIANA WOMAN", ref: "150260853", cant: getVal('confeccion-gastado-mediana-woman'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA G/P/W (WOMAN)", ref: "150260852", cant: getVal('confeccion-gastado-gp-woman'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA GRANDE MAN", ref: "150260856", cant: getVal('confeccion-gastado-grande-man'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA GP MAN", ref: "150260855", cant: getVal('confeccion-gastado-gp-man'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "TAPETA", ref: "150260862", cant: getVal('confeccion-gastado-tapeta'), sec: "Confección", agrupado: "PALET" }
+            ];
 
-            report += "📦 GASTO CONSUMIBLES CONFECCIÓN (Semana " + semana + "):\n";
-            report += "• Precinto Plataforma/Logo: " + getVal('confeccion-precinto-logo') + "\n";
-            report += "• Precinto Blanco: " + getVal('confeccion-precinto-blanco') + "\n";
-            report += "• Etiquetas Tienda: " + getVal('confeccion-etiqueta-tienda') + "\n";
-            report += "• Matrículas CVC1: " + getVal('confeccion-matricula-cvc1') + "\n";
-            report += "• Cola: " + getVal('confeccion-cola') + "\n\n";
+            // Usamos separador ";" para que Excel en español lo divida automáticamente en columnas.
+            let csvContent = "hora;semana;nombre articulo;referencia;movimiento;cantidad;agrupado por:;sección;usuario;año\n";
 
-            report += "📦 GASTO CAJAS (Semana " + semana + "):\n";
-            report += "• Caja Mediana Woman: " + getVal('confeccion-gastado-mediana-woman') + "\n";
-            report += "• Caja GP Woman: " + getVal('confeccion-gastado-gp-woman') + "\n";
-            report += "• Caja Grande Man: " + getVal('confeccion-gastado-grande-man') + "\n";
-            report += "• Caja GP Man: " + getVal('confeccion-gastado-gp-man') + "\n";
-            report += "• Tapeta: " + getVal('confeccion-gastado-tapeta') + "\n";
-
-            navigator.clipboard.writeText(report).then(() => {
-                const btn = document.getElementById('btn-copy-report');
-                if(btn) {
-                    const originalHTML = btn.innerHTML;
-                    btn.innerHTML = '<span>✅</span> ¡Copiado!';
-                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
-                    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.classList.replace('bg-green-600', 'bg-indigo-600');
-                        btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
-                    }, 2000);
-                }
-            }).catch(err => {
-                console.error('Error al copiar: ', err);
-                alert("No se pudo copiar al portapapeles.");
+            data.forEach(row => {
+                csvContent += `${hora};${semana};${row.nombre};${row.ref};SALIDA DE STOCK;${row.cant};${row.agrupado};${row.sec};APS;${ano}\n`;
             });
+
+            // \uFEFF añade el BOM para que Excel detecte tildes correctamente
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Gasto_Consumibles_Semana_${semana}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const btn = document.getElementById('btn-download-csv');
+            if(btn) {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> ¡Descargado!';
+                btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                    btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                }, 2000);
+            }
         };
     </script>
 </body>
