@@ -1420,6 +1420,15 @@
 
     <script>
         /* --- FUNCIONES UI GENERALES --- */
+        // Prevenir que se tecleen puntos o comas en los campos numéricos
+        document.addEventListener('keydown', function(e) {
+            if (e.target && e.target.type === 'number') {
+                if (e.key === '.' || e.key === ',') {
+                    e.preventDefault();
+                }
+            }
+        });
+
         // Redondear automáticamente cualquier número decimal que se introduzca
         document.addEventListener('input', function(e) {
             if (e.target && e.target.type === 'number') {
@@ -1765,7 +1774,7 @@
                                         }
 
                                         if (amount > 0) {
-                                            catDataArrays[cat][targetIndex] += amount;
+                                        catDataArrays[cat][targetIndex] += Math.round(amount);
                                         }
                                     });
                                 }
