@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -27,13 +28,12 @@
         }
         .excel-table th, .excel-table td {
             border: 2px solid #000;
-            padding: 4px;
+            padding: 8px;
             text-align: center;
             font-weight: bold;
         }
-        /* Adaptación de bordes en modo oscuro */
         .dark .excel-table th, .dark .excel-table td {
-            border-color: #6b7280; /* gray-500 */
+            border-color: #6b7280;
         }
         
         .excel-input {
@@ -47,16 +47,17 @@
             font-size: inherit;
             font-weight: inherit;
             color: inherit;
+            padding: 4px;
         }
         .excel-input:focus {
             background-color: #e6f2ff;
         }
         .dark .excel-input:focus {
-            background-color: #374151; /* gray-700 */
+            background-color: #374151;
         }
         
-        /* Selectores de semana */
-        select.week-selector {
+        /* Selectores de semana y año */
+        select.week-selector, select.year-selector {
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -66,11 +67,10 @@
             background-position-y: 50%;
             padding-right: 1.5rem;
         }
-        .dark select.week-selector {
+        .dark select.week-selector, .dark select.year-selector {
             background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
         }
         
-        /* Ocultar pestañas por defecto */
         .tabcontent {
             display: none;
             animation: fadeEffect 0.3s;
@@ -80,25 +80,40 @@
             to {opacity: 1;}
         }
 
-        /* Pestaña activa */
         .tablink.active {
-            background-color: #3b82f6 !important; /* blue-500 */
+            background-color: #3b82f6 !important;
             color: white !important;
             box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
         }
         .dark .tablink.active {
-            background-color: #2563eb !important; /* blue-600 */
+            background-color: #2563eb !important;
         }
 
-        /* Fuente digital para los contadores */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         .font-digital {
             font-family: 'Share Tech Mono', monospace;
         }
 
-        /* --- NUEVOS ESTILOS MODERNOS (DASHBOARD) --- */
+        /* --- ESTILOS MODERNOS (DASHBOARD) --- */
+        :root {
+            --main-alpha: 0.95;
+            --card-alpha: 1;
+            --app-brightness: 1;
+        }
+        
+        #main-dashboard {
+            filter: brightness(var(--app-brightness));
+        }
+
+        .main-dashboard-bg {
+            background-color: rgba(255, 255, 255, var(--main-alpha));
+        }
+        .dark .main-dashboard-bg {
+            background-color: rgba(31, 41, 55, var(--main-alpha));
+        }
+
         .modern-card {
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, var(--card-alpha));
             border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: 1px solid #e5e7eb;
@@ -106,7 +121,7 @@
             transition: all 0.3s ease;
         }
         .dark .modern-card {
-            background-color: #1f2937;
+            background-color: rgba(31, 41, 55, var(--card-alpha));
             border-color: #374151;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
@@ -167,7 +182,6 @@
             border-bottom: none;
         }
 
-        /* Ajustes específicos para filas más finas en la pestaña Stock */
         #Stock .modern-table th, #Stock .modern-table td {
             padding: 0.35rem 1rem;
         }
@@ -178,12 +192,27 @@
 </head>
 <body class="text-gray-900 dark:text-gray-100 min-h-screen p-4 transition-colors duration-200">
 
-    <!-- Se añade bg-white/95 y backdrop-blur-sm para la transparencia con el fondo de almacén -->
-    <div class="max-w-7xl mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700">
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div class="text-5xl mb-4">🔒</div>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-6">INVENTARIO/CONSUMIBLES</h2>
+            <input type="password" id="login-password" class="modern-input mb-4 w-full text-center tracking-widest text-lg" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <button onclick="checkLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">Entrar al Panel</button>
+            <p id="login-error" class="text-red-500 text-sm font-bold mt-4 opacity-0 transition-opacity">Contraseña incorrecta</p>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div id="main-dashboard" class="w-[98%] max-w-full mx-auto main-dashboard-bg backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700 hidden">
         
         <!-- Navegación de Pestañas -->
-        <div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
-            <div class="flex">
+        <div class="flex items-center border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
+            <button onclick="toggleDarkMode()" class="p-2 ml-4 mr-2 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition shadow shrink-0" title="Alternar modo oscuro">
+                <span id="theme-icon" class="text-xl leading-none block">☀️</span>
+            </button>
+            
+            <div class="flex flex-grow">
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap" onclick="openTab(event, 'Paqueteria')" id="defaultOpen">
                     1. Consumibles Paquetería
                 </button>
@@ -199,15 +228,16 @@
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'Stock')">
                     5. Stock Inventario
                 </button>
+                <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'GastoPromedio')">
+                    6. Gasto Promedio
+                </button>
+                <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'Ajustes')">
+                    7. Ajustes
+                </button>
             </div>
-            
-            <!-- Botón de Modo Oscuro -->
-            <button onclick="toggleDarkMode()" class="p-2 mx-4 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition shadow" title="Alternar modo oscuro">
-                <span id="theme-icon" class="text-xl leading-none block">🌙</span>
-            </button>
         </div>
 
-        <div class="p-4 overflow-x-auto">
+        <div class="p-6 overflow-x-auto">
             
             <!-- ================= PESTAÑA 1: PAQUETERIA ================= -->
             <div id="Paqueteria" class="tabcontent">
@@ -218,7 +248,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Artículos (Fondo Verde Claro) -->
                     <div class="lg:col-span-2 modern-card border-t-4 border-t-[#7CB342] !bg-green-50 dark:!bg-green-900/20">
                         <div class="bg-green-100/50 dark:bg-green-800/30 px-4 py-3 border-b border-green-200 dark:border-green-700">
                             <h3 class="font-bold text-green-800 dark:text-green-300">Consumibles Disponibles</h3>
@@ -235,50 +264,53 @@
                                 <tbody>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">700288</td>
-                                        <td class="text-left font-semibold">PRECINTO PLATAFORMA</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td class="text-left font-semibold">PRECINTO PLATAFORMA/LOGO</td>
+                                        <td><input type="number" id="paqueteria-precinto-plataforma" class="modern-input" value="" oninput="subtractFromStock('stock-precinto-logo', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">150022299</td>
                                         <td class="text-left font-semibold">PRECINTO BLANCO</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td><input type="number" id="paqueteria-precinto-blanco" class="modern-input" value="" oninput="subtractFromStock('stock-precinto-blanco', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">700292</td>
                                         <td class="text-left font-semibold">ETIQUETA TIENDA</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td><input type="number" id="paqueteria-etiqueta-tienda" class="modern-input" value="" oninput="subtractFromStock('stock-etiqueta-tienda', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">150027886</td>
                                         <td class="text-left font-semibold">MATRICULA CS8</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td><input type="number" id="paqueteria-matricula-cs8" class="modern-input" value="" oninput="subtractFromStock('stock-matricula-cs8', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">740437</td>
                                         <td class="text-left font-semibold">BOBINA 800</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td><input type="number" id="paqueteria-bobina-800" class="modern-input" value="" oninput="subtractFromStock('stock-bobina-800', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">736423</td>
                                         <td class="text-left font-semibold">BOBINA 1200</td>
-                                        <td><input type="text" class="modern-input" value="0"></td>
+                                        <td><input type="number" id="paqueteria-bobina-1200" class="modern-input" value="" oninput="subtractFromStock('stock-bobina-1200', this)"></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Configuración (Fondo Verde Claro) -->
                     <div class="flex flex-col gap-6">
                         <div class="modern-card border-t-4 border-t-blue-500 p-5 !bg-green-50 dark:!bg-green-900/20">
-                            <h3 class="text-sm font-bold text-green-700 dark:text-green-400 uppercase tracking-wider mb-4">Gestión de Semana</h3>
+                            <h3 class="text-sm font-bold text-green-700 dark:text-green-400 uppercase tracking-wider mb-4">Gestión de Tiempo</h3>
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 text-xl">
-                                    📅
-                                </div>
-                                <div class="flex-grow">
-                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Semana Actual</label>
-                                    <select class="modern-input week-selector cursor-pointer !text-left" onchange="syncWeeks(this.value)"></select>
+                                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 text-xl shrink-0">📅</div>
+                                <div class="flex-grow flex gap-2 w-full">
+                                    <div class="w-1/2">
+                                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Semana</label>
+                                        <select id="week-Paqueteria" class="modern-input week-selector cursor-pointer !text-left w-full min-w-[180px]" onchange="loadTab('Paqueteria')"></select>
+                                    </div>
+                                    <div class="w-1/2">
+                                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Año</label>
+                                        <select id="year-Paqueteria" class="modern-input year-selector cursor-pointer !text-left w-full min-w-[100px]" onchange="loadTab('Paqueteria')"></select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -286,10 +318,6 @@
                         <div class="modern-card border-t-4 border-t-purple-500 p-5 !overflow-visible !bg-green-50 dark:!bg-green-900/20">
                             <h3 class="text-sm font-bold text-green-700 dark:text-green-400 uppercase tracking-wider mb-4">Datos del Pedido</h3>
                             <div class="space-y-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Fecha Pedido</label>
-                                    <input type="date" class="modern-input">
-                                </div>
                                 <div class="relative">
                                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">AP</label>
                                     <div class="relative custom-multiselect">
@@ -300,32 +328,20 @@
                                             </div>
                                         </div>
                                         <div id="ap-dropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hidden max-h-56 overflow-y-auto text-sm text-left">
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="ALBERTO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ALBERTO
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="LUIS" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> LUIS
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="ANGY" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ANGY
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="ENZO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ENZO
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="PACO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> PACO
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="JEAN" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> JEAN
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="NATALIA" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> NATALIA
-                                            </label>
-                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                                <input type="checkbox" value="IVAN" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> IVAN
-                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-alberto" data-old-id="val_7" value="ALBERTO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ALBERTO</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-luis" data-old-id="val_8" value="LUIS" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> LUIS</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-angy" data-old-id="val_9" value="ANGY" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ANGY</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-enzo" data-old-id="val_10" value="ENZO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> ENZO</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-paco" data-old-id="val_11" value="PACO" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> PACO</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-jean" data-old-id="val_12" value="JEAN" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> JEAN</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-natalia" data-old-id="val_13" value="NATALIA" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> NATALIA</label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"><input type="checkbox" id="paqueteria-ap-ivan" data-old-id="val_14" value="IVAN" class="ap-checkbox mr-3 rounded text-blue-500 focus:ring-blue-500 w-4 h-4" onchange="updateApSelection()"> IVAN</label>
                                         </div>
                                     </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Fecha Pedido</label>
+                                    <input type="date" id="paqueteria-fecha-pedido" data-old-id="val_6" class="modern-input">
                                 </div>
                             </div>
                         </div>
@@ -339,9 +355,8 @@
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                         <span class="text-[#F4B084]">✂️</span> Confección
                     </h2>
+                    
                     <div class="flex flex-col sm:flex-row items-center gap-4 text-sm w-full sm:w-auto">
-                        
-                        <!-- NUEVO: Desplegable de Equipo Multi-Select -->
                         <div class="w-full sm:w-64 relative custom-multiselect-equipo z-50">
                             <div class="modern-input cursor-pointer flex flex-wrap gap-1 min-h-[42px] items-center justify-start text-left relative bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800" onclick="toggleEquipoDropdown(event)">
                                 <span id="equipo-selected-text" class="text-orange-700 dark:text-orange-300 font-bold">Selecciona Equipo...</span>
@@ -350,143 +365,123 @@
                                 </div>
                             </div>
                             <div id="equipo-dropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hidden max-h-56 overflow-y-auto text-sm text-left">
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="ALBERTO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ALBERTO
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="LUIS" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> LUIS
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="ANGY" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ANGY
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="ENZO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ENZO
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="PACO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> PACO
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="JEAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> JEAN
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="NATALIA" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> NATALIA
-                                </label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
-                                    <input type="checkbox" value="IVAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> IVAN
-                                </label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ALBERTO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ALBERTO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="LUIS" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> LUIS</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ANGY" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ANGY</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ENZO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ENZO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="PACO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> PACO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="JEAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> JEAN</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="NATALIA" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> NATALIA</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="IVAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> IVAN</label>
                             </div>
                         </div>
 
-                        <div class="w-full sm:w-48">
-                            <select class="modern-input week-selector cursor-pointer text-sm" onchange="syncWeeks(this.value)"></select>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="week-Confeccion" class="modern-input week-selector cursor-pointer text-sm w-48" onchange="loadTab('Confeccion'); updateRangoSemana(this.value)"></select>
+                            <select id="year-Confeccion" class="modern-input year-selector cursor-pointer text-sm w-28" onchange="loadTab('Confeccion')"></select>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
-                    <!-- Main Consumables Grid -->
                     <div class="modern-card border-t-4 border-t-[#F4B084] overflow-hidden">
                         <div class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                             <h3 class="font-bold text-gray-700 dark:text-gray-200">Consumibles Generales & Cajas</h3>
                         </div>
                         <div class="overflow-x-auto p-4 md:p-6">
                             
-                            <!-- Fila 1: Precintos y Etiquetas -->
                             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
-                                        <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">PRECINTO LOGO</div>
+                                        <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">PRECINTO PLATAFORMA/LOGO</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">700288</div>
                                     </div>
-                                    <input type="number" class="modern-input text-lg font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-precinto-logo" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-precinto-logo', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">PRECINTO BLANCO</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150022299</div>
                                     </div>
-                                    <input type="number" class="modern-input text-lg font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-precinto-blanco" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-precinto-blanco', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">ETIQUETAS TIENDA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">700292</div>
                                     </div>
-                                    <input type="number" class="modern-input text-lg font-bold text-blue-600 dark:text-blue-400 mt-auto" value="0">
+                                    <input type="number" id="confeccion-etiqueta-tienda" class="modern-input text-lg font-bold text-blue-600 dark:text-blue-400 mt-auto" value="" oninput="subtractFromStock('stock-etiqueta-tienda', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">MATRICULAS CVC1</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">734659</div>
                                     </div>
-                                    <input type="number" class="modern-input text-lg font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-matricula-cvc1" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-matricula-cvc1', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">COLA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">736438</div>
                                     </div>
-                                    <input type="number" class="modern-input text-lg font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="0" readonly>
+                                    <input type="number" id="confeccion-cola" class="modern-input text-lg font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                             </div>
                             
                             <hr class="border-gray-200 dark:border-gray-700 mb-6">
                             
-                            <!-- Fila 2: Cajas -->
                             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-2">
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">CAJA MEDIANA WOMAN</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150260853</div>
                                     </div>
-                                    <input type="number" class="modern-input font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-caja-mediana-woman" class="modern-input font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">CAJA GP WOMAN</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150260852</div>
                                     </div>
-                                    <input type="number" class="modern-input font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-caja-gp-woman" class="modern-input font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">CAJA GRANDE MAN</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150260856</div>
                                     </div>
-                                    <input type="number" class="modern-input font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-caja-grande-man" class="modern-input font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">CAJA GP MAN</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150260855</div>
                                     </div>
-                                    <input type="number" class="modern-input font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-caja-gp-man" class="modern-input font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">TAPETA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150260862</div>
                                     </div>
-                                    <input type="number" class="modern-input font-bold mt-auto" value="0">
+                                    <input type="number" id="confeccion-tapeta" class="modern-input font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
                                 </div>
                             </div>
                             
-                            <!-- Gastado en Semana -->
                             <div class="mb-3 mt-6 text-center">
                                 <span class="font-bold text-sm text-gray-600 dark:text-gray-300 uppercase tracking-wider">Gastado en semana</span>
                                 <span id="semana-rango" class="ml-2 font-black text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">--</span>
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 w-full mb-2">
-                                <div><input type="number" class="modern-input bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="0"></div>
-                                <div><input type="number" class="modern-input bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="0"></div>
-                                <div><input type="number" class="modern-input bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="0"></div>
-                                <div><input type="number" class="modern-input bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="0"></div>
-                                <div><input type="number" class="modern-input bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="0"></div>
+                                <div><input type="number" id="confeccion-gastado-mediana-woman" class="modern-input cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="" readonly></div>
+                                <div><input type="number" id="confeccion-gastado-gp-woman" class="modern-input cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="" readonly></div>
+                                <div><input type="number" id="confeccion-gastado-grande-man" class="modern-input cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="" readonly></div>
+                                <div><input type="number" id="confeccion-gastado-gp-man" class="modern-input cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="" readonly></div>
+                                <div><input type="number" id="confeccion-gastado-tapeta" class="modern-input cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 font-bold" value="" readonly></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Calculo Gasto Semanal -->
                     <div class="modern-card border-t-4 border-t-[#C6E0B4]">
                         <div class="bg-green-50 dark:bg-green-900/20 px-4 py-3 border-b border-green-100 dark:border-green-800 flex justify-between items-center">
                             <h3 class="font-bold text-green-800 dark:text-green-300">Cálculo Gasto Semanal</h3>
@@ -494,20 +489,32 @@
                         </div>
                         <div class="p-4 overflow-x-auto">
                             <table class="modern-table min-w-full">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th class="text-center text-[10px] w-24">MEDIANA WOMAN</th>
+                                        <th class="text-center text-[10px] w-24">GP WOMAN</th>
+                                        <th class="text-center text-[10px] w-24">GRANDE MAN</th>
+                                        <th class="text-center text-[10px] w-24">GP MAN</th>
+                                        <th class="text-center text-[10px] w-24">TAPETA</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                         <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4">Inventario Sem. Anterior</td>
-                                        <td><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td><input type="number" class="modern-input font-bold" value="0"></td>
+                                        <td><input type="number" id="confeccion-inv-ant-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
                                     </tr>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                         <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4 border-b-0">Pedido Sem. Anterior</td>
-                                        <td class="border-b-0"><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td class="border-b-0"><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td class="border-b-0"><input type="number" class="modern-input font-bold" value="0"></td>
-                                        <td class="border-b-0"><input type="number" class="modern-input font-bold" value="0"></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -518,68 +525,53 @@
 
             <!-- ================= PESTAÑA 3: DESCARGA CAMIONES ================= -->
             <div id="Descarga" class="tabcontent">
-                <table class="excel-table w-full mb-2">
-                    <tr>
-                        <td class="bg-yellow-300 dark:bg-yellow-700/60 w-3/4 text-center font-bold text-lg">SEMANA</td>
-                        <td class="bg-yellow-300 dark:bg-yellow-700/60 w-1/4 p-0">
-                            <select class="excel-input week-selector text-center font-bold text-lg cursor-pointer w-full h-full" onchange="syncWeeks(this.value)"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="bg-[#FF66FF] text-black text-center font-bold text-2xl py-2">CONTROL DESCARGA CAMIONES</td>
-                    </tr>
-                </table>
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
+                        <span class="text-[#FF66FF]">🚛</span> Descarga Camiones
+                    </h2>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="week-Descarga" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Descarga')"></select>
+                            <select id="year-Descarga" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Descarga')"></select>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="flex flex-col lg:flex-row gap-4 items-start">
-                    <!-- Tabla principal -->
-                    <div class="overflow-x-auto flex-grow">
-                        <table class="excel-table w-full bg-white dark:bg-gray-800">
+                <div class="flex flex-col xl:flex-row gap-6 items-start w-full">
+                    <!-- Tabla principal ampliada -->
+                    <div class="overflow-x-auto flex-grow w-full">
+                        <table class="excel-table w-full bg-white dark:bg-gray-800 shadow-sm">
                             <thead>
                                 <tr class="bg-gray-100 dark:bg-gray-700 text-xs">
-                                    <th>NOMBRE</th>
-                                    <th>FECHA</th>
-                                    <th>MEDIANA</th>
-                                    <th>GRANDE</th>
-                                    <th>G/P/W</th>
-                                    <th>G/P</th>
-                                    <th>TAPETA</th>
-                                    <th>Mini PAQ</th>
-                                    <th>Grande PAQ</th>
-                                    <th>SE LLEVA PALETS?</th>
-                                    <th>OBSERVACIONES</th>
+                                    <th class="p-3">NOMBRE</th>
+                                    <th class="p-3">FECHA</th>
+                                    <th class="p-3">MEDIANA</th>
+                                    <th class="p-3">GRANDE</th>
+                                    <th class="p-3">G/P/W</th>
+                                    <th class="p-3">G/P</th>
+                                    <th class="p-3">TAPETA</th>
+                                    <th class="p-3">Mini PAQ</th>
+                                    <th class="p-3">Grande PAQ</th>
+                                    <th class="p-3">SE LLEVA PALETS?</th>
+                                    <th class="p-3">OBSERVACIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Fila 1 -->
-                                <tr class="bg-purple-100 dark:bg-purple-900/40">
-                                    <td><input type="text" class="excel-input"></td>
-                                    <td><input type="date" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="number" class="excel-input"></td>
-                                    <td><input type="text" class="excel-input"></td>
-                                    <td><input type="text" class="excel-input"></td>
-                                </tr>
-                                <!-- Filas vacías para rellenar -->
                                 <script>
-                                    for(let i=0; i<9; i++) {
+                                    for(let i=0; i<10; i++) {
                                         document.write(`
-                                            <tr class="bg-purple-100 dark:bg-purple-900/40">
-                                                <td class="h-6"><input type="text" class="excel-input"></td>
-                                                <td><input type="date" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="number" class="excel-input"></td>
-                                                <td><input type="text" class="excel-input"></td>
-                                                <td><input type="text" class="excel-input"></td>
+                                            <tr class="bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
+                                                <td class="p-2"><input type="text" id="descarga-nombre-${i}" class="excel-input w-full min-w-[120px]"></td>
+                                                <td class="p-2"><input type="date" id="descarga-fecha-${i}" class="excel-input w-full min-w-[130px]"></td>
+                                                <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-mediana-woman', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-grande-man', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-woman', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-man', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-tapeta', this); calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
+                                                <td class="p-2"><input type="text" id="descarga-palets-${i}" class="excel-input w-full min-w-[100px]"></td>
+                                                <td class="p-2"><input type="text" id="descarga-obs-${i}" class="excel-input w-full min-w-[150px]"></td>
                                             </tr>
                                         `);
                                     }
@@ -589,49 +581,49 @@
                     </div>
 
                     <!-- Tabla Resumen -->
-                    <div class="bg-gray-600 dark:bg-gray-900 p-2 lg:w-1/4 rounded min-w-[250px]">
-                        <table class="excel-table w-full bg-white dark:bg-gray-800">
+                    <div class="bg-gray-600 dark:bg-gray-900 p-4 xl:w-1/4 rounded-xl min-w-[300px] shadow-md w-full">
+                        <table class="excel-table w-full bg-white dark:bg-gray-800 rounded overflow-hidden">
                             <thead>
                                 <tr>
-                                    <th colspan="2" class="text-xs">PEDIDO SEMANAL</th>
-                                    <th class="text-xs">FALTA POR<br>LLEGAR</th>
+                                    <th colspan="2" class="text-xs p-3">PEDIDO SEMANAL</th>
+                                    <th class="text-xs p-3">FALTA POR<br>LLEGAR</th>
                                 </tr>
                             </thead>
                             <tbody class="text-sm">
                                 <tr>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40">MEDIANA</td>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">MEDIANA</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-mediana-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-mediana" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-gray-100 dark:bg-gray-700">GRANDE</td>
-                                    <td class="bg-gray-100 dark:bg-gray-700"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">GRANDE</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-grande-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-grande" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40">G/P/W</td>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">G/P/W</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-gp-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-gpw" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-gray-100 dark:bg-gray-700">G/P</td>
-                                    <td class="bg-gray-100 dark:bg-gray-700"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">G/P</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-gp-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-gp" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40">TAPETA</td>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">TAPETA</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-tapeta" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-tapeta" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-gray-100 dark:bg-gray-700">Mini PAQ</td>
-                                    <td class="bg-gray-100 dark:bg-gray-700"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">Mini PAQ</td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-minipaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-minipaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40">Grande PAQ</td>
-                                    <td class="bg-purple-200 dark:bg-purple-800/40"><input type="number" class="excel-input" value="0"></td>
-                                    <td class="text-red-500 dark:text-red-400 font-bold">0</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">Grande PAQ</td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-grandepaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td id="descarga-falta-grandepaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -645,41 +637,79 @@
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                         <span class="text-[#FFC000]">⚙️</span> Control de Formadoras
                     </h2>
-                    <div class="w-full sm:w-56">
-                        <select class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 focus:border-yellow-500 focus:ring-yellow-500" onchange="syncWeeks(this.value)"></select>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="week-Formadoras" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Formadoras')"></select>
+                            <select id="year-Formadoras" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Formadoras')"></select>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8 items-stretch">
                     
-                    <!-- Formadora Antigua -->
-                    <div class="modern-card border-t-4 border-t-[#FFC000] flex flex-col h-full hover:shadow-lg transition-shadow">
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 px-6 py-4 border-b border-yellow-100 dark:border-yellow-900/50">
-                            <h3 class="font-bold text-yellow-800 dark:text-yellow-500 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                Formadora Antigua
-                            </h3>
-                        </div>
-                        <div class="p-6 flex-grow flex flex-col justify-center items-center gap-8 bg-gray-50/30 dark:bg-gray-800/20">
-                            
-                            <!-- Input section -->
-                            <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 w-full shadow-sm">
-                                <div class="flex-grow">
-                                    <div class="font-bold text-gray-700 dark:text-gray-200">Caja Mediana (Woman)</div>
-                                    <div class="text-xs text-gray-500 font-mono mt-1">600X800X400</div>
-                                </div>
-                                <div class="w-32">
-                                    <input type="number" class="modern-input text-xl font-black text-gray-800 dark:text-white" value="0">
-                                </div>
-                                <div class="text-[10px] font-bold text-yellow-600 dark:text-yellow-500 uppercase leading-tight text-center w-20 bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded">
-                                    Se cuenta<br>por cajas
+                    <!-- Columna Izquierda -->
+                    <div class="flex flex-col gap-6">
+                        <!-- Formadora Antigua (Más bajita) -->
+                        <div class="modern-card border-t-4 border-t-[#FFC000] flex flex-col hover:shadow-lg transition-shadow">
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 border-b border-yellow-100 dark:border-yellow-900/50">
+                                <h3 class="font-bold text-yellow-800 dark:text-yellow-500 flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    Formadora Antigua
+                                </h3>
+                            </div>
+                            <div class="p-4 flex-grow flex flex-col justify-center items-center gap-4 bg-gray-50/30 dark:bg-gray-800/20">
+                                <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700 w-full shadow-sm">
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-gray-700 dark:text-gray-200 text-sm">Caja Mediana (Woman)</div>
+                                        <div class="text-[10px] text-gray-500 font-mono mt-0.5">600X800X400</div>
+                                    </div>
+                                    <div class="w-24">
+                                        <input type="number" id="formadora-antigua-caja-mediana-woman" class="modern-input text-lg font-black text-gray-800 dark:text-white" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this, 100)">
+                                    </div>
+                                    <div class="text-[9px] font-bold text-yellow-600 dark:text-yellow-500 uppercase leading-tight text-center w-16 bg-yellow-100 dark:bg-yellow-900/30 p-1.5 rounded">
+                                        Se cuenta<br>por cajas
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <!-- Gasto Manual -->
+                        <div class="modern-card border-t-4 border-t-orange-400 flex flex-col hover:shadow-lg transition-shadow">
+                            <div class="bg-orange-50 dark:bg-orange-900/20 px-4 py-3 border-b border-orange-100 dark:border-orange-900/50">
+                                <h3 class="font-bold text-orange-800 dark:text-orange-500 flex items-center gap-2">
+                                    🖐️ Gasto Manual
+                                </h3>
+                            </div>
+                            <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" oninput="subtractFromStock('stock-cola', this)"></div>
+                                </div>
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" oninput="subtractFromStock('stock-tapeta', this)"></div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
+                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this)">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
+                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-woman', this)">
+                                </div>
+                                <div class="flex flex-col gap-1 mt-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
+                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-grande-man', this)">
+                                </div>
+                                <div class="flex flex-col gap-1 mt-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
+                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-man', this)">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Formadora Nueva -->
+                    <!-- Formadora Nueva (Más alta) -->
                     <div class="modern-card border-t-4 border-t-[#70AD47] flex flex-col h-full hover:shadow-lg transition-shadow">
                         <div class="bg-green-50 dark:bg-green-900/20 px-6 py-4 border-b border-green-100 dark:border-green-900/50">
                             <h3 class="font-bold text-green-800 dark:text-green-500 flex items-center gap-2">
@@ -687,55 +717,37 @@
                                 Formadora Nueva
                             </h3>
                         </div>
-                        <div class="p-6 flex-grow flex flex-col gap-8 bg-gray-50/30 dark:bg-gray-800/20">
+                        <div class="p-8 flex-grow flex flex-col justify-center gap-10 bg-gray-50/30 dark:bg-gray-800/20">
                             
-                            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm relative">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm relative">
                                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 px-4">
-                                    <span class="text-[10px] font-bold text-green-600 dark:text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">Se cuenta por cajas (Unidad)</span>
+                                    <span class="text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">Se cuenta por cajas (Unidad)</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-x-6 gap-y-4 mt-3">
-                                    <div class="flex flex-col gap-1">
+                                <div class="grid grid-cols-2 gap-x-8 gap-y-6 mt-4">
+                                    <div class="flex flex-col gap-1.5">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja G/P/W (Woman)</div>
-                                        <div class="text-[11px] text-gray-500 font-mono mb-1">600X800X200</div>
-                                        <input type="number" class="modern-input" value="0">
+                                        <div class="text-xs text-gray-500 font-mono mb-1">600X800X200</div>
+                                        <input type="number" id="formadora-nueva-caja-gp-woman" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-gp-woman', this, 100)">
                                     </div>
-                                    <div class="flex flex-col gap-1">
+                                    <div class="flex flex-col gap-1.5">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja G/P (Man)</div>
-                                        <div class="text-[11px] text-gray-500 font-mono mb-1">600X1000X200</div>
-                                        <input type="number" class="modern-input" value="0">
+                                        <div class="text-xs text-gray-500 font-mono mb-1">600X1000X200</div>
+                                        <input type="number" id="formadora-nueva-caja-gp-man" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-gp-man', this, 100)">
                                     </div>
-                                    <div class="flex flex-col gap-1 mt-2">
+                                    <div class="flex flex-col gap-1.5 mt-2">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja Mediana (Woman)</div>
-                                        <div class="text-[11px] text-gray-500 font-mono mb-1">600X800X400</div>
-                                        <input type="number" class="modern-input" value="0">
+                                        <div class="text-xs text-gray-500 font-mono mb-1">600X800X400</div>
+                                        <input type="number" id="formadora-nueva-caja-mediana-woman" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this, 100)">
                                     </div>
-                                    <div class="flex flex-col gap-1 mt-2">
+                                    <div class="flex flex-col gap-1.5 mt-2">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja Grande (Man)</div>
-                                        <div class="text-[11px] text-gray-500 font-mono mb-1">600X1000X400</div>
-                                        <input type="number" class="modern-input" value="0">
+                                        <div class="text-xs text-gray-500 font-mono mb-1">600X1000X400</div>
+                                        <input type="number" id="formadora-nueva-caja-grande-man" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-grande-man', this, 100)">
                                     </div>
                                 </div>
                             </div>
 
                         </div>
-                    </div>
-                </div>
-
-                <!-- Resumen Gastos Formadoras -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                    <div class="modern-card bg-white dark:bg-gray-800 p-5 flex items-center justify-between border-l-4 border-l-orange-400 shadow-sm hover:shadow transition-shadow">
-                        <div class="flex flex-col">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Consumo</span>
-                            <span class="font-black text-lg text-gray-700 dark:text-gray-200">Cola Gastada</span>
-                        </div>
-                        <div class="w-32"><input type="number" class="modern-input bg-orange-50 dark:bg-gray-700 text-xl font-bold" value="0"></div>
-                    </div>
-                    <div class="modern-card bg-white dark:bg-gray-800 p-5 flex items-center justify-between border-l-4 border-l-orange-400 shadow-sm hover:shadow transition-shadow">
-                         <div class="flex flex-col">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Consumo</span>
-                            <span class="font-black text-lg text-gray-700 dark:text-gray-200">Tapeta Gastada</span>
-                        </div>
-                        <div class="w-32"><input type="number" class="modern-input bg-orange-50 dark:bg-gray-700 text-xl font-bold" value="0"></div>
                     </div>
                 </div>
             </div>
@@ -746,124 +758,118 @@
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                         <span class="text-[#ED7D31]">📋</span> Stock Inventario
                     </h2>
-                    <div class="w-full sm:w-56">
-                        <select class="modern-input week-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 focus:border-orange-500 focus:ring-orange-500" onchange="syncWeeks(this.value)"></select>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button id="btn-download-csv" onclick="downloadCSVReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
+                            <span>📥</span> Descargar CSV
+                        </button>
+                        <button id="btn-unlock-stock" onclick="toggleStockLock()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
+                            <span id="lock-icon">🔒</span> Bloqueado
+                        </button>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="week-Stock" class="modern-input week-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 w-48" onchange="loadTab('Stock')"></select>
+                            <select id="year-Stock" class="modern-input year-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 w-28" onchange="loadTab('Stock')"></select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tarjeta con fondo naranja -->
                 <div class="modern-card border-t-4 border-t-[#ED7D31] !bg-orange-50 dark:!bg-orange-900/20">
                     <div class="overflow-x-auto">
                         <table class="modern-table min-w-full">
                             <thead class="bg-orange-100/50 dark:bg-orange-800/20 border-b border-orange-200 dark:border-orange-700">
                                 <tr>
-                                    <th class="text-left group cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-800/40 transition-colors">
-                                        <div class="flex items-center gap-2">
-                                            Nombre Artículo
-                                            <svg class="w-4 h-4 text-orange-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                        </div>
-                                    </th>
-                                    <th class="group cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-800/40 transition-colors w-32">
-                                        <div class="flex items-center justify-center gap-2">
-                                            Referencia
-                                            <svg class="w-4 h-4 text-orange-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                        </div>
-                                    </th>
-                                    <th class="group cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-800/40 transition-colors w-40">
-                                        <div class="flex items-center justify-center gap-2">
-                                            Stock Actual
-                                            <svg class="w-4 h-4 text-orange-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                        </div>
-                                    </th>
-                                    <th class="group cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-800/40 transition-colors w-40">
-                                        <div class="flex items-center justify-center gap-2">
-                                            Pedido
-                                            <svg class="w-4 h-4 text-orange-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                        </div>
-                                    </th>
+                                    <th class="text-left w-64">Nombre Artículo</th>
+                                    <th class="w-32">SECCIÓN</th>
+                                    <th class="w-32">Referencia</th>
+                                    <th class="w-40">Stock Actual</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- CAJAS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
-                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GP MAN</td>
-                                    <td class="font-mono text-lg font-black text-black dark:text-white">150260855</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA MEDIANA WOMAN</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
+                                    <td class="font-mono text-lg font-black text-black dark:text-white">150260853</td>
+                                    <td><input type="number" id="stock-caja-mediana-woman" data-old-id="val_10" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-mediana-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA G/P/W (WOMAN)</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260852</td>
-                                    <td><input type="number" class="modern-input border-green-500 ring-1 ring-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-caja-gp-woman" data-old-id="val_4" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GRANDE MAN</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260856</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-caja-grande-man" data-old-id="val_7" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-grande-man', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
-                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA MEDIANA WOMAN</td>
-                                    <td class="font-mono text-lg font-black text-black dark:text-white">150260853</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GP MAN</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
+                                    <td class="font-mono text-lg font-black text-black dark:text-white">150260855</td>
+                                    <td><input type="number" id="stock-caja-gp-man" data-old-id="val_1" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-man', this.value)"></td>
+                                </tr>
+                                <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
+                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">TAPETA</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
+                                    <td class="font-mono text-lg font-black text-black dark:text-white">150260862</td>
+                                    <td><input type="number" id="stock-tapeta" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('tapeta', this.value)"></td>
                                 </tr>
 
                                 <!-- PRECINTOS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO BLANCO</td>
+                                    <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150022299</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-precinto-blanco" data-old-id="val_13" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
-                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO CARRUSEL PLATAFORMA LOGO</td>
+                                    <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO PLATAFORMA/LOGO</td>
+                                    <td><span class="bg-blue-200 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">CONFE. PAQ.</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">700288</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-precinto-logo" data-old-id="val_16" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- ETIQUETAS Y MATRICULAS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">ETIQUETAS BLANCAS (120X70)</td>
+                                    <td><span class="bg-blue-200 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">CONFE. PAQ.</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">700292</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-etiqueta-tienda" data-old-id="val_19" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">ETIQUETAS MATRICULAS CVC1 CONF.</td>
+                                    <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">734659</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-matricula-cvc1" data-old-id="val_22" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">MATRICULA CS8</td>
+                                    <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150027886</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-matricula-cs8" data-old-id="val_25" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- BOBINAS -->
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">BOBINA 800</td>
+                                    <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">740437</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-bobina-800" data-old-id="val_28" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">BOBINA 1200</td>
+                                    <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">736423</td>
-                                    <td><input type="number" class="modern-input" value="0"></td>
-                                    <td><input type="text" class="modern-input"></td>
+                                    <td><input type="number" id="stock-bobina-1200" data-old-id="val_31" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
                                 <!-- OTROS (COLA) -->
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200 border-b-0">COLA</td>
+                                    <td class="border-b-0"><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white border-b-0">736438</td>
-                                    <td class="border-b-0"><input type="number" class="modern-input" value="0"></td>
-                                    <td class="border-b-0"><input type="text" class="modern-input"></td>
+                                    <td class="border-b-0"><input type="number" id="stock-cola" data-old-id="val_34" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -871,144 +877,549 @@
                 </div>
             </div>
 
+            <!-- ================= PESTAÑA 6: GASTO PROMEDIO ================= -->
+            <div id="GastoPromedio" class="tabcontent">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
+                        <span class="text-indigo-500">📊</span> Gasto Promedio
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                    <!-- Filtros -->
+                    <div class="lg:col-span-1 modern-card border-t-4 border-t-indigo-500 !bg-indigo-50 dark:!bg-indigo-900/20 p-5 flex flex-col gap-4">
+                        <h3 class="font-bold text-indigo-800 dark:text-indigo-300 mb-2 border-b border-indigo-200 dark:border-indigo-800/50 pb-2">Filtros de Búsqueda</h3>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Categoría</label>
+                            <select id="filter-category" class="modern-input cursor-pointer !text-left border-indigo-200 dark:border-indigo-800 focus:border-indigo-500" onchange="updateTypeDropdown()">
+                                <option value="Todas">Todas</option>
+                                <option value="Caja">Caja</option>
+                                <option value="Precinto">Precinto</option>
+                                <option value="Etiquetas">Etiquetas</option>
+                                <option value="Matriculas">Matrículas</option>
+                                <option value="Bobina">Bobina</option>
+                                <option value="Cola">Cola</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Tipo</label>
+                            <select id="filter-type" class="modern-input cursor-pointer !text-left border-indigo-200 dark:border-indigo-800 focus:border-indigo-500" onchange="updateChart()">
+                                <option value="Todos">Todos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Sección</label>
+                            <select id="filter-section" class="modern-input cursor-pointer !text-left border-indigo-200 dark:border-indigo-800 focus:border-indigo-500" onchange="updateChart()">
+                                <option value="Todas">Todas</option>
+                                <option value="Paqueteria">Paquetería</option>
+                                <option value="Confeccion">Confección</option>
+                                <option value="Formadoras">Formadoras</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Mes</label>
+                            <select id="filter-month" class="modern-input cursor-pointer !text-left border-indigo-200 dark:border-indigo-800 focus:border-indigo-500" onchange="updateChart()">
+                                <option value="Todos">Todo el año</option>
+                                <option value="0">Enero</option>
+                                <option value="1">Febrero</option>
+                                <option value="2">Marzo</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Mayo</option>
+                                <option value="5">Junio</option>
+                                <option value="6">Julio</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Septiembre</option>
+                                <option value="9">Octubre</option>
+                                <option value="10">Noviembre</option>
+                                <option value="11">Diciembre</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Año</label>
+                            <select id="filter-year" class="modern-input cursor-pointer !text-left border-indigo-200 dark:border-indigo-800 focus:border-indigo-500" onchange="updateChart()">
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico -->
+                    <div class="lg:col-span-3 modern-card p-5 border-t-4 border-t-indigo-500 bg-white dark:bg-gray-800 flex flex-col min-h-[400px]">
+                         <div class="flex justify-between items-center mb-4">
+                             <h3 class="font-bold text-gray-700 dark:text-gray-200">Evolución de Gasto Promedio</h3>
+                             <span class="text-xs font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full">Actualizado en tiempo real</span>
+                         </div>
+                         <div class="relative w-full flex-grow flex items-center justify-center" id="chart-container">
+                             <canvas id="gastoChart"></canvas>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PESTAÑA 7: AJUSTES ================= -->
+            <div id="Ajustes" class="tabcontent">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
+                        <span class="text-gray-500">⚙️</span> Ajustes de Apariencia
+                    </h2>
+                </div>
+
+                <div class="modern-card border-t-4 border-t-gray-500 p-8 max-w-2xl mx-auto">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">Personalización del Entorno</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Opacidad del Panel Principal (Fondo)</span>
+                                <span id="val-main-opacity" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">95%</span>
+                            </label>
+                            <input type="range" id="slider-main-opacity" min="40" max="100" value="95" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta cómo de transparente es la caja gigante que engloba toda la aplicación para ver la imagen de fondo.</p>
+                        </div>
+                        
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Opacidad de las Tarjetas Internas</span>
+                                <span id="val-card-opacity" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">100%</span>
+                            </label>
+                            <input type="range" id="slider-card-opacity" min="20" max="100" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta la transparencia de las tarjetas blancas/oscuras individuales dentro de cada pestaña.</p>
+                        </div>
+                        
+                        <div>
+                            <label class="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <span>Brillo General (Claro / Oscuro)</span>
+                                <span id="val-brightness" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono">100%</span>
+                            </label>
+                            <input type="range" id="slider-brightness" min="50" max="150" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="updateOpacities()">
+                            <p class="text-xs text-gray-500 mt-2">Ajusta el brillo del panel para encontrar un punto medio perfecto entre el modo claro y oscuro.</p>
+                        </div>
+
+                        <div class="pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                             <button onclick="resetOpacities()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                 <span>🔄</span> Restaurar Valores por Defecto
+                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <script>
-        // Función para alternar Modo Claro/Oscuro
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
-        }
+    <!-- === INICIALIZACIÓN DE FIREBASE E INTERACCIONES === -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Función para calcular la semana ISO actual (1 a 52/53)
-        function getISOWeek(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-        }
-
-        // Inicializar los menús desplegables de las semanas
-        function initWeeks() {
-            const currentWeek = getISOWeek(new Date());
-            const selectors = document.querySelectorAll('.week-selector');
-            
-            let optionsHTML = '';
-            for(let i=1; i<=52; i++) {
-                if(i === currentWeek) {
-                    optionsHTML += `<option value="${i}" selected class="bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold">Semana ${i} (Actual)</option>`;
-                } else {
-                    optionsHTML += `<option value="${i}">Semana ${i}</option>`;
-                }
-            }
-
-            selectors.forEach(select => {
-                select.innerHTML = optionsHTML;
-            });
-            
-            // Usar syncWeeks para inicializar el valor y la etiqueta dinámica de una vez
-            syncWeeks(currentWeek);
-        }
-
-        // Sincronizar todas las semanas cuando se cambia una en cualquier pestaña
-        function syncWeeks(val) {
-            const selectors = document.querySelectorAll('.week-selector');
-            selectors.forEach(select => {
-                select.value = val;
-            });
-            
-            // Actualizar etiqueta dinámica "Gastado en semana XX-YY" en la pestaña Confección
-            const rangoSpan = document.getElementById('semana-rango');
-            if (rangoSpan) {
-                const actual = parseInt(val, 10);
-                // Si la semana es la 1, la anterior fue la 52 del año pasado
-                const previa = actual === 1 ? 52 : actual - 1;
-                rangoSpan.textContent = previa + '-' + actual;
-            }
-        }
-
-        // Lógica de Pestañas
-        function openTab(evt, tabName) {
-            let i, tabcontent, tablinks;
-            
-            // Ocultar todo el contenido
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            
-            // Quitar clase activa de todos los botones
-            tablinks = document.getElementsByClassName("tablink");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            
-            // Mostrar la pestaña actual
-            document.getElementById(tabName).style.display = "block";
-            
-            // Añadir clase activa al botón clickeado o al predeterminado
-            if(evt) {
-                evt.currentTarget.classList.add("active");
-            } else {
-                document.getElementById("defaultOpen").classList.add("active");
-            }
-        }
-
-        // Al cargar la ventana, iniciar semanas y abrir la primera pestaña
-        window.onload = function() {
-            initWeeks();
-            openTab(null, 'Paqueteria');
+        const firebaseConfig = {
+            apiKey: "AIzaSyBELJgC4Hw6mxKwg0GzlTNKxgTMTspndUQ",
+            authDomain: "inventario-consumibles-bueno.firebaseapp.com",
+            projectId: "inventario-consumibles-bueno",
+            storageBucket: "inventario-consumibles-bueno.firebasestorage.app",
+            messagingSenderId: "554697107189",
+            appId: "1:554697107189:web:7f64755dd2a861eebf47bc"
         };
 
-        // --- LÓGICA PARA MULTI-SELECT DE 'AP' (Pestaña 1) ---
-        function toggleApDropdown(event) {
-            const dropdown = document.getElementById('ap-dropdown');
-            dropdown.classList.toggle('hidden');
-            if(event) event.stopPropagation(); // Evitar que el clic cierre el menú al instante
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.db = db; 
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.isDataLoaded = {};
+        window.hasShownLowStockAlert = false;
+
+        window.checkLowStockAlert = function() {
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen && !loginScreen.classList.contains('hidden')) {
+                return;
+            }
+
+            let lowStockItems = [];
+            const stockInputs = document.querySelectorAll('#Stock .locked-stock-input');
+            
+            stockInputs.forEach(input => {
+                if (input.value !== '') {
+                    const val = Number(input.value);
+                    if (val < 5) {
+                        const tr = input.closest('tr');
+                        if (tr) {
+                            const nameTd = tr.querySelector('td:first-child');
+                            if (nameTd) {
+                                lowStockItems.push(nameTd.textContent.trim());
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (lowStockItems.length > 0) {
+                let msg = "⚠️ AVISO DE STOCK BAJO ⚠️\n\nLos siguientes artículos están a punto de agotarse (menos de 5 unidades en stock):\n\n";
+                lowStockItems.forEach(item => msg += `• ${item}\n`);
+                
+                setTimeout(() => alert(msg), 500);
+            }
+            window.hasShownLowStockAlert = true;
+        };
+        
+        try {
+            const auth = getAuth(app);
+            await signInAnonymously(auth);
+            console.log("🔥 Firebase conectado.");
+        } catch(e) {
+            console.warn("Autenticación no requerida o fallida. Procediendo...", e);
         }
 
-        function updateApSelection() {
-            const checkboxes = document.querySelectorAll('.ap-checkbox:checked');
-            const selectedText = document.getElementById('ap-selected-text');
+        window.saveTab = async function(tabId, isAutoSave = false) {
+            if(!window.db) return;
+            if(window.isDataLoaded[tabId] !== true) return;
+
+            const year = document.getElementById('year-' + tabId).value;
+            const week = document.getElementById('week-' + tabId).value;
+
+            try {
+                const tabEl = document.getElementById(tabId);
+                const inputs = Array.from(tabEl.querySelectorAll('input, select, textarea')).filter(el => 
+                    !el.classList.contains('week-selector') && 
+                    !el.classList.contains('year-selector')
+                );
+                
+                const data = {};
+                inputs.forEach((input, index) => {
+                    const key = input.id || `val_${index}`;
+                    if(input.type === 'checkbox') data[key] = input.checked;
+                    else data[key] = input.value;
+                });
+
+                const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
+                await setDoc(docRef, data);
+            } catch (error) {
+                console.error("Error guardando datos: ", error);
+            }
+        };
+
+        window.loadTab = async function(tabId) {
+            if(!window.db) return;
+            window.isDataLoaded[tabId] = false;
+
+            const year = document.getElementById('year-' + tabId).value;
+            const week = document.getElementById('week-' + tabId).value;
+            const tabEl = document.getElementById(tabId);
             
-            if (checkboxes.length === 0) {
-                selectedText.innerHTML = 'Selecciona AP...';
-                selectedText.className = 'text-gray-400 font-normal';
+            const inputs = Array.from(tabEl.querySelectorAll('input, select, textarea')).filter(el => 
+                !el.classList.contains('week-selector') && 
+                !el.classList.contains('year-selector')
+            );
+
+            try {
+                const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    inputs.forEach((input, index) => {
+                        const key = input.id || `val_${index}`;
+                        const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
+                        
+                        let val = data[key];
+                        if (val === undefined || val === '') val = data[fallbackKey];
+                        
+                        if(val !== undefined) {
+                            if(input.type === 'checkbox') input.checked = val;
+                            else {
+                                input.value = val;
+                                input.dataset.prevValue = val;
+                            }
+                        } else {
+                            if(input.type !== 'checkbox' && input.type !== 'button') {
+                                input.value = '';
+                                input.dataset.prevValue = 0;
+                            }
+                        }
+                    });
+                } else {
+                    inputs.forEach(input => {
+                        if (input.type === 'checkbox') input.checked = false;
+                        else if (input.type !== 'button') {
+                            input.value = '';
+                            input.dataset.prevValue = 0;
+                        }
+                    });
+                }
+                
+                if(typeof updateApSelection === 'function') updateApSelection();
+                if(typeof updateEquipoSelection === 'function') updateEquipoSelection();
+
+                if (tabId === 'Confeccion') {
+                    if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
+                }
+                if (tabId === 'Descarga') {
+                    if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
+                }
+
+                if (tabId === 'Stock' || tabId === 'Confeccion') {
+                    const stockW = document.getElementById('week-Stock').value;
+                    const confW = document.getElementById('week-Confeccion').value;
+                    const stockY = document.getElementById('year-Stock').value;
+                    const confY = document.getElementById('year-Confeccion').value;
+                    
+                    if (stockW === confW && stockY === confY) {
+                        const items = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                        items.forEach(item => {
+                            const stockEl = document.getElementById(`stock-${item}`);
+                            const confEl = document.getElementById(`confeccion-${item}`);
+                            if (stockEl && confEl) {
+                                if (tabId === 'Stock' && stockEl.value !== '') confEl.value = stockEl.value;
+                                else if (tabId === 'Confeccion' && confEl.value !== '') stockEl.value = confEl.value;
+                            }
+                        });
+                        if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
+                    }
+                }
+                
+                window.isDataLoaded[tabId] = true;
+
+                if (tabId === 'Stock' && !window.hasShownLowStockAlert) {
+                    window.checkLowStockAlert();
+                }
+            } catch(e) {
+                console.error("Error al cargar la pestaña:", e);
+                window.isDataLoaded[tabId] = true;
+            }
+        };
+
+        window.syncToConfeccion = async function(item, value) {
+            const stockW = document.getElementById('week-Stock').value;
+            const confW = document.getElementById('week-Confeccion').value;
+            const stockY = document.getElementById('year-Stock').value;
+            const confY = document.getElementById('year-Confeccion').value;
+            
+            if (stockW === confW && stockY === confY) {
+                const confEl = document.getElementById(`confeccion-${item}`);
+                if (confEl) {
+                    confEl.value = value;
+                    if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
+                    if(window.saveTab) window.saveTab('Confeccion', true);
+                }
             } else {
-                let labels = Array.from(checkboxes).map(cb => 
-                    `<span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-0.5 rounded text-xs font-bold border border-blue-200 dark:border-blue-700">${cb.value}</span>`
-                ).join('');
-                selectedText.innerHTML = labels;
-                selectedText.className = 'flex flex-wrap gap-1 pr-6';
+                if (window.db && window.doc && window.getDoc && window.setDoc) {
+                    try {
+                        const docRef = window.doc(window.db, 'registros_semanales', `Confeccion_${stockY}_${stockW}`);
+                        const docSnap = await window.getDoc(docRef);
+                        let data = {};
+                        if (docSnap.exists()) data = docSnap.data();
+                        data[`confeccion-${item}`] = value;
+                        await window.setDoc(docRef, data);
+                    } catch (e) {
+                        console.error("Error sincronizando confección en segundo plano:", e);
+                    }
+                }
+            }
+        };
+
+        window.syncToStock = async function(item, value) {
+            const stockW = document.getElementById('week-Stock').value;
+            const confW = document.getElementById('week-Confeccion').value;
+            const stockY = document.getElementById('year-Stock').value;
+            const confY = document.getElementById('year-Confeccion').value;
+            
+            if (stockW === confW && stockY === confY) {
+                const stockEl = document.getElementById(`stock-${item}`);
+                if (stockEl) stockEl.value = value;
+            }
+        };
+
+        window.addToStock = async function(stockId, inputEl) {
+            let tabName = 'Descarga';
+            const stockW = document.getElementById('week-Stock').value;
+            const currentW = document.getElementById('week-' + tabName).value;
+            const stockY = document.getElementById('year-Stock').value;
+            const currentY = document.getElementById('year-' + tabName).value;
+            
+            const newVal = Number(inputEl.value) || 0;
+            const prevVal = Number(inputEl.dataset.prevValue) || 0;
+            const delta = newVal - prevVal; 
+            
+            if (delta === 0) return;
+            
+            if (stockW === currentW && stockY === currentY) {
+                const stockEl = document.getElementById(stockId);
+                if (stockEl) {
+                    const currentStock = Number(stockEl.value) || 0;
+                    const newStockVal = Math.round(currentStock + delta);
+                    stockEl.value = newStockVal; 
+                    
+                    const itemRawName = stockId.replace('stock-', '');
+                    const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                    
+                    if (inventoryItems.includes(itemRawName)) {
+                        const confEl = document.getElementById(`confeccion-${itemRawName}`);
+                        if (confEl) {
+                            confEl.value = newStockVal;
+                            if(typeof window.calculateGastadoConfeccion === 'function') {
+                                window.calculateGastadoConfeccion();
+                            }
+                            if(window.saveTab) window.saveTab('Confeccion', true);
+                        }
+                    }
+                    if(window.saveTab) window.saveTab('Stock', true);
+                }
+            } else {
+                if (window.db && window.doc && window.getDoc && window.setDoc) {
+                    try {
+                        const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
+                        const docSnap = await window.getDoc(docRef);
+                        let data = {};
+                        if (docSnap.exists()) data = docSnap.data();
+                        const currentStock = Number(data[stockId]) || 0;
+                        data[stockId] = Math.round(currentStock + delta);
+                        await window.setDoc(docRef, data);
+                    } catch (e) {
+                        console.error("Error actualizando stock en segundo plano (suma):", e);
+                    }
+                }
+            }
+            
+            inputEl.dataset.prevValue = newVal;
+            if(window.saveTab) window.saveTab(tabName, true);
+        };
+
+        window.subtractFromStock = async function(stockId, inputEl, divideBy = 1) {
+            let tabName = 'Confeccion';
+            if (inputEl.id.startsWith('paqueteria')) tabName = 'Paqueteria';
+            else if (inputEl.id.startsWith('formadora')) tabName = 'Formadoras';
+            const stockW = document.getElementById('week-Stock').value;
+            const currentW = document.getElementById('week-' + tabName).value;
+            const stockY = document.getElementById('year-Stock').value;
+            const currentY = document.getElementById('year-' + tabName).value;
+            
+            const newVal = Number(inputEl.value) || 0;
+            const prevVal = Number(inputEl.dataset.prevValue) || 0;
+            const delta = (newVal - prevVal) / divideBy;
+            
+            if (delta === 0) return;
+            
+            if (stockW === currentW && stockY === currentY) {
+                const stockEl = document.getElementById(stockId);
+                if (stockEl) {
+                    const currentStock = Number(stockEl.value) || 0;
+                    const newStockVal = Math.round(currentStock - delta);
+                    stockEl.value = newStockVal;
+                    
+                    const itemRawName = stockId.replace('stock-', '');
+                    const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                    
+                    if (inventoryItems.includes(itemRawName)) {
+                        const confEl = document.getElementById(`confeccion-${itemRawName}`);
+                        if (confEl) {
+                            confEl.value = newStockVal;
+                            if(typeof window.calculateGastadoConfeccion === 'function') {
+                                window.calculateGastadoConfeccion();
+                            }
+                            if(window.saveTab) window.saveTab('Confeccion', true);
+                        }
+                    }
+                    if(window.saveTab) window.saveTab('Stock', true);
+                }
+            } else {
+                if (window.db && window.doc && window.getDoc && window.setDoc) {
+                    try {
+                        const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
+                        const docSnap = await window.getDoc(docRef);
+                        let data = {};
+                        if (docSnap.exists()) data = docSnap.data();
+                        const currentStock = Number(data[stockId]) || 0;
+                        data[stockId] = Math.round(currentStock - delta);
+                        await window.setDoc(docRef, data);
+                    } catch (e) {
+                        console.error("Error actualizando stock en segundo plano:", e);
+                    }
+                }
+            }
+            
+            inputEl.dataset.prevValue = newVal;
+        };
+
+        window.calculateGastadoConfeccion = function() {
+            const items = [
+                { inv: 'confeccion-caja-mediana-woman', antInv: 'confeccion-inv-ant-mediana-woman', antPed: 'confeccion-ped-ant-mediana-woman', gastado: 'confeccion-gastado-mediana-woman' },
+                { inv: 'confeccion-caja-gp-woman', antInv: 'confeccion-inv-ant-gp-woman', antPed: 'confeccion-ped-ant-gp-woman', gastado: 'confeccion-gastado-gp-woman' },
+                { inv: 'confeccion-caja-grande-man', antInv: 'confeccion-inv-ant-grande-man', antPed: 'confeccion-ped-ant-grande-man', gastado: 'confeccion-gastado-grande-man' },
+                { inv: 'confeccion-caja-gp-man', antInv: 'confeccion-inv-ant-gp-man', antPed: 'confeccion-ped-ant-gp-man', gastado: 'confeccion-gastado-gp-man' },
+                { inv: 'confeccion-tapeta', antInv: 'confeccion-inv-ant-tapeta', antPed: 'confeccion-ped-ant-tapeta', gastado: 'confeccion-gastado-tapeta' }
+            ];
+
+            items.forEach(item => {
+                const currentInv = Number(document.getElementById(item.inv)?.value) || 0;
+                const antInv = Number(document.getElementById(item.antInv)?.value) || 0;
+                const antPed = Number(document.getElementById(item.antPed)?.value) || 0;
+                
+                let gastado = Math.round((antInv + antPed) - currentInv);
+                
+                const gastadoInput = document.getElementById(item.gastado);
+                if (gastadoInput) gastadoInput.value = gastado;
+            });
+        };
+
+        window.loadPreviousWeekData = async function(currentTab) {
+            if (currentTab !== 'Confeccion') return;
+            if (!window.db || !window.getDoc || !window.doc) return;
+
+            const currentYearStr = document.getElementById('year-Confeccion').value;
+            const currentWeekStr = document.getElementById('week-Confeccion').value;
+            let currentYear = parseInt(currentYearStr);
+            let currentWeek = parseInt(currentWeekStr);
+
+            let prevWeek = currentWeek - 1;
+            let prevYear = currentYear;
+            if (prevWeek < 1) {
+                prevWeek = 52;
+                prevYear -= 1;
+            }
+
+            try {
+                const docRefConf = window.doc(window.db, 'registros_semanales', `Confeccion_${prevYear}_${prevWeek}`);
+                const docSnapConf = await window.getDoc(docRefConf);
+                if (docSnapConf.exists()) {
+                    const data = docSnapConf.data();
+                    document.getElementById('confeccion-inv-ant-mediana-woman').value = data['confeccion-caja-mediana-woman'] || 0;
+                    document.getElementById('confeccion-inv-ant-gp-woman').value = data['confeccion-caja-gp-woman'] || 0;
+                    document.getElementById('confeccion-inv-ant-grande-man').value = data['confeccion-caja-grande-man'] || 0;
+                    document.getElementById('confeccion-inv-ant-gp-man').value = data['confeccion-caja-gp-man'] || 0;
+                    document.getElementById('confeccion-inv-ant-tapeta').value = data['confeccion-tapeta'] || 0;
+                } else {
+                    ['confeccion-inv-ant-mediana-woman', 'confeccion-inv-ant-gp-woman', 'confeccion-inv-ant-grande-man', 'confeccion-inv-ant-gp-man', 'confeccion-inv-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
+                }
+
+                const docRefDesc = window.doc(window.db, 'registros_semanales', `Descarga_${prevYear}_${prevWeek}`);
+                const docSnapDesc = await window.getDoc(docRefDesc);
+                if (docSnapDesc.exists()) {
+                    const data = docSnapDesc.data();
+                    document.getElementById('confeccion-ped-ant-mediana-woman').value = data['descarga-pedido-mediana-woman'] || 0;
+                    document.getElementById('confeccion-ped-ant-gp-woman').value = data['descarga-pedido-gp-woman'] || 0;
+                    document.getElementById('confeccion-ped-ant-grande-man').value = data['descarga-pedido-grande-man'] || 0;
+                    document.getElementById('confeccion-ped-ant-gp-man').value = data['descarga-pedido-gp-man'] || 0;
+                    document.getElementById('confeccion-ped-ant-tapeta').value = data['descarga-pedido-tapeta'] || 0;
+                } else {
+                    ['confeccion-ped-ant-mediana-woman', 'confeccion-ped-ant-gp-woman', 'confeccion-ped-ant-grande-man', 'confeccion-ped-ant-gp-man', 'confeccion-ped-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
+                }
+
+                window.calculateGastadoConfeccion();
+            } catch (e) {
+                console.error("Error cargando datos de la semana anterior:", e);
             }
         }
+    </script>
 
-        // --- LÓGICA PARA MULTI-SELECT DE 'EQUIPO' (Pestaña 2) ---
-        function toggleEquipoDropdown(event) {
-            const dropdown = document.getElementById('equipo-dropdown');
-            dropdown.classList.toggle('hidden');
-            if(event) event.stopPropagation(); // Evitar que el clic cierre el menú al instante
-        }
-
-        function updateEquipoSelection() {
-            const checkboxes = document.querySelectorAll('.equipo-checkbox:checked');
-            const selectedText = document.getElementById('equipo-selected-text');
-            
-            if (checkboxes.length === 0) {
-                selectedText.innerHTML = 'Selecciona Equipo...';
-                selectedText.className = 'text-orange-700 dark:text-orange-300 font-bold';
-            } else {
-                let labels = Array.from(checkboxes).map(cb => 
-                    `<span class="bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 px-2 py-0.5 rounded text-xs font-bold border border-orange-300 dark:border-orange-700">${cb.value}</span>`
-                ).join('');
-                selectedText.innerHTML = labels;
-                selectedText.className = 'flex flex-wrap gap-1 pr-6';
-            }
-        }
-
+    <script>
+        /* --- FUNCIONES UI GENERALES --- */
         // Redondear automáticamente cualquier número decimal que se introduzca
         document.addEventListener('input', function(e) {
             if (e.target && e.target.type === 'number') {
@@ -1018,26 +1429,596 @@
             }
         });
 
-        // Cerrar los dropdowns si se hace clic fuera de ellos
-        document.addEventListener('click', function(event) {
-            // Dropdown de AP
-            const apDropdown = document.getElementById('ap-dropdown');
-            const apMultiselect = document.querySelector('.custom-multiselect');
-            if (apDropdown && !apDropdown.classList.contains('hidden')) {
-                if (apMultiselect && !apMultiselect.contains(event.target)) {
-                    apDropdown.classList.add('hidden');
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+
+            if (gastoChartInstance) {
+                const textColor = isDark ? '#9ca3af' : '#4b5563';
+                const gridColor = isDark ? '#374151' : '#e5e7eb';
+                gastoChartInstance.options.plugins.legend.labels.color = textColor;
+                gastoChartInstance.options.scales.x.ticks.color = textColor;
+                gastoChartInstance.options.scales.y.ticks.color = textColor;
+                gastoChartInstance.options.scales.y.grid.color = gridColor;
+                gastoChartInstance.update();
+            }
+        }
+
+        function getISOWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function initWeeks() {
+            const currentWeek = getISOWeek(new Date());
+            const selectors = document.querySelectorAll('.week-selector');
+            selectors.forEach(select => {
+                let optionsHTML = '';
+                for(let i=1; i<=52; i++) {
+                    if(i === currentWeek) optionsHTML += `<option value="${i}" selected>Semana ${i} (Actual)</option>`;
+                    else optionsHTML += `<option value="${i}">Semana ${i}</option>`;
+                }
+                select.innerHTML = optionsHTML;
+            });
+            updateRangoSemana(currentWeek);
+        }
+
+        function initYears() {
+            const currentYear = new Date().getFullYear();
+            const selectors = document.querySelectorAll('.year-selector');
+            selectors.forEach(select => {
+                let optionsHTML = '';
+                for(let i = currentYear - 3; i <= currentYear + 3; i++) {
+                    if(i === currentYear) optionsHTML += `<option value="${i}" selected>Año ${i}</option>`;
+                    else optionsHTML += `<option value="${i}">Año ${i}</option>`;
+                }
+                select.innerHTML = optionsHTML;
+            });
+        }
+
+        function updateRangoSemana(val) {
+            const rangoSpan = document.getElementById('semana-rango');
+            if (rangoSpan) {
+                const actual = parseInt(val, 10);
+                const previa = actual === 1 ? 52 : actual - 1;
+                rangoSpan.textContent = previa + '-' + actual;
+            }
+        }
+
+        function resetOpacities() {
+            const mainSlider = document.getElementById('slider-main-opacity');
+            const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
+            
+            if (mainSlider) mainSlider.value = 95;
+            if (cardSlider) cardSlider.value = 100;
+            if (brightnessSlider) brightnessSlider.value = 100;
+            
+            updateOpacities();
+        }
+
+        function updateOpacities() {
+            const mainSlider = document.getElementById('slider-main-opacity');
+            const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
+            
+            if (mainSlider && cardSlider) {
+                const mainOp = mainSlider.value / 100;
+                const cardOp = cardSlider.value / 100;
+                
+                document.documentElement.style.setProperty('--main-alpha', mainOp);
+                document.documentElement.style.setProperty('--card-alpha', cardOp);
+                
+                document.getElementById('val-main-opacity').textContent = mainSlider.value + '%';
+                document.getElementById('val-card-opacity').textContent = cardSlider.value + '%';
+
+                localStorage.setItem('mainOpacity', mainSlider.value);
+                localStorage.setItem('cardOpacity', cardSlider.value);
+            }
+
+            if (brightnessSlider) {
+                const brightness = brightnessSlider.value / 100;
+                document.documentElement.style.setProperty('--app-brightness', brightness);
+                document.getElementById('val-brightness').textContent = brightnessSlider.value + '%';
+                localStorage.setItem('appBrightness', brightnessSlider.value);
+            }
+        }
+
+        function initOpacities() {
+            const savedMain = localStorage.getItem('mainOpacity');
+            const savedCard = localStorage.getItem('cardOpacity');
+            const savedBrightness = localStorage.getItem('appBrightness');
+            
+            const mainSlider = document.getElementById('slider-main-opacity');
+            const cardSlider = document.getElementById('slider-card-opacity');
+            const brightnessSlider = document.getElementById('slider-brightness');
+            
+            if (savedMain && mainSlider) {
+                mainSlider.value = savedMain;
+                document.documentElement.style.setProperty('--main-alpha', savedMain / 100);
+                document.getElementById('val-main-opacity').textContent = savedMain + '%';
+            }
+            if (savedCard && cardSlider) {
+                cardSlider.value = savedCard;
+                document.documentElement.style.setProperty('--card-alpha', savedCard / 100);
+                document.getElementById('val-card-opacity').textContent = savedCard + '%';
+            }
+            if (savedBrightness && brightnessSlider) {
+                brightnessSlider.value = savedBrightness;
+                document.documentElement.style.setProperty('--app-brightness', savedBrightness / 100);
+                document.getElementById('val-brightness').textContent = savedBrightness + '%';
+            }
+        }
+
+        window.currentActiveTab = 'Paqueteria';
+
+        function openTab(evt, tabName) {
+            if (window.currentActiveTab && window.saveTab) {
+                const tabsToSave = ['Paqueteria', 'Confeccion', 'Descarga', 'Formadoras', 'Stock'];
+                if (tabsToSave.includes(window.currentActiveTab)) {
+                    window.saveTab(window.currentActiveTab, true);
                 }
             }
 
-            // Dropdown de Equipo
-            const eqDropdown = document.getElementById('equipo-dropdown');
-            const eqMultiselect = document.querySelector('.custom-multiselect-equipo');
-            if (eqDropdown && !eqDropdown.classList.contains('hidden')) {
-                if (eqMultiselect && !eqMultiselect.contains(event.target)) {
-                    eqDropdown.classList.add('hidden');
+            window.currentActiveTab = tabName;
+            const tabcontents = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontents.length; i++) tabcontents[i].style.display = "none";
+            const tablinks = document.getElementsByClassName("tablink");
+            for (let i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+            
+            document.getElementById(tabName).style.display = "block";
+            if(evt) evt.currentTarget.classList.add("active");
+            else document.getElementById("defaultOpen").classList.add("active");
+        }
+
+        window.onload = function() {
+            initWeeks();
+            initYears();
+            initChart();
+            initOpacities();
+            openTab(null, 'Paqueteria');
+
+            setTimeout(() => {
+                if(window.loadTab) {
+                    ['Paqueteria', 'Confeccion', 'Descarga', 'Formadoras', 'Stock'].forEach(tab => window.loadTab(tab));
+                }
+            }, 500);
+
+            setInterval(() => {
+                if (window.currentActiveTab && window.currentActiveTab !== 'GastoPromedio' && window.currentActiveTab !== 'Ajustes') {
+                    if(window.saveTab) window.saveTab(window.currentActiveTab, true);
+                }
+            }, 60000);
+        };
+
+        // --- LÓGICA DEL GRÁFICO (Pestaña 6) ---
+        let gastoChartInstance = null;
+
+        const subtipos = {
+            "Todas": ["Todos"],
+            "Caja": ["Todos", "Caja Mediana Woman", "Caja GP Woman", "Caja Grande Man", "Caja GP Man"],
+            "Precinto": ["Todos", "Precinto Plataforma/Logo", "Precinto Blanco"],
+            "Etiquetas": ["Todos", "Etiquetas Tienda"],
+            "Matriculas": ["Todos", "Matriculas CVC1", "Matricula CS8"],
+            "Bobina": ["Todos", "Bobina 800", "Bobina 1200"],
+            "Cola": ["Todos", "Cola"]
+        };
+
+        function updateTypeDropdown() {
+            const cat = document.getElementById('filter-category').value;
+            const typeSelect = document.getElementById('filter-type');
+            
+            typeSelect.innerHTML = '';
+            subtipos[cat].forEach(tipo => {
+                let opt = document.createElement('option');
+                opt.value = tipo;
+                opt.textContent = tipo;
+                typeSelect.appendChild(opt);
+            });
+            updateChart();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('gastoChart');
+            if(!ctx) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const gridColor = isDark ? '#374151' : '#e5e7eb';
+
+            gastoChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Cargando datos...',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor, font: { weight: 'bold' } } } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { weight: '600' } }, grid: { display: false } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor, borderDash: [4, 4] }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        async function updateChart() {
+            if (!gastoChartInstance) return;
+            const month = document.getElementById('filter-month').value;
+            const year = document.getElementById('filter-year').value;
+            const category = document.getElementById('filter-category').value;
+            const type = document.getElementById('filter-type').value;
+            const section = document.getElementById('filter-section').value;
+            
+            let newLabels = [];
+            if (month !== 'Todos') {
+                newLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5'];
+            } else {
+                newLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            }
+            
+            const validCategories = ['Caja', 'Precinto', 'Etiquetas', 'Matriculas', 'Bobina', 'Cola'];
+            let isAll = category === 'Todas';
+            let categoriesToProcess = isAll ? validCategories : [category];
+            
+            let catDataArrays = {};
+            categoriesToProcess.forEach(c => {
+                catDataArrays[c] = (month !== 'Todos') ? [0,0,0,0,0] : [0,0,0,0,0,0,0,0,0,0,0,0];
+            });
+            
+            if (window.db && window.getDocs) {
+                try {
+                    const querySnapshot = await window.getDocs(window.collection(window.db, 'registros_semanales'));
+                    querySnapshot.forEach((doc) => {
+                        const parts = doc.id.split('_');
+                        if (parts.length === 3) {
+                            const docSection = parts[0];
+                            const docYear = parts[1];
+                            const docWeek = parseInt(parts[2], 10);
+                            
+                            if (docYear === year) {
+                                if (section !== 'Todas' && docSection !== section) return;
+                                
+                                const data = doc.data();
+                                const d = new Date(parseInt(docYear), 0, 1 + (docWeek - 1) * 7);
+                                const docMonth = d.getMonth();
+
+                                let targetIndex = -1;
+                                if (month === 'Todos') {
+                                    targetIndex = docMonth;
+                                } else if (docMonth.toString() === month) {
+                                    const weekOfMonth = Math.floor(d.getDate() / 7);
+                                    if (weekOfMonth >= 0 && weekOfMonth < 5) targetIndex = weekOfMonth;
+                                }
+
+                                if (targetIndex !== -1) {
+                                    categoriesToProcess.forEach(cat => {
+                                        let amount = 0;
+                                        let currentType = isAll ? 'Todos' : type;
+
+                                        if (docSection === 'Paqueteria') {
+                                            if (cat === 'Precinto') {
+                                                if (currentType === 'Todos' || currentType === 'Precinto Plataforma/Logo') amount += Number(data['paqueteria-precinto-plataforma'] || 0);
+                                                if (currentType === 'Todos' || currentType === 'Precinto Blanco') amount += Number(data['paqueteria-precinto-blanco'] || 0);
+                                            }
+                                            if (cat === 'Etiquetas') {
+                                                if (currentType === 'Todos' || currentType === 'Etiquetas Tienda') amount += Number(data['paqueteria-etiqueta-tienda'] || 0);
+                                            }
+                                            if (cat === 'Matriculas') {
+                                                if (currentType === 'Todos' || currentType === 'Matricula CS8') amount += Number(data['paqueteria-matricula-cs8'] || 0);
+                                            }
+                                            if (cat === 'Bobina') {
+                                                if (currentType === 'Todos' || currentType === 'Bobina 800') amount += Number(data['paqueteria-bobina-800'] || 0);
+                                                if (currentType === 'Todos' || currentType === 'Bobina 1200') amount += Number(data['paqueteria-bobina-1200'] || 0);
+                                            }
+                                        }
+                                        if (docSection === 'Confeccion') {
+                                            if (cat === 'Precinto') {
+                                                if (currentType === 'Todos' || currentType === 'Precinto Plataforma/Logo') amount += Number(data['confeccion-precinto-logo'] || 0);
+                                                if (currentType === 'Todos' || currentType === 'Precinto Blanco') amount += Number(data['confeccion-precinto-blanco'] || 0);
+                                            }
+                                            if (cat === 'Etiquetas') {
+                                                if (currentType === 'Todos' || currentType === 'Etiquetas Tienda') amount += Number(data['confeccion-etiqueta-tienda'] || 0);
+                                            }
+                                            if (cat === 'Matriculas') {
+                                                if (currentType === 'Todos' || currentType === 'Matriculas CVC1') amount += Number(data['confeccion-matricula-cvc1'] || 0);
+                                            }
+                                            if (cat === 'Cola') {
+                                                if (currentType === 'Todos' || currentType === 'Cola') amount += Number(data['confeccion-cola'] || 0);
+                                            }
+                                        }
+                                        if (docSection === 'Formadoras') {
+                                            if (cat === 'Caja') {
+                                                let valMedianaWoman = 0, valGpWoman = 0, valGrandeMan = 0, valGpMan = 0;
+                                                
+                                                valMedianaWoman += Number(data['formadora-antigua-caja-mediana-woman'] || 0) / 100;
+                                                valGpWoman += Number(data['formadora-nueva-caja-gp-woman'] || 0) / 100;
+                                                valGpMan += Number(data['formadora-nueva-caja-gp-man'] || 0) / 100;
+                                                valMedianaWoman += Number(data['formadora-nueva-caja-mediana-woman'] || 0) / 100;
+                                                valGrandeMan += Number(data['formadora-nueva-caja-grande-man'] || 0) / 100;
+                                                
+                                                valMedianaWoman += Number(data['formadora-manual-caja-mediana-woman'] || 0);
+                                                valGpWoman += Number(data['formadora-manual-caja-gp-woman'] || 0);
+                                                valGrandeMan += Number(data['formadora-manual-caja-grande-man'] || 0);
+                                                valGpMan += Number(data['formadora-manual-caja-gp-man'] || 0);
+                                                
+                                                if (currentType === 'Todos' || currentType === 'Caja Mediana Woman') amount += valMedianaWoman;
+                                                if (currentType === 'Todos' || currentType === 'Caja GP Woman') amount += valGpWoman;
+                                                if (currentType === 'Todos' || currentType === 'Caja Grande Man') amount += valGrandeMan;
+                                                if (currentType === 'Todos' || currentType === 'Caja GP Man') amount += valGpMan;
+                                            }
+                                            if (cat === 'Cola') {
+                                                if (currentType === 'Todos' || currentType === 'Cola') amount += Number(data['formadora-manual-cola'] || 0);
+                                            }
+                                        }
+
+                                        if (amount > 0) {
+                                            catDataArrays[cat][targetIndex] += amount;
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                } catch(e) {
+                    console.error("Error consultando Firebase para el gráfico:", e);
                 }
             }
+            
+            const bgColors = {
+                'Caja': 'rgba(234, 88, 12, 0.85)',
+                'Precinto': 'rgba(22, 163, 74, 0.85)',
+                'Etiquetas': 'rgba(37, 99, 235, 0.85)',
+                'Matriculas': 'rgba(147, 51, 234, 0.85)',
+                'Bobina': 'rgba(234, 179, 8, 0.85)',
+                'Cola': 'rgba(75, 85, 99, 0.85)'
+            };
+            
+            const borderColors = {
+                'Caja': 'rgb(234, 88, 12)',
+                'Precinto': 'rgb(22, 163, 74)',
+                'Etiquetas': 'rgb(37, 99, 235)',
+                'Matriculas': 'rgb(147, 51, 234)',
+                'Bobina': 'rgb(234, 179, 8)',
+                'Cola': 'rgb(75, 85, 99)'
+            };
+
+            let datasets = [];
+            categoriesToProcess.forEach(c => {
+                datasets.push({
+                    label: isAll ? `Gasto ${c}` : (type === 'Todos' ? `Total ${c}` : type),
+                    data: catDataArrays[c],
+                    backgroundColor: bgColors[c] || 'rgba(99, 102, 241, 0.85)',
+                    borderColor: borderColors[c] || 'rgb(79, 70, 229)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                });
+            });
+            
+            gastoChartInstance.data.datasets = datasets;
+            gastoChartInstance.data.labels = newLabels;
+            gastoChartInstance.update();
+        }
+
+        // --- COMPORTAMIENTO DE UI MENÚS ---
+        function toggleApDropdown(event) {
+            document.getElementById('ap-dropdown').classList.toggle('hidden');
+            if(event) event.stopPropagation();
+        }
+        function updateApSelection() {
+            const checkboxes = document.querySelectorAll('.ap-checkbox:checked');
+            const selectedText = document.getElementById('ap-selected-text');
+            if (checkboxes.length === 0) {
+                selectedText.innerHTML = 'Selecciona AP...';
+                selectedText.className = 'text-gray-400 font-normal';
+            } else {
+                let labels = Array.from(checkboxes).map(cb => `<span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-0.5 rounded text-xs font-bold">${cb.value}</span>`).join('');
+                selectedText.innerHTML = labels;
+                selectedText.className = 'flex flex-wrap gap-1 pr-6';
+            }
+        }
+
+        function toggleEquipoDropdown(event) {
+            document.getElementById('equipo-dropdown').classList.toggle('hidden');
+            if(event) event.stopPropagation();
+        }
+        function updateEquipoSelection() {
+            const checkboxes = document.querySelectorAll('.equipo-checkbox:checked');
+            const selectedText = document.getElementById('equipo-selected-text');
+            if (checkboxes.length === 0) {
+                selectedText.innerHTML = 'Selecciona Equipo...';
+                selectedText.className = 'text-orange-700 dark:text-orange-300 font-bold';
+            } else {
+                let labels = Array.from(checkboxes).map(cb => `<span class="bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 px-2 py-0.5 rounded text-xs font-bold">${cb.value}</span>`).join('');
+                selectedText.innerHTML = labels;
+                selectedText.className = 'flex flex-wrap gap-1 pr-6';
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const apDropdown = document.getElementById('ap-dropdown');
+            const apMultiselect = document.querySelector('.custom-multiselect');
+            if (apDropdown && !apDropdown.classList.contains('hidden') && apMultiselect && !apMultiselect.contains(event.target)) apDropdown.classList.add('hidden');
+            
+            const eqDropdown = document.getElementById('equipo-dropdown');
+            const eqMultiselect = document.querySelector('.custom-multiselect-equipo');
+            if (eqDropdown && !eqDropdown.classList.contains('hidden') && eqMultiselect && !eqMultiselect.contains(event.target)) eqDropdown.classList.add('hidden');
         });
+
+        // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
+        function checkLogin() {
+            const pwd = document.getElementById('login-password').value;
+            const errorMsg = document.getElementById('login-error');
+            if (pwd === 'APS') {
+                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-dashboard').classList.remove('hidden');
+                    document.getElementById('main-dashboard').classList.add('animate-[fadeEffect_0.5s]');
+                    
+                    if (!window.hasShownLowStockAlert && window.isDataLoaded && window.isDataLoaded['Stock']) {
+                        window.checkLowStockAlert();
+                    }
+                }, 300);
+            } else {
+                errorMsg.classList.remove('opacity-0');
+                setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+            }
+        }
+
+        let isStockLocked = true;
+        function toggleStockLock() {
+            const btn = document.getElementById('btn-unlock-stock');
+            const icon = document.getElementById('lock-icon');
+            const inputs = document.querySelectorAll('.locked-stock-input');
+            
+            if (isStockLocked) {
+                const pwd = prompt("Introduce la contraseña para editar el stock:");
+                if (pwd === 'patron') {
+                    isStockLocked = false;
+                    icon.textContent = '🔓';
+                    btn.innerHTML = '<span id="lock-icon">🔓</span> Desbloqueado';
+                    btn.classList.replace('bg-gray-200', 'bg-green-100');
+                    btn.classList.replace('dark:bg-gray-700', 'dark:bg-green-900/50');
+                    btn.classList.replace('text-gray-800', 'text-green-800');
+                    
+                    inputs.forEach(el => {
+                        el.removeAttribute('readonly');
+                        el.classList.remove('cursor-not-allowed');
+                    });
+                } else if (pwd !== null) {
+                    alert("Contraseña incorrecta");
+                }
+            } else {
+                isStockLocked = true;
+                icon.textContent = '🔒';
+                btn.innerHTML = '<span id="lock-icon">🔒</span> Bloqueado';
+                btn.classList.replace('bg-green-100', 'bg-gray-200');
+                btn.classList.replace('dark:bg-green-900/50', 'dark:bg-gray-700');
+                btn.classList.replace('text-green-800', 'text-gray-800');
+                
+                inputs.forEach(el => {
+                    el.setAttribute('readonly', 'true');
+                    el.classList.add('cursor-not-allowed');
+                });
+                
+                if(window.saveTab) window.saveTab('Stock', true);
+            }
+        }
+
+        window.calculateFaltaPorLlegar = function() {
+            const types = [
+                { id: 'mediana', pedidoId: 'descarga-pedido-mediana-woman' },
+                { id: 'grande', pedidoId: 'descarga-pedido-grande-man' },
+                { id: 'gpw', pedidoId: 'descarga-pedido-gp-woman' },
+                { id: 'gp', pedidoId: 'descarga-pedido-gp-man' },
+                { id: 'tapeta', pedidoId: 'descarga-pedido-tapeta' },
+                { id: 'minipaq', pedidoId: 'descarga-pedido-minipaq' },
+                { id: 'grandepaq', pedidoId: 'descarga-pedido-grandepaq' }
+            ];
+
+            types.forEach(type => {
+                let pedido = Number(document.getElementById(type.pedidoId)?.value) || 0;
+                let sumLlegado = 0;
+                
+                for (let i = 0; i < 10; i++) {
+                    sumLlegado += Number(document.getElementById(`descarga-${type.id}-${i}`)?.value) || 0;
+                }
+                
+                let falta = Math.round(pedido - sumLlegado);
+                const faltaEl = document.getElementById(`descarga-falta-${type.id}`);
+                
+                if (faltaEl) {
+                    faltaEl.textContent = falta;
+                    if(falta > 0) {
+                        faltaEl.className = "text-red-500 dark:text-red-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    } else if(falta === 0) {
+                        faltaEl.className = "text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    } else {
+                        faltaEl.className = "text-blue-500 dark:text-blue-400 font-black p-2 bg-gray-50 dark:bg-gray-800";
+                    }
+                }
+            });
+        }
+
+        window.downloadCSVReport = function() {
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el && el.value !== '' ? el.value : "0";
+            };
+            
+            const semana = document.getElementById('week-Stock') ? document.getElementById('week-Stock').value : '';
+            const ano = document.getElementById('year-Stock') ? document.getElementById('year-Stock').value : new Date().getFullYear();
+            
+            const ahora = new Date();
+            const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+
+            const data = [
+                // Paquetería
+                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('paqueteria-precinto-plataforma'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('paqueteria-precinto-blanco'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('paqueteria-etiqueta-tienda'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS MATRICULAS CS8", ref: "150027886", cant: getVal('paqueteria-matricula-cs8'), sec: "Paquetería", agrupado: "CAJA" },
+                { nombre: "BOBINA FILM HORNOS 800", ref: "740437", cant: getVal('paqueteria-bobina-800'), sec: "Paquetería", agrupado: "UNIDAD" },
+                { nombre: "BOBINA FILM HORNOS 1200", ref: "736423", cant: getVal('paqueteria-bobina-1200'), sec: "Paquetería", agrupado: "UNIDAD" },
+                // Confección (Consumibles)
+                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('confeccion-precinto-logo'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('confeccion-precinto-blanco'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('confeccion-etiqueta-tienda'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "ETIQUETAS MATRICULAS CVC1 CONF.", ref: "734659", cant: getVal('confeccion-matricula-cvc1'), sec: "Confección", agrupado: "CAJA" },
+                { nombre: "COLA FORMADORAS", ref: "736438", cant: getVal('confeccion-cola'), sec: "Confección", agrupado: "UNIDAD" },
+                // Confección (Cajas)
+                { nombre: "CAJA MEDIANA WOMAN", ref: "150260853", cant: getVal('confeccion-gastado-mediana-woman'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA G/P/W (WOMAN)", ref: "150260852", cant: getVal('confeccion-gastado-gp-woman'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA GRANDE MAN", ref: "150260856", cant: getVal('confeccion-gastado-grande-man'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "CAJA GP MAN", ref: "150260855", cant: getVal('confeccion-gastado-gp-man'), sec: "Confección", agrupado: "PALET" },
+                { nombre: "TAPETA", ref: "150260862", cant: getVal('confeccion-gastado-tapeta'), sec: "Confección", agrupado: "PALET" }
+            ];
+
+            // Usamos separador ";" para que Excel en español lo divida automáticamente en columnas.
+            let csvContent = "hora;semana;nombre articulo;referencia;movimiento;cantidad;agrupado por:;sección;usuario;año\n";
+
+            data.forEach(row => {
+                csvContent += `${hora};${semana};${row.nombre};${row.ref};SALIDA DE STOCK;${row.cant};${row.agrupado};${row.sec};APS;${ano}\n`;
+            });
+
+            // \uFEFF añade el BOM para que Excel detecte tildes correctamente
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Gasto_Consumibles_Semana_${semana}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const btn = document.getElementById('btn-download-csv');
+            if(btn) {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> ¡Descargado!';
+                btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                    btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                }, 2000);
+            }
+        };
     </script>
 </body>
 </html>
