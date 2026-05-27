@@ -203,6 +203,18 @@
 </head>
 <body class="text-gray-900 dark:text-gray-100 min-h-screen p-4 transition-colors duration-200">
 
+    <!-- PANTALLA DE CARGA DE DATOS -->
+    <div id="data-loading-overlay" class="fixed inset-0 z-[60] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-gray-200 dark:border-gray-700">
+            <svg class="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h2 class="text-xl font-black text-gray-800 dark:text-white">Cargando Servidor...</h2>
+            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Sincronizando datos</p>
+        </div>
+    </div>
+
     <!-- PANTALLA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 text-center">
@@ -221,6 +233,10 @@
         <div class="flex items-center border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
             <button onclick="toggleDarkMode()" class="p-2 ml-4 mr-2 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition shadow shrink-0" title="Alternar modo oscuro">
                 <span id="theme-icon" class="text-xl leading-none block">☀️</span>
+            </button>
+
+            <button onclick="forceReloadData()" class="p-2 mr-4 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/60 transition shadow shrink-0 flex items-center gap-1 px-3 font-bold text-sm border border-blue-200 dark:border-blue-800" title="Forzar recarga de datos del servidor">
+                <span class="text-lg leading-none block">🔄</span> Recargar
             </button>
             
             <div class="flex flex-grow">
@@ -256,6 +272,9 @@
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                         <span class="text-[#7CB342]">📦</span> Panel de Paquetería
                     </h2>
+                    <button onclick="saveCurrentTab('Paqueteria', this)" class="bg-[#7CB342] hover:bg-[#689f38] text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2">
+                        <span>💾</span> Guardar
+                    </button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -368,6 +387,9 @@
                     </h2>
                     
                     <div class="flex flex-col sm:flex-row items-center gap-4 text-sm w-full sm:w-auto">
+                        <button onclick="saveCurrentTab('Confeccion', this)" class="bg-[#F4B084] hover:bg-[#e09e73] text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
+                            <span>💾</span> Guardar
+                        </button>
                         <div class="w-full sm:w-64 relative custom-multiselect-equipo z-50">
                             <div class="modern-input cursor-pointer flex flex-wrap gap-1 min-h-[42px] items-center justify-start text-left relative bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800" onclick="toggleEquipoDropdown(event)">
                                 <span id="equipo-selected-text" class="text-orange-700 dark:text-orange-300 font-bold">Selecciona Equipo...</span>
@@ -435,7 +457,7 @@
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">COLA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">736438</div>
                                     </div>
-                                    <input type="number" id="confeccion-cola" class="modern-input text-lg font-bold mt-auto cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly>
+                                    <input type="number" id="confeccion-cola" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-cola', this)">
                                 </div>
                             </div>
                             
@@ -541,6 +563,9 @@
                         <span class="text-[#FF66FF]">🚛</span> Descarga Camiones
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button onclick="saveCurrentTab('Descarga', this)" class="bg-[#FF66FF] hover:bg-[#e55ce5] text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
+                            <span>💾</span> Guardar
+                        </button>
                         <div class="flex gap-2 w-full sm:w-auto">
                             <select id="week-Descarga" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Descarga')"></select>
                             <select id="year-Descarga" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Descarga')"></select>
@@ -649,6 +674,9 @@
                         <span class="text-[#FFC000]">⚙️</span> Control de Formadoras
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button onclick="saveCurrentTab('Formadoras', this)" class="bg-[#FFC000] hover:bg-[#e6ac00] text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
+                            <span>💾</span> Guardar
+                        </button>
                         <div class="flex gap-2 w-full sm:w-auto">
                             <select id="week-Formadoras" class="modern-input week-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-48" onchange="loadTab('Formadoras')"></select>
                             <select id="year-Formadoras" class="modern-input year-selector cursor-pointer text-sm font-bold bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400 w-28" onchange="loadTab('Formadoras')"></select>
@@ -770,6 +798,9 @@
                         <span class="text-[#ED7D31]">📋</span> Stock Inventario
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <button onclick="saveCurrentTab('Stock', this)" class="bg-[#ED7D31] hover:bg-[#d66f2a] text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
+                            <span>💾</span> Guardar
+                        </button>
                         <button id="btn-download-csv" onclick="downloadCSVReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
                             <span>📥</span> Descargar CSV
                         </button>
@@ -1080,12 +1111,67 @@
             window.hasShownLowStockAlert = true;
         };
         
+        window.loadingRequests = 0;
+        window.showLoading = function() {
+            window.loadingRequests++;
+            const overlay = document.getElementById('data-loading-overlay');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+        };
+        window.hideLoading = function() {
+            window.loadingRequests--;
+            if (window.loadingRequests <= 0) {
+                window.loadingRequests = 0;
+                const overlay = document.getElementById('data-loading-overlay');
+                if (overlay) {
+                    overlay.classList.remove('flex');
+                    overlay.classList.add('hidden');
+                }
+            }
+        };
+
+        window.loadAllTabs = async function() {
+            if(window.loadTab) {
+                await window.loadTab('Stock');
+                await window.loadTab('Confeccion');
+                await window.loadTab('Descarga');
+                await window.loadTab('Formadoras');
+                await window.loadTab('Paqueteria');
+            }
+        };
+
+        window.forceReloadData = async function() {
+            try {
+                window.showLoading();
+                await window.loadAllTabs();
+                
+                if (window.currentActiveTab === 'GastoPromedio' && typeof updateChart === 'function') {
+                    await updateChart();
+                }
+            } catch (error) {
+                console.error("Error al recargar desde el servidor: ", error);
+            } finally {
+                window.hideLoading();
+            }
+        };
+
         try {
+            window.showLoading();
             const auth = getAuth(app);
             await signInAnonymously(auth);
             console.log("🔥 Firebase conectado.");
+            
+            window.firebaseConnected = true;
+            // Cargar datos de forma secuencial SOLO cuando la BD y la web estén listas
+            if(window.appInitialized) {
+                await window.loadAllTabs();
+            }
         } catch(e) {
             console.warn("Autenticación no requerida o fallida. Procediendo...", e);
+        } finally {
+            window.hideLoading();
         }
 
         window.saveTab = async function(tabId, isAutoSave = false) {
@@ -1116,8 +1202,24 @@
             }
         };
 
+        window.saveCurrentTab = async function(tabId, btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> Guardando...';
+            btn.disabled = true;
+            
+            await window.saveTab(tabId);
+            
+            btn.innerHTML = '<span>✅</span> ¡Guardado!';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 2000);
+        };
+
         window.loadTab = async function(tabId) {
             if(!window.db) return;
+            window.showLoading();
             window.isDataLoaded[tabId] = false;
 
             const year = document.getElementById('year-' + tabId).value;
@@ -1203,6 +1305,8 @@
             } catch(e) {
                 console.error("Error al cargar la pestaña:", e);
                 window.isDataLoaded[tabId] = true;
+            } finally {
+                window.hideLoading();
             }
         };
 
@@ -1217,7 +1321,6 @@
                 if (confEl) {
                     confEl.value = value;
                     if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
-                    if(window.saveTab) window.saveTab('Confeccion', true);
                 }
             } else {
                 if (window.db && window.doc && window.getDoc && window.setDoc) {
@@ -1277,10 +1380,8 @@
                             if(typeof window.calculateGastadoConfeccion === 'function') {
                                 window.calculateGastadoConfeccion();
                             }
-                            if(window.saveTab) window.saveTab('Confeccion', true);
                         }
                     }
-                    if(window.saveTab) window.saveTab('Stock', true);
                 }
             } else {
                 if (window.db && window.doc && window.getDoc && window.setDoc) {
@@ -1299,7 +1400,6 @@
             }
             
             inputEl.dataset.prevValue = newVal;
-            if(window.saveTab) window.saveTab(tabName, true);
         };
 
         window.subtractFromStock = async function(stockId, inputEl, divideBy = 1) {
@@ -1334,10 +1434,8 @@
                             if(typeof window.calculateGastadoConfeccion === 'function') {
                                 window.calculateGastadoConfeccion();
                             }
-                            if(window.saveTab) window.saveTab('Confeccion', true);
                         }
                     }
-                    if(window.saveTab) window.saveTab('Stock', true);
                 }
             } else {
                 if (window.db && window.doc && window.getDoc && window.setDoc) {
@@ -1577,12 +1675,6 @@
         window.currentActiveTab = 'Paqueteria';
 
         function openTab(evt, tabName) {
-            if (window.currentActiveTab && window.saveTab) {
-                const tabsToSave = ['Paqueteria', 'Confeccion', 'Descarga', 'Formadoras', 'Stock'];
-                if (tabsToSave.includes(window.currentActiveTab)) {
-                    window.saveTab(window.currentActiveTab, true);
-                }
-            }
 
             window.currentActiveTab = tabName;
             const tabcontents = document.getElementsByClassName("tabcontent");
@@ -1595,24 +1687,17 @@
             else document.getElementById("defaultOpen").classList.add("active");
         }
 
-        window.onload = function() {
+        window.onload = async function() {
             initWeeks();
             initYears();
             initChart();
             initOpacities();
             openTab(null, 'Paqueteria');
 
-            setTimeout(() => {
-                if(window.loadTab) {
-                    ['Paqueteria', 'Confeccion', 'Descarga', 'Formadoras', 'Stock'].forEach(tab => window.loadTab(tab));
-                }
-            }, 500);
-
-            setInterval(() => {
-                if (window.currentActiveTab && window.currentActiveTab !== 'GastoPromedio' && window.currentActiveTab !== 'Ajustes') {
-                    if(window.saveTab) window.saveTab(window.currentActiveTab, true);
-                }
-            }, 60000);
+            window.appInitialized = true;
+            if (window.firebaseConnected && window.loadAllTabs) {
+                await window.loadAllTabs();
+            }
         };
 
         // --- LÓGICA DEL GRÁFICO (Pestaña 6) ---
@@ -1676,6 +1761,7 @@
 
         async function updateChart() {
             if (!gastoChartInstance) return;
+            window.showLoading();
             const month = document.getElementById('filter-month').value;
             const year = document.getElementById('filter-year').value;
             const category = document.getElementById('filter-category').value;
@@ -1830,6 +1916,7 @@
             gastoChartInstance.data.datasets = datasets;
             gastoChartInstance.data.labels = newLabels;
             gastoChartInstance.update();
+            window.hideLoading();
         }
 
         // --- COMPORTAMIENTO DE UI MENÚS ---
@@ -1933,8 +2020,6 @@
                     el.setAttribute('readonly', 'true');
                     el.classList.add('cursor-not-allowed');
                 });
-                
-                if(window.saveTab) window.saveTab('Stock', true);
             }
         }
 
