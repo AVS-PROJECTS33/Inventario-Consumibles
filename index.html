@@ -203,7 +203,6 @@
 </head>
 <body class="text-gray-900 dark:text-gray-100 min-h-screen p-4 transition-colors duration-200">
 
-    <!-- PANTALLA DE CARGA DE DATOS -->
     <div id="data-loading-overlay" class="fixed inset-0 z-[60] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-gray-200 dark:border-gray-700">
             <svg class="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -215,7 +214,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 text-center">
             <div class="text-5xl mb-4">🔒</div>
@@ -226,10 +224,8 @@
         </div>
     </div>
 
-    <!-- Contenedor Principal -->
     <div id="main-dashboard" class="w-[98%] max-w-full mx-auto main-dashboard-bg backdrop-blur-sm shadow-2xl rounded-lg overflow-hidden transition-colors duration-200 border border-gray-200 dark:border-gray-700 hidden">
         
-        <!-- Navegación de Pestañas -->
         <div class="flex items-center border-b border-gray-300 dark:border-gray-700 bg-gray-200/90 dark:bg-gray-900/90 overflow-x-auto">
             <button onclick="toggleDarkMode()" class="p-2 ml-4 mr-2 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition shadow shrink-0" title="Alternar modo oscuro">
                 <span id="theme-icon" class="text-xl leading-none block">☀️</span>
@@ -266,7 +262,6 @@
 
         <div class="p-6 overflow-x-auto">
             
-            <!-- ================= PESTAÑA 1: PAQUETERIA ================= -->
             <div id="Paqueteria" class="tabcontent">
                 <div class="mb-6 flex items-center justify-between">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -295,32 +290,32 @@
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">700288</td>
                                         <td class="text-left font-semibold">PRECINTO PLATAFORMA/LOGO</td>
-                                        <td><input type="number" id="paqueteria-precinto-plataforma" class="modern-input" value="" oninput="subtractFromStock('stock-precinto-logo', this)"></td>
+                                        <td><input type="number" id="paqueteria-precinto-plataforma" class="modern-input" value="" onchange="subtractFromStock('stock-precinto-logo', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">150022299</td>
                                         <td class="text-left font-semibold">PRECINTO BLANCO</td>
-                                        <td><input type="number" id="paqueteria-precinto-blanco" class="modern-input" value="" oninput="subtractFromStock('stock-precinto-blanco', this)"></td>
+                                        <td><input type="number" id="paqueteria-precinto-blanco" class="modern-input" value="" onchange="subtractFromStock('stock-precinto-blanco', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">700292</td>
                                         <td class="text-left font-semibold">ETIQUETA TIENDA</td>
-                                        <td><input type="number" id="paqueteria-etiqueta-tienda" class="modern-input" value="" oninput="subtractFromStock('stock-etiqueta-tienda', this)"></td>
+                                        <td><input type="number" id="paqueteria-etiqueta-tienda" class="modern-input" value="" onchange="subtractFromStock('stock-etiqueta-tienda', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">150027886</td>
                                         <td class="text-left font-semibold">MATRICULA CS8</td>
-                                        <td><input type="number" id="paqueteria-matricula-cs8" class="modern-input" value="" oninput="subtractFromStock('stock-matricula-cs8', this)"></td>
+                                        <td><input type="number" id="paqueteria-matricula-cs8" class="modern-input" value="" onchange="subtractFromStock('stock-matricula-cs8', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">740437</td>
                                         <td class="text-left font-semibold">BOBINA 800</td>
-                                        <td><input type="number" id="paqueteria-bobina-800" class="modern-input" value="" oninput="subtractFromStock('stock-bobina-800', this)"></td>
+                                        <td><input type="number" id="paqueteria-bobina-800" class="modern-input" value="" onchange="subtractFromStock('stock-bobina-800', this)"></td>
                                     </tr>
                                     <tr class="hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors">
                                         <td class="font-mono text-lg font-black text-black dark:text-white">736423</td>
                                         <td class="text-left font-semibold">BOBINA 1200</td>
-                                        <td><input type="number" id="paqueteria-bobina-1200" class="modern-input" value="" oninput="subtractFromStock('stock-bobina-1200', this)"></td>
+                                        <td><input type="number" id="paqueteria-bobina-1200" class="modern-input" value="" onchange="subtractFromStock('stock-bobina-1200', this)"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -379,7 +374,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 2: CONFECCION ================= -->
             <div id="Confeccion" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 !overflow-visible relative">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -398,14 +392,14 @@
                                 </div>
                             </div>
                             <div id="equipo-dropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hidden max-h-56 overflow-y-auto text-sm text-left">
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ALBERTO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ALBERTO</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="LUIS" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> LUIS</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ANGY" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ANGY</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="ENZO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ENZO</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="PACO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> PACO</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="JEAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> JEAN</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="NATALIA" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> NATALIA</label>
-                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="IVAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> IVAN</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-alberto" value="ALBERTO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ALBERTO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-luis" value="LUIS" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> LUIS</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-angy" value="ANGY" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ANGY</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-enzo" value="ENZO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> ENZO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-paco" value="PACO" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> PACO</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-jean" value="JEAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> JEAN</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-natalia" value="NATALIA" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> NATALIA</label>
+                                <label class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" id="confeccion-equipo-ivan" value="IVAN" class="equipo-checkbox mr-3 rounded text-orange-500 focus:ring-orange-500 w-4 h-4" onchange="updateEquipoSelection()"> IVAN</label>
                             </div>
                         </div>
 
@@ -429,35 +423,35 @@
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">PRECINTO PLATAFORMA/LOGO</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">700288</div>
                                     </div>
-                                    <input type="number" id="confeccion-precinto-logo" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-precinto-logo', this)">
+                                    <input type="number" id="confeccion-precinto-logo" class="modern-input text-lg font-bold mt-auto" value="" onchange="subtractFromStock('stock-precinto-logo', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">PRECINTO BLANCO</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">150022299</div>
                                     </div>
-                                    <input type="number" id="confeccion-precinto-blanco" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-precinto-blanco', this)">
+                                    <input type="number" id="confeccion-precinto-blanco" class="modern-input text-lg font-bold mt-auto" value="" onchange="subtractFromStock('stock-precinto-blanco', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">ETIQUETAS TIENDA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">700292</div>
                                     </div>
-                                    <input type="number" id="confeccion-etiqueta-tienda" class="modern-input text-lg font-bold text-blue-600 dark:text-blue-400 mt-auto" value="" oninput="subtractFromStock('stock-etiqueta-tienda', this)">
+                                    <input type="number" id="confeccion-etiqueta-tienda" class="modern-input text-lg font-bold text-blue-600 dark:text-blue-400 mt-auto" value="" onchange="subtractFromStock('stock-etiqueta-tienda', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">MATRICULAS CVC1</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">734659</div>
                                     </div>
-                                    <input type="number" id="confeccion-matricula-cvc1" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-matricula-cvc1', this)">
+                                    <input type="number" id="confeccion-matricula-cvc1" class="modern-input text-lg font-bold mt-auto" value="" onchange="subtractFromStock('stock-matricula-cvc1', this)">
                                 </div>
                                 <div class="flex flex-col justify-between h-full bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm transition-colors">
                                     <div class="flex-grow flex flex-col justify-center mb-3">
                                         <div class="text-sm font-black text-gray-900 dark:text-white text-center uppercase tracking-wide leading-tight">COLA</div>
                                         <div class="font-mono text-base font-black text-gray-600 dark:text-gray-400 text-center mt-1">736438</div>
                                     </div>
-                                    <input type="number" id="confeccion-cola" class="modern-input text-lg font-bold mt-auto" value="" oninput="subtractFromStock('stock-cola', this)">
+                                    <input type="number" id="confeccion-cola" class="modern-input text-lg font-bold mt-auto" value="" onchange="subtractFromStock('stock-cola', this)">
                                 </div>
                             </div>
                             
@@ -556,7 +550,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 3: DESCARGA CAMIONES ================= -->
             <div id="Descarga" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -574,7 +567,6 @@
                 </div>
 
                 <div class="flex flex-col xl:flex-row gap-6 items-start w-full">
-                    <!-- Tabla principal ampliada -->
                     <div class="overflow-x-auto flex-grow w-full">
                         <table class="excel-table w-full bg-white dark:bg-gray-800 shadow-sm">
                             <thead>
@@ -592,31 +584,11 @@
                                     <th class="p-3">OBSERVACIONES</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <script>
-                                    for(let i=0; i<10; i++) {
-                                        document.write(`
-                                            <tr class="bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
-                                                <td class="p-2"><input type="text" id="descarga-nombre-${i}" class="excel-input w-full min-w-[120px]"></td>
-                                                <td class="p-2"><input type="date" id="descarga-fecha-${i}" class="excel-input w-full min-w-[130px]"></td>
-                                                <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-mediana-woman', this); calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-grande-man', this); calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-woman', this); calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-caja-gp-man', this); calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" oninput="addToStock('stock-tapeta', this); calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]" oninput="calculateFaltaPorLlegar()"></td>
-                                                <td class="p-2"><input type="text" id="descarga-palets-${i}" class="excel-input w-full min-w-[100px]"></td>
-                                                <td class="p-2"><input type="text" id="descarga-obs-${i}" class="excel-input w-full min-w-[150px]"></td>
-                                            </tr>
-                                        `);
-                                    }
-                                </script>
+                            <tbody id="tabla-descarga-body">
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Tabla Resumen -->
                     <div class="bg-gray-600 dark:bg-gray-900 p-4 xl:w-1/4 rounded-xl min-w-[300px] shadow-md w-full">
                         <table class="excel-table w-full bg-white dark:bg-gray-800 rounded overflow-hidden">
                             <thead>
@@ -628,37 +600,37 @@
                             <tbody class="text-sm">
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">MEDIANA</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-mediana-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-mediana-woman" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-mediana" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">GRANDE</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-grande-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-grande-man" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-grande" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">G/P/W</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-gp-woman" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-gp-woman" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-gpw" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">G/P</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-gp-man" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-gp-man" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-gp" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">TAPETA</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-tapeta" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-tapeta" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-tapeta" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-gray-50 dark:bg-gray-700 p-2 font-bold">Mini PAQ</td>
-                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-minipaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-gray-50 dark:bg-gray-700 p-2"><input type="number" id="descarga-pedido-minipaq" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-minipaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-purple-100 dark:bg-purple-900/40 p-2 font-bold">Grande PAQ</td>
-                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-grandepaq" class="excel-input" value="" oninput="calculateFaltaPorLlegar()"></td>
+                                    <td class="bg-purple-100 dark:bg-purple-900/40 p-2"><input type="number" id="descarga-pedido-grandepaq" class="excel-input" value="" onchange="calculateFaltaPorLlegar()"></td>
                                     <td id="descarga-falta-grandepaq" class="text-gray-500 dark:text-gray-400 font-black p-2 bg-gray-50 dark:bg-gray-800">0</td>
                                 </tr>
                             </tbody>
@@ -667,7 +639,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 4: FORMADORAS ================= -->
             <div id="Formadoras" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -686,9 +657,7 @@
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8 items-stretch">
                     
-                    <!-- Columna Izquierda -->
                     <div class="flex flex-col gap-6">
-                        <!-- Formadora Antigua (Más bajita) -->
                         <div class="modern-card border-t-4 border-t-[#FFC000] flex flex-col hover:shadow-lg transition-shadow">
                             <div class="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 border-b border-yellow-100 dark:border-yellow-900/50">
                                 <h3 class="font-bold text-yellow-800 dark:text-yellow-500 flex items-center gap-2">
@@ -703,7 +672,7 @@
                                         <div class="text-[10px] text-gray-500 font-mono mt-0.5">600X800X400</div>
                                     </div>
                                     <div class="w-24">
-                                        <input type="number" id="formadora-antigua-caja-mediana-woman" class="modern-input text-lg font-black text-gray-800 dark:text-white" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this, 100)">
+                                        <input type="number" id="formadora-antigua-caja-mediana-woman" class="modern-input text-lg font-black text-gray-800 dark:text-white" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this, 100)">
                                     </div>
                                     <div class="text-[9px] font-bold text-yellow-600 dark:text-yellow-500 uppercase leading-tight text-center w-16 bg-yellow-100 dark:bg-yellow-900/30 p-1.5 rounded">
                                         Se cuenta<br>por cajas
@@ -712,7 +681,6 @@
                             </div>
                         </div>
 
-                        <!-- Gasto Manual -->
                         <div class="modern-card border-t-4 border-t-orange-400 flex flex-col hover:shadow-lg transition-shadow">
                             <div class="bg-orange-50 dark:bg-orange-900/20 px-4 py-3 border-b border-orange-100 dark:border-orange-900/50">
                                 <h3 class="font-bold text-orange-800 dark:text-orange-500 flex items-center gap-2">
@@ -722,33 +690,32 @@
                             <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" oninput="subtractFromStock('stock-cola', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-cola', this)"></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" oninput="subtractFromStock('stock-tapeta', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-tapeta', this)"></div>
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this)">
+                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-woman', this)">
+                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-grande-man', this)">
+                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-grande-man', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" oninput="subtractFromStock('stock-caja-gp-man', this)">
+                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-man', this)">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Formadora Nueva (Más alta) -->
                     <div class="modern-card border-t-4 border-t-[#70AD47] flex flex-col h-full hover:shadow-lg transition-shadow">
                         <div class="bg-green-50 dark:bg-green-900/20 px-6 py-4 border-b border-green-100 dark:border-green-900/50">
                             <h3 class="font-bold text-green-800 dark:text-green-500 flex items-center gap-2">
@@ -766,22 +733,22 @@
                                     <div class="flex flex-col gap-1.5">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja G/P/W (Woman)</div>
                                         <div class="text-xs text-gray-500 font-mono mb-1">600X800X200</div>
-                                        <input type="number" id="formadora-nueva-caja-gp-woman" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-gp-woman', this, 100)">
+                                        <input type="number" id="formadora-nueva-caja-gp-woman" class="modern-input py-2" value="" onchange="subtractFromStock('stock-caja-gp-woman', this, 100)">
                                     </div>
                                     <div class="flex flex-col gap-1.5">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja G/P (Man)</div>
                                         <div class="text-xs text-gray-500 font-mono mb-1">600X1000X200</div>
-                                        <input type="number" id="formadora-nueva-caja-gp-man" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-gp-man', this, 100)">
+                                        <input type="number" id="formadora-nueva-caja-gp-man" class="modern-input py-2" value="" onchange="subtractFromStock('stock-caja-gp-man', this, 100)">
                                     </div>
                                     <div class="flex flex-col gap-1.5 mt-2">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja Mediana (Woman)</div>
                                         <div class="text-xs text-gray-500 font-mono mb-1">600X800X400</div>
-                                        <input type="number" id="formadora-nueva-caja-mediana-woman" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-mediana-woman', this, 100)">
+                                        <input type="number" id="formadora-nueva-caja-mediana-woman" class="modern-input py-2" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this, 100)">
                                     </div>
                                     <div class="flex flex-col gap-1.5 mt-2">
                                         <div class="text-sm font-bold text-gray-700 dark:text-gray-200">Caja Grande (Man)</div>
                                         <div class="text-xs text-gray-500 font-mono mb-1">600X1000X400</div>
-                                        <input type="number" id="formadora-nueva-caja-grande-man" class="modern-input py-2" value="" oninput="subtractFromStock('stock-caja-grande-man', this, 100)">
+                                        <input type="number" id="formadora-nueva-caja-grande-man" class="modern-input py-2" value="" onchange="subtractFromStock('stock-caja-grande-man', this, 100)">
                                     </div>
                                 </div>
                             </div>
@@ -791,7 +758,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 5: STOCK INVENTARIO ================= -->
             <div id="Stock" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -826,39 +792,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- CAJAS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA MEDIANA WOMAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260853</td>
-                                    <td><input type="number" id="stock-caja-mediana-woman" data-old-id="val_10" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-mediana-woman', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-mediana-woman" data-old-id="val_10" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly onchange="syncToConfeccion('caja-mediana-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA G/P/W (WOMAN)</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260852</td>
-                                    <td><input type="number" id="stock-caja-gp-woman" data-old-id="val_4" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-woman', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-gp-woman" data-old-id="val_4" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly onchange="syncToConfeccion('caja-gp-woman', this.value)"></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GRANDE MAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260856</td>
-                                    <td><input type="number" id="stock-caja-grande-man" data-old-id="val_7" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-grande-man', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-grande-man" data-old-id="val_7" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly onchange="syncToConfeccion('caja-grande-man', this.value)"></td>
                                 </tr>
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">CAJA GP MAN</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260855</td>
-                                    <td><input type="number" id="stock-caja-gp-man" data-old-id="val_1" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('caja-gp-man', this.value)"></td>
+                                    <td><input type="number" id="stock-caja-gp-man" data-old-id="val_1" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly onchange="syncToConfeccion('caja-gp-man', this.value)"></td>
                                 </tr>
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">TAPETA</td>
                                     <td><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
                                     <td class="font-mono text-lg font-black text-black dark:text-white">150260862</td>
-                                    <td><input type="number" id="stock-tapeta" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly oninput="syncToConfeccion('tapeta', this.value)"></td>
+                                    <td><input type="number" id="stock-tapeta" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly onchange="syncToConfeccion('tapeta', this.value)"></td>
                                 </tr>
 
-                                <!-- PRECINTOS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">PRECINTO BLANCO</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
@@ -872,7 +836,6 @@
                                     <td><input type="number" id="stock-precinto-logo" data-old-id="val_16" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
-                                <!-- ETIQUETAS Y MATRICULAS -->
                                 <tr class="bg-orange-100/40 dark:bg-orange-900/30 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">ETIQUETAS BLANCAS (120X70)</td>
                                     <td><span class="bg-blue-200 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">CONFE. PAQ.</span></td>
@@ -892,7 +855,6 @@
                                     <td><input type="number" id="stock-matricula-cs8" data-old-id="val_25" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
-                                <!-- BOBINAS -->
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200">BOBINA 800</td>
                                     <td><span class="bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Paquetería</span></td>
@@ -906,7 +868,6 @@
                                     <td><input type="number" id="stock-bobina-1200" data-old-id="val_31" class="modern-input locked-stock-input cursor-not-allowed" value="" readonly></td>
                                 </tr>
 
-                                <!-- OTROS (COLA) -->
                                 <tr class="bg-white/60 dark:bg-gray-800/40 hover:bg-orange-200/50 dark:hover:bg-orange-800/50 transition-colors">
                                     <td class="text-left font-semibold text-gray-700 dark:text-gray-200 border-b-0">COLA</td>
                                     <td class="border-b-0"><span class="bg-orange-200 dark:bg-orange-800/50 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-[10px] font-black tracking-wider uppercase">Confección</span></td>
@@ -919,7 +880,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 6: GASTO PROMEDIO ================= -->
             <div id="GastoPromedio" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -928,7 +888,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-                    <!-- Filtros -->
                     <div class="lg:col-span-1 modern-card border-t-4 border-t-indigo-500 !bg-indigo-50 dark:!bg-indigo-900/20 p-5 flex flex-col gap-4">
                         <h3 class="font-bold text-indigo-800 dark:text-indigo-300 mb-2 border-b border-indigo-200 dark:border-indigo-800/50 pb-2">Filtros de Búsqueda</h3>
                         
@@ -987,7 +946,6 @@
                         </div>
                     </div>
 
-                    <!-- Gráfico -->
                     <div class="lg:col-span-3 modern-card p-5 border-t-4 border-t-indigo-500 bg-white dark:bg-gray-800 flex flex-col min-h-[400px]">
                          <div class="flex justify-between items-center mb-4">
                              <h3 class="font-bold text-gray-700 dark:text-gray-200">Evolución de Gasto Promedio</h3>
@@ -1000,7 +958,6 @@
                 </div>
             </div>
 
-            <!-- ================= PESTAÑA 7: AJUSTES ================= -->
             <div id="Ajustes" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
@@ -1051,11 +1008,13 @@
         </div>
     </div>
 
-    <!-- === INICIALIZACIÓN DE FIREBASE E INTERACCIONES === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        window.query = query;
+        window.where = where;
 
         const firebaseConfig = {
             apiKey: "AIzaSyBELJgC4Hw6mxKwg0GzlTNKxgTMTspndUQ",
@@ -1134,11 +1093,13 @@
 
         window.loadAllTabs = async function() {
             if(window.loadTab) {
-                await window.loadTab('Stock');
-                await window.loadTab('Confeccion');
-                await window.loadTab('Descarga');
-                await window.loadTab('Formadoras');
-                await window.loadTab('Paqueteria');
+                await Promise.all([
+                    window.loadTab('Stock'),
+                    window.loadTab('Confeccion'),
+                    window.loadTab('Descarga'),
+                    window.loadTab('Formadoras'),
+                    window.loadTab('Paqueteria')
+                ]);
             }
         };
 
@@ -1158,20 +1119,13 @@
         };
 
         try {
-            window.showLoading();
+            // Solo conectamos a Firebase de forma invisible. Sin pantallas de carga ni descargas de datos.
             const auth = getAuth(app);
             await signInAnonymously(auth);
-            console.log("🔥 Firebase conectado.");
-            
+            console.log("🔥 Firebase conectado silenciosamente.");
             window.firebaseConnected = true;
-            // Cargar datos de forma secuencial SOLO cuando la BD y la web estén listas
-            if(window.appInitialized) {
-                await window.loadAllTabs();
-            }
         } catch(e) {
-            console.warn("Autenticación no requerida o fallida. Procediendo...", e);
-        } finally {
-            window.hideLoading();
+            console.warn("Autenticación fallida. Procediendo...", e);
         }
 
         window.saveTab = async function(tabId, isAutoSave = false) {
@@ -1194,6 +1148,10 @@
                     if(input.type === 'checkbox') data[key] = input.checked;
                     else data[key] = input.value;
                 });
+                
+                data['_ano'] = year;
+                data['_semana'] = week;
+                data['_seccion'] = tabId;
 
                 const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
                 await setDoc(docRef, data);
@@ -1207,7 +1165,20 @@
             btn.innerHTML = '<span>⏳</span> Guardando...';
             btn.disabled = true;
             
+            // 1. Guardamos la pestaña en la que ha hecho clic el usuario
             await window.saveTab(tabId);
+            
+            // 2. SINCRONIZACIÓN PROFUNDA: 
+            // Si guardamos movimientos (Descarga, Formadoras, Paqueteria), 
+            // guardamos silenciosamente Stock y Confeccion para fijar las sumas/restas.
+            if (tabId === 'Descarga' || tabId === 'Formadoras' || tabId === 'Paqueteria') {
+                await window.saveTab('Stock');
+                await window.saveTab('Confeccion');
+            } else if (tabId === 'Stock') {
+                await window.saveTab('Confeccion');
+            } else if (tabId === 'Confeccion') {
+                await window.saveTab('Stock');
+            }
             
             btn.innerHTML = '<span>✅</span> ¡Guardado!';
             
@@ -1258,13 +1229,65 @@
                         }
                     });
                 } else {
-                    inputs.forEach(input => {
-                        if (input.type === 'checkbox') input.checked = false;
-                        else if (input.type !== 'button') {
-                            input.value = '';
-                            input.dataset.prevValue = 0;
+                    // --- NUEVA LÓGICA DE HERENCIA AUTOMÁTICA DE STOCK ---
+                    let inheritedData = null;
+                    
+                    // Si estamos en la pestaña Stock y no hay datos, buscamos la semana anterior
+                    if (tabId === 'Stock') {
+                        let prevWeek = parseInt(week) - 1;
+                        let prevYear = parseInt(year);
+                        
+                        // Si la semana es la 1, volvemos a la 52 del año anterior
+                        if (prevWeek < 1) {
+                            prevWeek = 52;
+                            prevYear -= 1;
+                        }
+                        
+                        try {
+                            const prevDocRef = window.doc(window.db, 'registros_semanales', `Stock_${prevYear}_${prevWeek}`);
+                            const prevDocSnap = await window.getDoc(prevDocRef);
+                            if (prevDocSnap.exists()) {
+                                inheritedData = prevDocSnap.data();
+                            }
+                        } catch (e) {
+                            console.error("Error buscando stock de la semana pasada:", e);
+                        }
+                    }
+
+                    // Rellenamos los inputs con los datos heredados (o los vaciamos si no hay herencia)
+                    inputs.forEach((input, index) => {
+                        const key = input.id || `val_${index}`;
+                        const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
+
+                        if (inheritedData && (inheritedData[key] !== undefined || inheritedData[fallbackKey] !== undefined)) {
+                            let val = inheritedData[key];
+                            if (val === undefined || val === '') val = inheritedData[fallbackKey];
+                            
+                            if (input.type === 'checkbox') input.checked = val;
+                            else if (input.type !== 'button') {
+                                input.value = val;
+                                input.dataset.prevValue = val;
+                            }
+                        } else {
+                            if (input.type === 'checkbox') input.checked = false;
+                            else if (input.type !== 'button') {
+                                input.value = '';
+                                input.dataset.prevValue = 0;
+                            }
                         }
                     });
+
+                    // Si hemos conseguido heredar datos, forzamos un guardado silencioso 
+                    // para fijar el inventario inicial en la nueva semana
+                    if (inheritedData && tabId === 'Stock') {
+                        setTimeout(() => {
+                            if (window.saveTab) {
+                                window.saveTab('Stock');
+                                window.saveTab('Confeccion');
+                            }
+                        }, 1000);
+                    }
+                    // --------------------------------------------------------
                 }
                 
                 if(typeof updateApSelection === 'function') updateApSelection();
@@ -1289,8 +1312,11 @@
                             const stockEl = document.getElementById(`stock-${item}`);
                             const confEl = document.getElementById(`confeccion-${item}`);
                             if (stockEl && confEl) {
-                                if (tabId === 'Stock' && stockEl.value !== '') confEl.value = stockEl.value;
-                                else if (tabId === 'Confeccion' && confEl.value !== '') stockEl.value = confEl.value;
+                                // SOLUCIÓN: Como las cajas en Confección son de solo lectura, 
+                                // el Stock es la fuente de la verdad absoluta. Forzamos a copiar el valor de Stock.
+                                if (stockEl.value !== '') {
+                                    confEl.value = stockEl.value;
+                                }
                             }
                         });
                         if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
@@ -1323,14 +1349,10 @@
                     if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
                 }
             } else {
-                if (window.db && window.doc && window.getDoc && window.setDoc) {
+                if (window.db && window.doc && window.setDoc) {
                     try {
                         const docRef = window.doc(window.db, 'registros_semanales', `Confeccion_${stockY}_${stockW}`);
-                        const docSnap = await window.getDoc(docRef);
-                        let data = {};
-                        if (docSnap.exists()) data = docSnap.data();
-                        data[`confeccion-${item}`] = value;
-                        await window.setDoc(docRef, data);
+                        await window.setDoc(docRef, { [`confeccion-${item}`]: value }, { merge: true });
                     } catch (e) {
                         console.error("Error sincronizando confección en segundo plano:", e);
                     }
@@ -1388,11 +1410,8 @@
                     try {
                         const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
                         const docSnap = await window.getDoc(docRef);
-                        let data = {};
-                        if (docSnap.exists()) data = docSnap.data();
-                        const currentStock = Number(data[stockId]) || 0;
-                        data[stockId] = Math.round(currentStock + delta);
-                        await window.setDoc(docRef, data);
+                        const currentStock = docSnap.exists() ? (Number(docSnap.data()[stockId]) || 0) : 0;
+                        await window.setDoc(docRef, { [stockId]: Math.round(currentStock + delta) }, { merge: true });
                     } catch (e) {
                         console.error("Error actualizando stock en segundo plano (suma):", e);
                     }
@@ -1442,11 +1461,8 @@
                     try {
                         const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
                         const docSnap = await window.getDoc(docRef);
-                        let data = {};
-                        if (docSnap.exists()) data = docSnap.data();
-                        const currentStock = Number(data[stockId]) || 0;
-                        data[stockId] = Math.round(currentStock - delta);
-                        await window.setDoc(docRef, data);
+                        const currentStock = docSnap.exists() ? (Number(docSnap.data()[stockId]) || 0) : 0;
+                        await window.setDoc(docRef, { [stockId]: Math.round(currentStock - delta) }, { merge: true });
                     } catch (e) {
                         console.error("Error actualizando stock en segundo plano:", e);
                     }
@@ -1672,10 +1688,37 @@
             }
         }
 
+        // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
+        async function checkLogin() {
+            const pwd = document.getElementById('login-password').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            if (pwd === 'APS') {
+                // 1. Forzamos la descarga de datos ANTES de quitar la pantalla de login
+                if (typeof window.forceReloadData === 'function') {
+                    await window.forceReloadData();
+                }
+
+                // 2. Quitamos la pantalla de login con la animación
+                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-dashboard').classList.remove('hidden');
+                    document.getElementById('main-dashboard').classList.add('animate-[fadeEffect_0.5s]');
+                    
+                    if (!window.hasShownLowStockAlert && window.isDataLoaded && window.isDataLoaded['Stock']) {
+                        window.checkLowStockAlert();
+                    }
+                }, 300);
+            } else {
+                errorMsg.classList.remove('opacity-0');
+                setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+            }
+        }
+
         window.currentActiveTab = 'Paqueteria';
 
         function openTab(evt, tabName) {
-
             window.currentActiveTab = tabName;
             const tabcontents = document.getElementsByClassName("tabcontent");
             for (let i = 0; i < tabcontents.length; i++) tabcontents[i].style.display = "none";
@@ -1685,9 +1728,39 @@
             document.getElementById(tabName).style.display = "block";
             if(evt) evt.currentTarget.classList.add("active");
             else document.getElementById("defaultOpen").classList.add("active");
+
+            // Si abrimos la pestaña de Gasto Promedio, forzamos a que el gráfico se dibuje
+            if (tabName === 'GastoPromedio' && typeof updateChart === 'function') {
+                updateChart();
+            }
+        }
+        
+        function initDescargaTable() {
+            const tbody = document.getElementById('tabla-descarga-body');
+            if (!tbody) return;
+            let html = '';
+            for(let i=0; i<10; i++) {
+                html += `
+                    <tr class="bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
+                        <td class="p-2"><input type="text" id="descarga-nombre-${i}" class="excel-input w-full min-w-[120px]"></td>
+                        <td class="p-2"><input type="date" id="descarga-fecha-${i}" class="excel-input w-full min-w-[130px]"></td>
+                        <td class="p-2"><input type="number" id="descarga-mediana-${i}" class="excel-input w-full min-w-[80px]" onchange="addToStock('stock-caja-mediana-woman', this); calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-grande-${i}" class="excel-input w-full min-w-[80px]" onchange="addToStock('stock-caja-grande-man', this); calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-gpw-${i}" class="excel-input w-full min-w-[80px]" onchange="addToStock('stock-caja-gp-woman', this); calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-gp-${i}" class="excel-input w-full min-w-[80px]" onchange="addToStock('stock-caja-gp-man', this); calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-tapeta-${i}" class="excel-input w-full min-w-[80px]" onchange="addToStock('stock-tapeta', this); calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-minipaq-${i}" class="excel-input w-full min-w-[80px]" onchange="calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="number" id="descarga-grandepaq-${i}" class="excel-input w-full min-w-[80px]" onchange="calculateFaltaPorLlegar()"></td>
+                        <td class="p-2"><input type="text" id="descarga-palets-${i}" class="excel-input w-full min-w-[100px]"></td>
+                        <td class="p-2"><input type="text" id="descarga-obs-${i}" class="excel-input w-full min-w-[150px]"></td>
+                    </tr>
+                `;
+            }
+            tbody.innerHTML = html;
         }
 
         window.onload = async function() {
+            initDescargaTable();
             initWeeks();
             initYears();
             initChart();
@@ -1695,9 +1768,8 @@
             openTab(null, 'Paqueteria');
 
             window.appInitialized = true;
-            if (window.firebaseConnected && window.loadAllTabs) {
-                await window.loadAllTabs();
-            }
+            // Hemos quitado la descarga automática de pestañas aquí. 
+            // Ahora los datos SOLO se descargarán cuando se introduzca la contraseña correctamente.
         };
 
         // --- LÓGICA DEL GRÁFICO (Pestaña 6) ---
@@ -1786,7 +1858,8 @@
             
             if (window.db && window.getDocs) {
                 try {
-                    const querySnapshot = await window.getDocs(window.collection(window.db, 'registros_semanales'));
+                    const q = window.query(window.collection(window.db, 'registros_semanales'), window.where('_ano', '==', year));
+                    const querySnapshot = await window.getDocs(q);
                     querySnapshot.forEach((doc) => {
                         const parts = doc.id.split('_');
                         if (parts.length === 3) {
@@ -1963,27 +2036,6 @@
             const eqMultiselect = document.querySelector('.custom-multiselect-equipo');
             if (eqDropdown && !eqDropdown.classList.contains('hidden') && eqMultiselect && !eqMultiselect.contains(event.target)) eqDropdown.classList.add('hidden');
         });
-
-        // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
-        function checkLogin() {
-            const pwd = document.getElementById('login-password').value;
-            const errorMsg = document.getElementById('login-error');
-            if (pwd === 'APS') {
-                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('main-dashboard').classList.remove('hidden');
-                    document.getElementById('main-dashboard').classList.add('animate-[fadeEffect_0.5s]');
-                    
-                    if (!window.hasShownLowStockAlert && window.isDataLoaded && window.isDataLoaded['Stock']) {
-                        window.checkLowStockAlert();
-                    }
-                }, 300);
-            } else {
-                errorMsg.classList.remove('opacity-0');
-                setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
-            }
-        }
 
         let isStockLocked = true;
         function toggleStockLock() {
