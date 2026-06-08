@@ -536,12 +536,12 @@
                                         <td><input type="number" id="confeccion-inv-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
                                     </tr>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4 border-b-0">Pedido Sem. Anterior</td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-ped-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4 border-b-0">Entradas Semana (Camiones)</td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1100,6 +1100,10 @@
                     window.loadTab('Formadoras'),
                     window.loadTab('Paqueteria')
                 ]);
+                
+                // Las matemáticas corren al final, asegurándonos de que todo el HTML se ha rellenado
+                if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
+                if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
             }
         };
 
@@ -1296,9 +1300,6 @@
                 if (tabId === 'Confeccion') {
                     if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
                 }
-                if (tabId === 'Descarga') {
-                    if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
-                }
 
                 if (tabId === 'Stock' || tabId === 'Confeccion') {
                     const stockW = document.getElementById('week-Stock').value;
@@ -1319,7 +1320,6 @@
                                 }
                             }
                         });
-                        if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
                     }
                 }
                 
@@ -1474,19 +1474,29 @@
 
         window.calculateGastadoConfeccion = function() {
             const items = [
-                { inv: 'confeccion-caja-mediana-woman', antInv: 'confeccion-inv-ant-mediana-woman', antPed: 'confeccion-ped-ant-mediana-woman', gastado: 'confeccion-gastado-mediana-woman' },
-                { inv: 'confeccion-caja-gp-woman', antInv: 'confeccion-inv-ant-gp-woman', antPed: 'confeccion-ped-ant-gp-woman', gastado: 'confeccion-gastado-gp-woman' },
-                { inv: 'confeccion-caja-grande-man', antInv: 'confeccion-inv-ant-grande-man', antPed: 'confeccion-ped-ant-grande-man', gastado: 'confeccion-gastado-grande-man' },
-                { inv: 'confeccion-caja-gp-man', antInv: 'confeccion-inv-ant-gp-man', antPed: 'confeccion-ped-ant-gp-man', gastado: 'confeccion-gastado-gp-man' },
-                { inv: 'confeccion-tapeta', antInv: 'confeccion-inv-ant-tapeta', antPed: 'confeccion-ped-ant-tapeta', gastado: 'confeccion-gastado-tapeta' }
+                { inv: 'confeccion-caja-mediana-woman', antInv: 'confeccion-inv-ant-mediana-woman', entrada: 'confeccion-entradas-mediana-woman', gastado: 'confeccion-gastado-mediana-woman', descargaId: 'mediana' },
+                { inv: 'confeccion-caja-gp-woman', antInv: 'confeccion-inv-ant-gp-woman', entrada: 'confeccion-entradas-gp-woman', gastado: 'confeccion-gastado-gp-woman', descargaId: 'gpw' },
+                { inv: 'confeccion-caja-grande-man', antInv: 'confeccion-inv-ant-grande-man', entrada: 'confeccion-entradas-grande-man', gastado: 'confeccion-gastado-grande-man', descargaId: 'grande' },
+                { inv: 'confeccion-caja-gp-man', antInv: 'confeccion-inv-ant-gp-man', entrada: 'confeccion-entradas-gp-man', gastado: 'confeccion-gastado-gp-man', descargaId: 'gp' },
+                { inv: 'confeccion-tapeta', antInv: 'confeccion-inv-ant-tapeta', entrada: 'confeccion-entradas-tapeta', gastado: 'confeccion-gastado-tapeta', descargaId: 'tapeta' }
             ];
 
             items.forEach(item => {
                 const currentInv = Number(document.getElementById(item.inv)?.value) || 0;
                 const antInv = Number(document.getElementById(item.antInv)?.value) || 0;
-                const antPed = Number(document.getElementById(item.antPed)?.value) || 0;
                 
-                let gastado = Math.round((antInv + antPed) - currentInv);
+                // Sumamos las descargas reales de la semana actual
+                let totalEntradas = 0;
+                for (let i = 0; i < 10; i++) {
+                    totalEntradas += Number(document.getElementById(`descarga-${item.descargaId}-${i}`)?.value) || 0;
+                }
+                
+                // Mostramos visualmente lo que ha entrado
+                const entradaInput = document.getElementById(item.entrada);
+                if(entradaInput) entradaInput.value = totalEntradas;
+                
+                // Aplicamos la fórmula matemática exacta
+                let gastado = Math.round((antInv + totalEntradas) - currentInv);
                 
                 const gastadoInput = document.getElementById(item.gastado);
                 if (gastadoInput) gastadoInput.value = gastado;
@@ -1522,21 +1532,8 @@
                 } else {
                     ['confeccion-inv-ant-mediana-woman', 'confeccion-inv-ant-gp-woman', 'confeccion-inv-ant-grande-man', 'confeccion-inv-ant-gp-man', 'confeccion-inv-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
                 }
-
-                const docRefDesc = window.doc(window.db, 'registros_semanales', `Descarga_${prevYear}_${prevWeek}`);
-                const docSnapDesc = await window.getDoc(docRefDesc);
-                if (docSnapDesc.exists()) {
-                    const data = docSnapDesc.data();
-                    document.getElementById('confeccion-ped-ant-mediana-woman').value = data['descarga-pedido-mediana-woman'] || 0;
-                    document.getElementById('confeccion-ped-ant-gp-woman').value = data['descarga-pedido-gp-woman'] || 0;
-                    document.getElementById('confeccion-ped-ant-grande-man').value = data['descarga-pedido-grande-man'] || 0;
-                    document.getElementById('confeccion-ped-ant-gp-man').value = data['descarga-pedido-gp-man'] || 0;
-                    document.getElementById('confeccion-ped-ant-tapeta').value = data['descarga-pedido-tapeta'] || 0;
-                } else {
-                    ['confeccion-ped-ant-mediana-woman', 'confeccion-ped-ant-gp-woman', 'confeccion-ped-ant-grande-man', 'confeccion-ped-ant-gp-man', 'confeccion-ped-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
-                }
-
-                window.calculateGastadoConfeccion();
+                
+                // NOTA: Como ahora usamos la función unificada calculateGastadoConfeccion, no necesitamos hacer más peticiones
             } catch (e) {
                 console.error("Error cargando datos de la semana anterior:", e);
             }
