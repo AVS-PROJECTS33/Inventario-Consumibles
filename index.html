@@ -246,7 +246,7 @@
                     3. Descarga Camiones
                 </button>
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap" onclick="openTab(event, 'Formadoras')">
-                    4. Formadoras
+                    4. Gasto Manual / Formadoras
                 </button>
                 <button class="tablink px-6 py-3 font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border-l-2 border-gray-400 dark:border-gray-600" onclick="openTab(event, 'Stock')">
                     5. Stock Inventario
@@ -642,7 +642,7 @@
             <div id="Formadoras" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
-                        <span class="text-[#FFC000]">⚙️</span> Control de Formadoras
+                        <span class="text-[#FFC000]">⚙️</span> Control Gasto Manual / Formadoras
                     </h2>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                         <button onclick="saveCurrentTab('Formadoras', this)" class="bg-[#FFC000] hover:bg-[#e6ac00] text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
@@ -688,14 +688,6 @@
                                 </h3>
                             </div>
                             <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
-                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-cola', this)"></div>
-                                </div>
-                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-tapeta', this)"></div>
-                                </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
                                     <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this)">
@@ -711,6 +703,22 @@
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
                                     <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-man', this)">
+                                </div>
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-cola', this)"></div>
+                                </div>
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-tapeta', this)"></div>
+                                </div>
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 800</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-800" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-800', this)"></div>
+                                </div>
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 1200</span>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-1200" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-1200', this)"></div>
                                 </div>
                             </div>
                         </div>
@@ -760,9 +768,12 @@
 
             <div id="Stock" class="tabcontent">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
-                        <span class="text-[#ED7D31]">📋</span> Stock Inventario
-                    </h2>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
+                            <span class="text-[#ED7D31]">📋</span> Stock Inventario
+                        </h2>
+                        <p class="text-xs font-bold text-orange-600 dark:text-orange-400 mt-1">⚠️ Nota: El cambio de semana automática para el stock se realizará los miércoles.</p>
+                    </div>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                         <button onclick="saveCurrentTab('Stock', this)" class="bg-[#ED7D31] hover:bg-[#d66f2a] text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
                             <span>💾</span> Guardar
@@ -1102,7 +1113,7 @@
                 ]);
                 
                 // Las matemáticas corren al final, asegurándonos de que todo el HTML se ha rellenado
-                if(typeof window.calculateGastadoConfeccion === 'function') window.calculateGastadoConfeccion();
+                if(typeof window.calculateGastadoConfeccion === 'function') await window.calculateGastadoConfeccion();
                 if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
             }
         };
@@ -1301,6 +1312,10 @@
                     if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
                 }
 
+                if (tabId === 'Descarga') {
+                    if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
+                }
+
                 if (tabId === 'Stock' || tabId === 'Confeccion') {
                     const stockW = document.getElementById('week-Stock').value;
                     const confW = document.getElementById('week-Confeccion').value;
@@ -1472,7 +1487,23 @@
             inputEl.dataset.prevValue = newVal;
         };
 
-        window.calculateGastadoConfeccion = function() {
+        window.calculateGastadoConfeccion = async function() {
+            const currentYearStr = document.getElementById('year-Confeccion').value;
+            const currentWeekStr = document.getElementById('week-Confeccion').value;
+            
+            let currentYear = parseInt(currentYearStr);
+            let currentWeek = parseInt(currentWeekStr);
+
+            let prevWeek = currentWeek - 1;
+            let prevYear = currentYear;
+            if (prevWeek < 1) {
+                prevWeek = 52;
+                prevYear -= 1;
+            }
+            
+            const descargaYearStr = document.getElementById('year-Descarga').value;
+            const descargaWeekStr = document.getElementById('week-Descarga').value;
+            
             const items = [
                 { inv: 'confeccion-caja-mediana-woman', antInv: 'confeccion-inv-ant-mediana-woman', entrada: 'confeccion-entradas-mediana-woman', gastado: 'confeccion-gastado-mediana-woman', descargaId: 'mediana' },
                 { inv: 'confeccion-caja-gp-woman', antInv: 'confeccion-inv-ant-gp-woman', entrada: 'confeccion-entradas-gp-woman', gastado: 'confeccion-gastado-gp-woman', descargaId: 'gpw' },
@@ -1481,14 +1512,33 @@
                 { inv: 'confeccion-tapeta', antInv: 'confeccion-inv-ant-tapeta', entrada: 'confeccion-entradas-tapeta', gastado: 'confeccion-gastado-tapeta', descargaId: 'tapeta' }
             ];
 
+            // Para calcular las entradas de Confección de una semana, miramos a los camiones de la SEMANA ANTERIOR.
+            let useDOM = (prevYear.toString() === descargaYearStr && prevWeek.toString() === descargaWeekStr);
+            let descargaData = {};
+
+            if (!useDOM && window.db && window.getDoc && window.doc) {
+                try {
+                    const docRefDesc = window.doc(window.db, 'registros_semanales', `Descarga_${prevYear}_${prevWeek}`);
+                    const docSnapDesc = await window.getDoc(docRefDesc);
+                    if (docSnapDesc.exists()) {
+                        descargaData = docSnapDesc.data();
+                    }
+                } catch (e) {
+                    console.error("Error cargando datos de Descarga para Confección:", e);
+                }
+            }
+
             items.forEach(item => {
                 const currentInv = Number(document.getElementById(item.inv)?.value) || 0;
                 const antInv = Number(document.getElementById(item.antInv)?.value) || 0;
                 
-                // Sumamos las descargas reales de la semana actual
                 let totalEntradas = 0;
                 for (let i = 0; i < 10; i++) {
-                    totalEntradas += Number(document.getElementById(`descarga-${item.descargaId}-${i}`)?.value) || 0;
+                    if (useDOM) {
+                        totalEntradas += Number(document.getElementById(`descarga-${item.descargaId}-${i}`)?.value) || 0;
+                    } else {
+                        totalEntradas += Number(descargaData[`descarga-${item.descargaId}-${i}`]) || 0;
+                    }
                 }
                 
                 // Mostramos visualmente lo que ha entrado
@@ -1533,7 +1583,9 @@
                     ['confeccion-inv-ant-mediana-woman', 'confeccion-inv-ant-gp-woman', 'confeccion-inv-ant-grande-man', 'confeccion-inv-ant-gp-man', 'confeccion-inv-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
                 }
                 
-                // NOTA: Como ahora usamos la función unificada calculateGastadoConfeccion, no necesitamos hacer más peticiones
+                if (typeof window.calculateGastadoConfeccion === 'function') {
+                    window.calculateGastadoConfeccion();
+                }
             } catch (e) {
                 console.error("Error cargando datos de la semana anterior:", e);
             }
@@ -1585,7 +1637,9 @@
         }
 
         function initWeeks() {
-            const currentWeek = getISOWeek(new Date());
+            // Restamos 2 días (48 horas) para que el cambio de semana se haga el miércoles (el lunes y el martes seguirán en la semana anterior)
+            const shiftedDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+            const currentWeek = getISOWeek(shiftedDate);
             const selectors = document.querySelectorAll('.week-selector');
             selectors.forEach(select => {
                 let optionsHTML = '';
@@ -1898,6 +1952,10 @@
                                             if (cat === 'Bobina') {
                                                 if (currentType === 'Todos' || currentType === 'Bobina 800') amount += Number(data['paqueteria-bobina-800'] || 0);
                                                 if (currentType === 'Todos' || currentType === 'Bobina 1200') amount += Number(data['paqueteria-bobina-1200'] || 0);
+                                            }
+                                            if (cat === 'Bobina') {
+                                                if (currentType === 'Todos' || currentType === 'Bobina 800') amount += Number(data['formadora-manual-bobina-800'] || 0);
+                                                if (currentType === 'Todos' || currentType === 'Bobina 1200') amount += Number(data['formadora-manual-bobina-1200'] || 0);
                                             }
                                         }
                                         if (docSection === 'Confeccion') {
