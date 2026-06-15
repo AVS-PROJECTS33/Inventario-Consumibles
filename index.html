@@ -508,45 +508,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="modern-card border-t-4 border-t-[#C6E0B4]">
-                        <div class="bg-green-50 dark:bg-green-900/20 px-4 py-3 border-b border-green-100 dark:border-green-800 flex justify-between items-center">
-                            <h3 class="font-bold text-green-800 dark:text-green-300">Cálculo Gasto Semanal</h3>
-                            <span class="text-[10px] font-bold px-3 py-1 bg-red-100 text-red-700 rounded-full dark:bg-red-900/50 dark:text-red-300 tracking-wide">NO ENVIAR AL TEAMS</span>
-                        </div>
-                        <div class="p-4 overflow-x-auto">
-                            <table class="modern-table min-w-full">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th class="text-center text-[10px] w-24">MEDIANA WOMAN</th>
-                                        <th class="text-center text-[10px] w-24">GP WOMAN</th>
-                                        <th class="text-center text-[10px] w-24">GRANDE MAN</th>
-                                        <th class="text-center text-[10px] w-24">GP MAN</th>
-                                        <th class="text-center text-[10px] w-24">TAPETA</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4">Inventario Sem. Anterior</td>
-                                        <td><input type="number" id="confeccion-inv-ant-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td><input type="number" id="confeccion-inv-ant-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td><input type="number" id="confeccion-inv-ant-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td><input type="number" id="confeccion-inv-ant-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td><input type="number" id="confeccion-inv-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4 border-b-0">Entradas Semana (Camiones)</td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                        <td class="border-b-0"><input type="number" id="confeccion-entradas-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -690,19 +651,19 @@
                             <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="">
+                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="">
+                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="">
+                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="">
+                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
@@ -710,7 +671,7 @@
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value=""></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="calculateGastadoConfeccion()"></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 800</span>
@@ -772,7 +733,7 @@
                         <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
                             <span class="text-[#ED7D31]">📋</span> Stock Inventario
                         </h2>
-                        <p class="text-xs font-bold text-orange-600 dark:text-orange-400 mt-1">⚠️ Nota: El cambio de semana automática para el stock se realizará los miércoles.</p>
+                        <p class="text-xs font-bold text-orange-600 dark:text-orange-400 mt-1">⚠️ Nota: El cambio de semana se realiza los miércoles (o usa el botón 'Martes' si es festivo).</p>
                     </div>
                     <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                         <button onclick="saveCurrentTab('Stock', this)" class="bg-[#ED7D31] hover:bg-[#d66f2a] text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
@@ -783,6 +744,9 @@
                         </button>
                         <button id="btn-unlock-stock" onclick="toggleStockLock()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
                             <span id="lock-icon">🔒</span> Bloqueado
+                        </button>
+                        <button id="btn-martes" onclick="unlockMartes()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-transparent w-full sm:w-auto justify-center shadow-md" title="Habilitar inventario en Martes si el miércoles es festivo">
+                            <span>📅</span> Martes
                         </button>
                         <div class="flex gap-2 w-full sm:w-auto">
                             <select id="week-Stock" class="modern-input week-selector cursor-pointer text-sm font-bold bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400 w-48" onchange="loadTab('Stock')"></select>
@@ -1346,7 +1310,7 @@
                 if(typeof updateEquipoSelection === 'function') updateEquipoSelection();
 
                 if (tabId === 'Confeccion') {
-                    if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
+                    if (typeof window.calculateGastadoConfeccion === 'function') await window.calculateGastadoConfeccion();
                 }
 
                 if (tabId === 'Descarga') {
@@ -1440,7 +1404,7 @@
             const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
 
             // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
-            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3) {
+            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
                 alert("No se pueden registrar entradas en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
                 // Revertimos el cambio en el input
                 inputEl.value = inputEl.dataset.prevValue || '';
@@ -1504,7 +1468,7 @@
             const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
 
             // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
-            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3) {
+            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
                 alert("No se pueden registrar consumos en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
                 // Revertimos el cambio en el input
                 inputEl.value = inputEl.dataset.prevValue || '';
@@ -1555,108 +1519,69 @@
         };
 
         window.calculateGastadoConfeccion = async function() {
-            const currentYearStr = document.getElementById('year-Confeccion').value;
-            const currentWeekStr = document.getElementById('week-Confeccion').value;
-            
-            let currentYear = parseInt(currentYearStr);
-            let currentWeek = parseInt(currentWeekStr);
+            const confW = document.getElementById('week-Confeccion').value;
+            const confY = document.getElementById('year-Confeccion').value;
+            const formW = document.getElementById('week-Formadoras').value;
+            const formY = document.getElementById('year-Formadoras').value;
 
-            let prevWeek = currentWeek - 1;
-            let prevYear = currentYear;
-            if (prevWeek < 1) {
-                prevWeek = 52;
-                prevYear -= 1;
-            }
-            
-            const descargaYearStr = document.getElementById('year-Descarga').value;
-            const descargaWeekStr = document.getElementById('week-Descarga').value;
-            
-            const items = [
-                { inv: 'confeccion-caja-mediana-woman', antInv: 'confeccion-inv-ant-mediana-woman', entrada: 'confeccion-entradas-mediana-woman', gastado: 'confeccion-gastado-mediana-woman', descargaId: 'mediana' },
-                { inv: 'confeccion-caja-gp-woman', antInv: 'confeccion-inv-ant-gp-woman', entrada: 'confeccion-entradas-gp-woman', gastado: 'confeccion-gastado-gp-woman', descargaId: 'gpw' },
-                { inv: 'confeccion-caja-grande-man', antInv: 'confeccion-inv-ant-grande-man', entrada: 'confeccion-entradas-grande-man', gastado: 'confeccion-gastado-grande-man', descargaId: 'grande' },
-                { inv: 'confeccion-caja-gp-man', antInv: 'confeccion-inv-ant-gp-man', entrada: 'confeccion-entradas-gp-man', gastado: 'confeccion-gastado-gp-man', descargaId: 'gp' },
-                { inv: 'confeccion-tapeta', antInv: 'confeccion-inv-ant-tapeta', entrada: 'confeccion-entradas-tapeta', gastado: 'confeccion-gastado-tapeta', descargaId: 'tapeta' }
-            ];
+            let data = {};
 
-            // Para calcular las entradas de Confección de una semana, miramos a los camiones de la SEMANA ANTERIOR.
-            let useDOM = (prevYear.toString() === descargaYearStr && prevWeek.toString() === descargaWeekStr);
-            let descargaData = {};
-
-            if (!useDOM && window.db && window.getDoc && window.doc) {
-                try {
-                    const docRefDesc = window.doc(window.db, 'registros_semanales', `Descarga_${prevYear}_${prevWeek}`);
-                    const docSnapDesc = await window.getDoc(docRefDesc);
-                    if (docSnapDesc.exists()) {
-                        descargaData = docSnapDesc.data();
+            if (confW === formW && confY === formY) {
+                const getVal = id => document.getElementById(id)?.value;
+                data = {
+                    'formadora-antigua-caja-mediana-woman': getVal('formadora-antigua-caja-mediana-woman'),
+                    'formadora-nueva-caja-gp-woman': getVal('formadora-nueva-caja-gp-woman'),
+                    'formadora-nueva-caja-gp-man': getVal('formadora-nueva-caja-gp-man'),
+                    'formadora-nueva-caja-mediana-woman': getVal('formadora-nueva-caja-mediana-woman'),
+                    'formadora-nueva-caja-grande-man': getVal('formadora-nueva-caja-grande-man'),
+                    'formadora-manual-caja-mediana-woman': getVal('formadora-manual-caja-mediana-woman'),
+                    'formadora-manual-caja-gp-woman': getVal('formadora-manual-caja-gp-woman'),
+                    'formadora-manual-caja-grande-man': getVal('formadora-manual-caja-grande-man'),
+                    'formadora-manual-caja-gp-man': getVal('formadora-manual-caja-gp-man'),
+                    'formadora-manual-tapetas': getVal('formadora-manual-tapetas')
+                };
+            } else {
+                if (window.db && window.getDoc && window.doc) {
+                    try {
+                        const docRef = window.doc(window.db, 'registros_semanales', `Formadoras_${confY}_${confW}`);
+                        const docSnap = await window.getDoc(docRef);
+                        if (docSnap.exists()) {
+                            data = docSnap.data();
+                        }
+                    } catch (e) {
+                        console.error("Error fetching Formadoras para Confeccion:", e);
                     }
-                } catch (e) {
-                    console.error("Error cargando datos de Descarga para Confección:", e);
                 }
             }
 
-            items.forEach(item => {
-                const currentInv = Number(document.getElementById(item.inv)?.value) || 0;
-                const antInv = Number(document.getElementById(item.antInv)?.value) || 0;
-                
-                let totalEntradas = 0;
-                for (let i = 0; i < 10; i++) {
-                    if (useDOM) {
-                        totalEntradas += Number(document.getElementById(`descarga-${item.descargaId}-${i}`)?.value) || 0;
-                    } else {
-                        totalEntradas += Number(descargaData[`descarga-${item.descargaId}-${i}`]) || 0;
-                    }
-                }
-                
-                // Mostramos visualmente lo que ha entrado
-                const entradaInput = document.getElementById(item.entrada);
-                if(entradaInput) entradaInput.value = totalEntradas;
-                
-                // Aplicamos la fórmula matemática exacta
-                let gastado = Math.round((antInv + totalEntradas) - currentInv);
-                
-                const gastadoInput = document.getElementById(item.gastado);
-                if (gastadoInput) gastadoInput.value = gastado;
-            });
+            const faMediana = (Number(data['formadora-antigua-caja-mediana-woman']) || 0) / 100;
+            
+            const fnGpWoman = (Number(data['formadora-nueva-caja-gp-woman']) || 0) / 100;
+            const fnGpMan = (Number(data['formadora-nueva-caja-gp-man']) || 0) / 100;
+            const fnMediana = (Number(data['formadora-nueva-caja-mediana-woman']) || 0) / 100;
+            const fnGrandeMan = (Number(data['formadora-nueva-caja-grande-man']) || 0) / 100;
+            
+            const manMediana = Number(data['formadora-manual-caja-mediana-woman']) || 0;
+            const manGpWoman = Number(data['formadora-manual-caja-gp-woman']) || 0;
+            const manGrandeMan = Number(data['formadora-manual-caja-grande-man']) || 0;
+            const manGpMan = Number(data['formadora-manual-caja-gp-man']) || 0;
+            const manTapetas = Number(data['formadora-manual-tapetas']) || 0;
+
+            const gastadoMedianaInput = document.getElementById('confeccion-gastado-mediana-woman');
+            if (gastadoMedianaInput) gastadoMedianaInput.value = Math.round(faMediana + fnMediana + manMediana);
+
+            const gastadoGpWomanInput = document.getElementById('confeccion-gastado-gp-woman');
+            if (gastadoGpWomanInput) gastadoGpWomanInput.value = Math.round(fnGpWoman + manGpWoman);
+
+            const gastadoGrandeManInput = document.getElementById('confeccion-gastado-grande-man');
+            if (gastadoGrandeManInput) gastadoGrandeManInput.value = Math.round(fnGrandeMan + manGrandeMan);
+
+            const gastadoGpManInput = document.getElementById('confeccion-gastado-gp-man');
+            if (gastadoGpManInput) gastadoGpManInput.value = Math.round(fnGpMan + manGpMan);
+
+            const gastadoTapetaInput = document.getElementById('confeccion-gastado-tapeta');
+            if (gastadoTapetaInput) gastadoTapetaInput.value = Math.round(manTapetas);
         };
-
-        window.loadPreviousWeekData = async function(currentTab) {
-            if (currentTab !== 'Confeccion') return;
-            if (!window.db || !window.getDoc || !window.doc) return;
-
-            const currentYearStr = document.getElementById('year-Confeccion').value;
-            const currentWeekStr = document.getElementById('week-Confeccion').value;
-            let currentYear = parseInt(currentYearStr);
-            let currentWeek = parseInt(currentWeekStr);
-
-            let prevWeek = currentWeek - 1;
-            let prevYear = currentYear;
-            if (prevWeek < 1) {
-                prevWeek = 52;
-                prevYear -= 1;
-            }
-
-            try {
-                const docRefConf = window.doc(window.db, 'registros_semanales', `Confeccion_${prevYear}_${prevWeek}`);
-                const docSnapConf = await window.getDoc(docRefConf);
-                if (docSnapConf.exists()) {
-                    const data = docSnapConf.data();
-                    document.getElementById('confeccion-inv-ant-mediana-woman').value = data['confeccion-caja-mediana-woman'] || 0;
-                    document.getElementById('confeccion-inv-ant-gp-woman').value = data['confeccion-caja-gp-woman'] || 0;
-                    document.getElementById('confeccion-inv-ant-grande-man').value = data['confeccion-caja-grande-man'] || 0;
-                    document.getElementById('confeccion-inv-ant-gp-man').value = data['confeccion-caja-gp-man'] || 0;
-                    document.getElementById('confeccion-inv-ant-tapeta').value = data['confeccion-tapeta'] || 0;
-                } else {
-                    ['confeccion-inv-ant-mediana-woman', 'confeccion-inv-ant-gp-woman', 'confeccion-inv-ant-grande-man', 'confeccion-inv-ant-gp-man', 'confeccion-inv-ant-tapeta'].forEach(id => document.getElementById(id).value = '');
-                }
-                
-                if (typeof window.calculateGastadoConfeccion === 'function') {
-                    window.calculateGastadoConfeccion();
-                }
-            } catch (e) {
-                console.error("Error cargando datos de la semana anterior:", e);
-            }
-        }
     </script>
 
     <script>
