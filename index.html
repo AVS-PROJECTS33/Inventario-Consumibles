@@ -690,35 +690,35 @@
                             <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this)">
+                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-woman', this)">
+                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-grande-man', this)">
+                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-man', this)">
+                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="">
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-cola', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value=""></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-tapeta', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value=""></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 800</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-800" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-800', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-800" class="modern-input text-sm" value=""></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 1200</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-1200" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-1200', this)"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-1200" class="modern-input text-sm" value=""></div>
                                 </div>
                             </div>
                         </div>
@@ -1245,14 +1245,28 @@
                     });
                 } else {
                     // --- NUEVA LÓGICA DE HERENCIA AUTOMÁTICA DE STOCK ---
+                    // El documento no existe. Puede ser una semana nueva.
                     let inheritedData = null;
+                    let performCopy = false;
                     
-                    // Si estamos en la pestaña Stock y no hay datos, buscamos la semana anterior
+                    // --- LÓGICA DE HERENCIA DE STOCK ---
                     if (tabId === 'Stock') {
+                        const now = new Date();
+                        const realCurrentWeek = getISOWeek(now);
+                        const realCurrentYear = now.getFullYear();
+                        const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+
+                        // Condición para la copia definitiva:
+                        // 1. Estamos cargando la semana actual real.
+                        // 2. Es miércoles (3) o un día posterior.
+                        if (year === realCurrentYear.toString() && week === realCurrentWeek.toString() && dayOfWeek >= 3) {
+                            performCopy = true;
+                        }
+
+                        // De todas formas, intentamos cargar los datos de la semana anterior para mostrarlos
+                        // (sea para la copia definitiva o para la visualización temporal de Lunes/Martes).
                         let prevWeek = parseInt(week) - 1;
                         let prevYear = parseInt(year);
-                        
-                        // Si la semana es la 1, volvemos a la 52 del año anterior
                         if (prevWeek < 1) {
                             prevWeek = 52;
                             prevYear -= 1;
@@ -1264,12 +1278,37 @@
                             if (prevDocSnap.exists()) {
                                 inheritedData = prevDocSnap.data();
                             }
+
+                            // NUEVA LÓGICA: Si vamos a copiar, restamos el Gasto Manual de la semana actual.
+                            if (performCopy && inheritedData) {
+                                try {
+                                    const manualGastoRef = window.doc(window.db, 'registros_semanales', `Formadoras_${year}_${week}`);
+                                    const manualGastoSnap = await window.getDoc(manualGastoRef);
+                                    if (manualGastoSnap.exists()) {
+                                        const manualGastoData = manualGastoSnap.data();
+                                        const expenseMap = {
+                                            'formadora-manual-caja-mediana-woman': 'stock-caja-mediana-woman', 'formadora-manual-caja-gp-woman': 'stock-caja-gp-woman',
+                                            'formadora-manual-caja-grande-man': 'stock-caja-grande-man', 'formadora-manual-caja-gp-man': 'stock-caja-gp-man',
+                                            'formadora-manual-tapetas': 'stock-tapeta', 'formadora-manual-cola': 'stock-cola',
+                                            'formadora-manual-bobina-800': 'stock-bobina-800', 'formadora-manual-bobina-1200': 'stock-bobina-1200'
+                                        };
+                                        for (const [expenseId, stockId] of Object.entries(expenseMap)) {
+                                            const expenseValue = Number(manualGastoData[expenseId]) || 0;
+                                            if (expenseValue > 0) {
+                                                const stockValue = Number(inheritedData[stockId]) || 0;
+                                                inheritedData[stockId] = stockValue - expenseValue;
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error("Error al restar gasto manual durante la herencia de stock:", e);
+                                }
+                            }
                         } catch (e) {
-                            console.error("Error buscando stock de la semana pasada:", e);
+                            console.error("Error buscando stock de la semana pasada para heredar:", e);
                         }
                     }
 
-                    // Rellenamos los inputs con los datos heredados (o los vaciamos si no hay herencia)
                     inputs.forEach((input, index) => {
                         const key = input.id || `val_${index}`;
                         const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
@@ -1277,24 +1316,23 @@
                         if (inheritedData && (inheritedData[key] !== undefined || inheritedData[fallbackKey] !== undefined)) {
                             let val = inheritedData[key];
                             if (val === undefined || val === '') val = inheritedData[fallbackKey];
-                            
                             if (input.type === 'checkbox') input.checked = val;
                             else if (input.type !== 'button') {
                                 input.value = val;
                                 input.dataset.prevValue = val;
                             }
                         } else {
-                            if (input.type === 'checkbox') input.checked = false;
-                            else if (input.type !== 'button') {
+                            if (input.type === 'checkbox') {
+ input.checked = false;
+} else if (input.type !== 'button') {
                                 input.value = '';
                                 input.dataset.prevValue = 0;
                             }
                         }
                     });
 
-                    // Si hemos conseguido heredar datos, forzamos un guardado silencioso 
-                    // para fijar el inventario inicial en la nueva semana
-                    if (inheritedData && tabId === 'Stock') {
+                    // Si se cumplen las condiciones, forzamos un guardado para fijar el inventario en la nueva semana.
+                    if (performCopy && inheritedData && tabId === 'Stock') {
                         setTimeout(() => {
                             if (window.saveTab) {
                                 window.saveTab('Stock');
@@ -1302,7 +1340,6 @@
                             }
                         }, 1000);
                     }
-                    // --------------------------------------------------------
                 }
                 
                 if(typeof updateApSelection === 'function') updateApSelection();
@@ -1395,6 +1432,21 @@
             const currentY = document.getElementById('year-' + tabName).value;
             
             const newVal = Number(inputEl.value) || 0;
+
+            // --- NUEVO BLOQUEO ---
+            const now = new Date();
+            const realCurrentWeek = getISOWeek(now);
+            const realCurrentYear = now.getFullYear();
+            const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+
+            // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
+            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3) {
+                alert("No se pueden registrar entradas en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
+                // Revertimos el cambio en el input
+                inputEl.value = inputEl.dataset.prevValue || '';
+                return;
+            }
+            // --- FIN BLOQUEO ---
             const prevVal = Number(inputEl.dataset.prevValue) || 0;
             const delta = newVal - prevVal; 
             
@@ -1444,6 +1496,21 @@
             const currentW = document.getElementById('week-' + tabName).value;
             const stockY = document.getElementById('year-Stock').value;
             const currentY = document.getElementById('year-' + tabName).value;
+            
+            // --- NUEVO BLOQUEO ---
+            const now = new Date();
+            const realCurrentWeek = getISOWeek(now);
+            const realCurrentYear = now.getFullYear();
+            const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+
+            // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
+            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3) {
+                alert("No se pueden registrar consumos en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
+                // Revertimos el cambio en el input
+                inputEl.value = inputEl.dataset.prevValue || '';
+                return;
+            }
+            // --- FIN BLOQUEO ---
             
             const newVal = Number(inputEl.value) || 0;
             const prevVal = Number(inputEl.dataset.prevValue) || 0;
@@ -1637,9 +1704,8 @@
         }
 
         function initWeeks() {
-            // Restamos 2 días (48 horas) para que el cambio de semana se haga el miércoles (el lunes y el martes seguirán en la semana anterior)
-            const shiftedDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-            const currentWeek = getISOWeek(shiftedDate);
+            // La semana se actualiza visualmente los lunes, mostrando la semana real.
+            const currentWeek = getISOWeek(new Date());
             const selectors = document.querySelectorAll('.week-selector');
             selectors.forEach(select => {
                 let optionsHTML = '';
