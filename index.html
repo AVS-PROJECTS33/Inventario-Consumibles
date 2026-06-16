@@ -508,6 +508,37 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="modern-card border-t-4 border-t-[#C6E0B4]">
+                        <div class="bg-green-50 dark:bg-green-900/20 px-4 py-3 border-b border-green-100 dark:border-green-800 flex justify-between items-center">
+                            <h3 class="font-bold text-green-800 dark:text-green-300">Cálculo Gasto Semanal</h3>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-red-100 text-red-700 rounded-full dark:bg-red-900/50 dark:text-red-300 tracking-wide">NO ENVIAR AL TEAMS</span>
+                        </div>
+                        <div class="p-4 overflow-x-auto">
+                            <table class="modern-table min-w-full">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th class="text-center text-[10px] w-24">MEDIANA WOMAN</th>
+                                        <th class="text-center text-[10px] w-24">GP WOMAN</th>
+                                        <th class="text-center text-[10px] w-24">GRANDE MAN</th>
+                                        <th class="text-center text-[10px] w-24">GP MAN</th>
+                                        <th class="text-center text-[10px] w-24">TAPETA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="text-left font-bold text-gray-600 dark:text-gray-400 w-1/4">Inventario Sem. Anterior</td>
+                                        <td><input type="number" id="confeccion-inv-ant-mediana-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-gp-woman" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-grande-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-gp-man" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                        <td><input type="number" id="confeccion-inv-ant-tapeta" class="modern-input font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700" value="" readonly></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -651,35 +682,35 @@
                             <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 bg-white dark:bg-gray-800">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Mediana (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
+                                    <input type="number" id="formadora-manual-caja-mediana-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-mediana-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Woman)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
+                                    <input type="number" id="formadora-manual-caja-gp-woman" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-woman', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja Grande (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
+                                    <input type="number" id="formadora-manual-caja-grande-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-grande-man', this)">
                                 </div>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Caja GP (Man)</span>
-                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="calculateGastadoConfeccion()">
+                                    <input type="number" id="formadora-manual-caja-gp-man" class="modern-input" value="" onchange="subtractFromStock('stock-caja-gp-man', this)">
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Cola</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value=""></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-cola" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-cola', this)"></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 mt-1">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Tapetas</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="calculateGastadoConfeccion()"></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-tapetas" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-tapeta', this)"></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 800</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-800" class="modern-input text-sm" value=""></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-800" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-800', this)"></div>
                                 </div>
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Bobina 1200</span>
-                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-1200" class="modern-input text-sm" value=""></div>
+                                    <div class="w-20"><input type="number" id="formadora-manual-bobina-1200" class="modern-input text-sm" value="" onchange="subtractFromStock('stock-bobina-1200', this)"></div>
                                 </div>
                             </div>
                         </div>
@@ -1098,7 +1129,6 @@
         };
 
         try {
-            // Solo conectamos a Firebase de forma invisible. Sin pantallas de carga ni descargas de datos.
             const auth = getAuth(app);
             await signInAnonymously(auth);
             console.log("🔥 Firebase conectado silenciosamente.");
@@ -1133,23 +1163,33 @@
                 data['_seccion'] = tabId;
 
                 const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
-                await setDoc(docRef, data);
+                await setDoc(docRef, data, { merge: true });
             } catch (error) {
                 console.error("Error guardando datos: ", error);
             }
         };
 
         window.saveCurrentTab = async function(tabId, btn) {
+            const now = new Date();
+            const realCurrentWeek = getISOWeek(now);
+            const realCurrentYear = now.getFullYear();
+            const dayOfWeek = now.getDay();
+            
+            const year = document.getElementById('year-' + tabId).value;
+            const week = document.getElementById('week-' + tabId).value;
+
+            // Bloqueo de seguridad al intentar guardar
+            if (tabId !== 'Formadoras' && year == realCurrentYear && week == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
+                alert(`Acción denegada.\nNo se pueden guardar datos en la pestaña ${tabId} de la semana actual hasta el miércoles.`);
+                return;
+            }
+
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span>⏳</span> Guardando...';
             btn.disabled = true;
             
-            // 1. Guardamos la pestaña en la que ha hecho clic el usuario
             await window.saveTab(tabId);
             
-            // 2. SINCRONIZACIÓN PROFUNDA: 
-            // Si guardamos movimientos (Descarga, Formadoras, Paqueteria), 
-            // guardamos silenciosamente Stock y Confeccion para fijar las sumas/restas.
             if (tabId === 'Descarga' || tabId === 'Formadoras' || tabId === 'Paqueteria') {
                 await window.saveTab('Stock');
                 await window.saveTab('Confeccion');
@@ -1182,135 +1222,97 @@
             );
 
             try {
-                const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
-                const docSnap = await getDoc(docRef);
+                const docRef = window.doc(window.db, 'registros_semanales', `${tabId}_${year}_${week}`);
+                const docSnap = await window.getDoc(docRef);
+                
+                let data = {};
+                let needsInheritance = false;
 
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    inputs.forEach((input, index) => {
-                        const key = input.id || `val_${index}`;
-                        const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
-                        
-                        let val = data[key];
-                        if (val === undefined || val === '') val = data[fallbackKey];
-                        
-                        if(val !== undefined) {
-                            if(input.type === 'checkbox') input.checked = val;
-                            else {
-                                input.value = val;
-                                input.dataset.prevValue = val;
-                            }
-                        } else {
-                            if(input.type !== 'checkbox' && input.type !== 'button') {
-                                input.value = '';
-                                input.dataset.prevValue = 0;
-                            }
-                        }
-                    });
-                } else {
-                    // --- NUEVA LÓGICA DE HERENCIA AUTOMÁTICA DE STOCK ---
-                    // El documento no existe. Puede ser una semana nueva.
-                    let inheritedData = null;
-                    let performCopy = false;
-                    
-                    // --- LÓGICA DE HERENCIA DE STOCK ---
-                    if (tabId === 'Stock') {
-                        const now = new Date();
-                        const realCurrentWeek = getISOWeek(now);
-                        const realCurrentYear = now.getFullYear();
-                        const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
-
-                        // Condición para la copia definitiva:
-                        // 1. Estamos cargando la semana actual real.
-                        // 2. Es miércoles (3) o un día posterior.
-                        if (year === realCurrentYear.toString() && week === realCurrentWeek.toString() && dayOfWeek >= 3) {
-                            performCopy = true;
-                        }
-
-                        // De todas formas, intentamos cargar los datos de la semana anterior para mostrarlos
-                        // (sea para la copia definitiva o para la visualización temporal de Lunes/Martes).
-                        let prevWeek = parseInt(week) - 1;
-                        let prevYear = parseInt(year);
-                        if (prevWeek < 1) {
-                            prevWeek = 52;
-                            prevYear -= 1;
-                        }
-                        
-                        try {
-                            const prevDocRef = window.doc(window.db, 'registros_semanales', `Stock_${prevYear}_${prevWeek}`);
-                            const prevDocSnap = await window.getDoc(prevDocRef);
-                            if (prevDocSnap.exists()) {
-                                inheritedData = prevDocSnap.data();
-                            }
-
-                            // NUEVA LÓGICA: Si vamos a copiar, restamos el Gasto Manual de la semana actual.
-                            if (performCopy && inheritedData) {
-                                try {
-                                    const manualGastoRef = window.doc(window.db, 'registros_semanales', `Formadoras_${year}_${week}`);
-                                    const manualGastoSnap = await window.getDoc(manualGastoRef);
-                                    if (manualGastoSnap.exists()) {
-                                        const manualGastoData = manualGastoSnap.data();
-                                        const expenseMap = {
-                                            'formadora-manual-caja-mediana-woman': 'stock-caja-mediana-woman', 'formadora-manual-caja-gp-woman': 'stock-caja-gp-woman',
-                                            'formadora-manual-caja-grande-man': 'stock-caja-grande-man', 'formadora-manual-caja-gp-man': 'stock-caja-gp-man',
-                                            'formadora-manual-tapetas': 'stock-tapeta', 'formadora-manual-cola': 'stock-cola',
-                                            'formadora-manual-bobina-800': 'stock-bobina-800', 'formadora-manual-bobina-1200': 'stock-bobina-1200'
-                                        };
-                                        for (const [expenseId, stockId] of Object.entries(expenseMap)) {
-                                            const expenseValue = Number(manualGastoData[expenseId]) || 0;
-                                            if (expenseValue > 0) {
-                                                const stockValue = Number(inheritedData[stockId]) || 0;
-                                                inheritedData[stockId] = stockValue - expenseValue;
-                                            }
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.error("Error al restar gasto manual durante la herencia de stock:", e);
-                                }
-                            }
-                        } catch (e) {
-                            console.error("Error buscando stock de la semana pasada para heredar:", e);
-                        }
+                    data = docSnap.data();
+                    if (tabId === 'Stock' && !data._herenciaAplicada) {
+                        needsInheritance = true;
                     }
-
-                    inputs.forEach((input, index) => {
-                        const key = input.id || `val_${index}`;
-                        const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
-
-                        if (inheritedData && (inheritedData[key] !== undefined || inheritedData[fallbackKey] !== undefined)) {
-                            let val = inheritedData[key];
-                            if (val === undefined || val === '') val = inheritedData[fallbackKey];
-                            if (input.type === 'checkbox') input.checked = val;
-                            else if (input.type !== 'button') {
-                                input.value = val;
-                                input.dataset.prevValue = val;
-                            }
-                        } else {
-                            if (input.type === 'checkbox') {
- input.checked = false;
-} else if (input.type !== 'button') {
-                                input.value = '';
-                                input.dataset.prevValue = 0;
-                            }
-                        }
-                    });
-
-                    // Si se cumplen las condiciones, forzamos un guardado para fijar el inventario en la nueva semana.
-                    if (performCopy && inheritedData && tabId === 'Stock') {
-                        setTimeout(() => {
-                            if (window.saveTab) {
-                                window.saveTab('Stock');
-                                window.saveTab('Confeccion');
-                            }
-                        }, 1000);
+                } else {
+                    if (tabId === 'Stock') {
+                        needsInheritance = true;
                     }
                 }
+
+                // --- LÓGICA DE HERENCIA ACUMULATIVA ---
+                const now = new Date();
+                const realCurrentWeek = getISOWeek(now);
+                const realCurrentYear = now.getFullYear();
+                const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+
+                let performCopy = false;
+                if (needsInheritance && year == realCurrentYear && week == realCurrentWeek && (dayOfWeek >= 3 || window.martesUnlocked)) {
+                    performCopy = true;
+                }
+
+                if (performCopy) {
+                    let prevWeek = parseInt(week) - 1;
+                    let prevYear = parseInt(year);
+                    if (prevWeek < 1) { prevWeek = 52; prevYear -= 1; }
+                    
+                    try {
+                        const prevDocRef = window.doc(window.db, 'registros_semanales', `Stock_${prevYear}_${prevWeek}`);
+                        const prevDocSnap = await window.getDoc(prevDocRef);
+                        
+                        if (prevDocSnap.exists()) {
+                            const inheritedData = prevDocSnap.data();
+                            
+                            inputs.forEach((input, index) => {
+                                if (input.type !== 'checkbox' && input.type !== 'button') {
+                                    const key = input.id || `val_${index}`;
+                                    const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
+                                    
+                                    let currentVal = Number(data[key] !== undefined ? data[key] : (data[fallbackKey] || 0));
+                                    let inheritedVal = Number(inheritedData[key] !== undefined ? inheritedData[key] : (inheritedData[fallbackKey] || 0));
+                                    
+                                    data[key] = currentVal + inheritedVal;
+                                }
+                            });
+                        }
+                        
+                        data._herenciaAplicada = true;
+                        data._ano = year;
+                        data._semana = week;
+                        data._seccion = tabId;
+                        
+                        await window.setDoc(docRef, data, { merge: true });
+                        
+                    } catch (e) {
+                        console.error("Error ejecutando herencia de stock:", e);
+                    }
+                }
+
+                inputs.forEach((input, index) => {
+                    const key = input.id || `val_${index}`;
+                    const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
+                    
+                    let val = data[key];
+                    if (val === undefined || val === '') val = data[fallbackKey];
+                    
+                    if(val !== undefined) {
+                        if(input.type === 'checkbox') input.checked = val;
+                        else {
+                            input.value = val;
+                            input.dataset.prevValue = val;
+                        }
+                    } else {
+                        if(input.type !== 'checkbox' && input.type !== 'button') {
+                            input.value = '';
+                            input.dataset.prevValue = 0;
+                        }
+                    }
+                });
                 
                 if(typeof updateApSelection === 'function') updateApSelection();
                 if(typeof updateEquipoSelection === 'function') updateEquipoSelection();
 
                 if (tabId === 'Confeccion') {
-                    if (typeof window.calculateGastadoConfeccion === 'function') await window.calculateGastadoConfeccion();
+                    if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
                 }
 
                 if (tabId === 'Descarga') {
@@ -1329,8 +1331,6 @@
                             const stockEl = document.getElementById(`stock-${item}`);
                             const confEl = document.getElementById(`confeccion-${item}`);
                             if (stockEl && confEl) {
-                                // SOLUCIÓN: Como las cajas en Confección son de solo lectura, 
-                                // el Stock es la fuente de la verdad absoluta. Forzamos a copiar el valor de Stock.
                                 if (stockEl.value !== '') {
                                     confEl.value = stockEl.value;
                                 }
@@ -1403,14 +1403,13 @@
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
 
-            // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
-            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
-                alert("No se pueden registrar entradas en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
-                // Revertimos el cambio en el input
+            if (tabName !== 'Formadoras' && currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
+                alert(`Acción denegada.\nNo se pueden registrar entradas en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
                 inputEl.value = inputEl.dataset.prevValue || '';
                 return;
             }
             // --- FIN BLOQUEO ---
+            
             const prevVal = Number(inputEl.dataset.prevValue) || 0;
             const delta = newVal - prevVal; 
             
@@ -1465,12 +1464,10 @@
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
-            const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+            const dayOfWeek = now.getDay(); 
 
-            // Si intentamos modificar la semana actual un lunes o martes, lo impedimos.
-            if (currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
-                alert("No se pueden registrar consumos en la semana actual hasta el miércoles.\nLos datos mostrados son los del cierre de la semana anterior.");
-                // Revertimos el cambio en el input
+            if (tabName !== 'Formadoras' && currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
+                alert(`Acción denegada.\nNo se pueden registrar consumos en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
                 inputEl.value = inputEl.dataset.prevValue || '';
                 return;
             }
@@ -1586,7 +1583,6 @@
 
     <script>
         /* --- FUNCIONES UI GENERALES --- */
-        // Prevenir que se tecleen puntos o comas en los campos numéricos
         document.addEventListener('keydown', function(e) {
             if (e.target && e.target.type === 'number') {
                 if (e.key === '.' || e.key === ',') {
@@ -1595,7 +1591,6 @@
             }
         });
 
-        // Redondear automáticamente cualquier número decimal que se introduzca
         document.addEventListener('input', function(e) {
             if (e.target && e.target.type === 'number') {
                 if (e.target.value !== '' && e.target.value % 1 !== 0) {
@@ -1629,7 +1624,6 @@
         }
 
         function initWeeks() {
-            // La semana se actualiza visualmente los lunes, mostrando la semana real.
             const currentWeek = getISOWeek(new Date());
             const selectors = document.querySelectorAll('.week-selector');
             selectors.forEach(select => {
@@ -1730,18 +1724,42 @@
             }
         }
 
+        // --- BOTÓN MARTES (MODO FESTIVO) ---
+        window.martesUnlocked = false;
+        window.unlockMartes = function() {
+            if (!window.martesUnlocked) {
+                const confirmacion = confirm("⚠️ ATENCIÓN ⚠️\n\n¿Estás seguro de que quieres habilitar el inventario hoy martes?\nEste proceso es IRREVERSIBLE y forzará la herencia de datos de la semana pasada.");
+                if (!confirmacion) return;
+            }
+            
+            window.martesUnlocked = !window.martesUnlocked;
+            const btn = document.getElementById('btn-martes');
+            
+            if (window.martesUnlocked) {
+                btn.classList.replace('bg-purple-600', 'bg-green-600');
+                btn.classList.replace('hover:bg-purple-700', 'hover:bg-green-700');
+                btn.innerHTML = '<span>✅</span> Martes Abierto';
+                alert("¡Modo festivo activado!\nRecargando datos...");
+                if(window.currentActiveTab) window.loadTab(window.currentActiveTab);
+            } else {
+                btn.classList.replace('bg-green-600', 'bg-purple-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-purple-700');
+                btn.innerHTML = '<span>📅</span> Martes';
+                alert("Modo festivo desactivado.");
+                if(window.currentActiveTab) window.loadTab(window.currentActiveTab);
+            }
+        };
+
         // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
         async function checkLogin() {
             const pwd = document.getElementById('login-password').value;
             const errorMsg = document.getElementById('login-error');
             
             if (pwd === 'APS') {
-                // 1. Forzamos la descarga de datos ANTES de quitar la pantalla de login
                 if (typeof window.forceReloadData === 'function') {
                     await window.forceReloadData();
                 }
 
-                // 2. Quitamos la pantalla de login con la animación
                 document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
                 setTimeout(() => {
                     document.getElementById('login-screen').classList.add('hidden');
@@ -1771,7 +1789,6 @@
             if(evt) evt.currentTarget.classList.add("active");
             else document.getElementById("defaultOpen").classList.add("active");
 
-            // Si abrimos la pestaña de Gasto Promedio, forzamos a que el gráfico se dibuje
             if (tabName === 'GastoPromedio' && typeof updateChart === 'function') {
                 updateChart();
             }
@@ -1808,13 +1825,9 @@
             initChart();
             initOpacities();
             openTab(null, 'Paqueteria');
-
             window.appInitialized = true;
-            // Hemos quitado la descarga automática de pestañas aquí. 
-            // Ahora los datos SOLO se descargarán cuando se introduzca la contraseña correctamente.
         };
 
-        // --- LÓGICA DEL GRÁFICO (Pestaña 6) ---
         let gastoChartInstance = null;
 
         const subtipos = {
@@ -2038,7 +2051,6 @@
             window.hideLoading();
         }
 
-        // --- COMPORTAMIENTO DE UI MENÚS ---
         function toggleApDropdown(event) {
             document.getElementById('ap-dropdown').classList.toggle('hidden');
             if(event) event.stopPropagation();
@@ -2190,14 +2202,12 @@
                 { nombre: "TAPETA", ref: "150260862", cant: getVal('confeccion-gastado-tapeta'), sec: "Confección", agrupado: "PALET" }
             ];
 
-            // Usamos separador ";" para que Excel en español lo divida automáticamente en columnas.
             let csvContent = "hora;semana;nombre articulo;referencia;movimiento;cantidad;agrupado por:;sección;usuario;año\n";
 
             data.forEach(row => {
                 csvContent += `${hora};${semana};${row.nombre};${row.ref};SALIDA DE STOCK;${row.cant};${row.agrupado};${row.sec};APS;${ano}\n`;
             });
 
-            // \uFEFF añade el BOM para que Excel detecte tildes correctamente
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
