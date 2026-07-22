@@ -2614,19 +2614,20 @@
                         <label class="flex items-center cursor-pointer">
                             <div class="relative">
                                 <input type="checkbox" id="worker-active-${index}" class="sr-only" ${worker.active ? 'checked' : ''}>
-                                <div class="block bg-gray-300 dark:bg-gray-600 w-10 h-6 rounded-full transition-colors ${worker.active ? 'bg-blue-500' : ''}"></div>
+                                <div class="block w-10 h-6 rounded-full transition-colors ${worker.active ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}"></div>
                                 <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${worker.active ? 'transform translate-x-4' : ''}"></div>
                             </div>
-                            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Activo</span>
+                            <span id="worker-active-text-${index}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">${worker.active ? 'Activado' : 'Desactivado'}</span>
                         </label>
                     </div>
                 `;
             });
             container.innerHTML = html;
 
-            // Añadir event listeners para los toggles para que cambien de color visualmente
+            // Añadir event listeners para los toggles para que cambien de color visualmente y actualicen el texto
             workers.forEach((_, index) => {
                 const checkbox = document.getElementById(`worker-active-${index}`);
+                const textSpan = document.getElementById(`worker-active-text-${index}`);
                 if (checkbox) {
                     checkbox.addEventListener('change', function() {
                         const bg = this.nextElementSibling;
@@ -2635,10 +2636,12 @@
                             bg.classList.remove('bg-gray-300', 'dark:bg-gray-600');
                             bg.classList.add('bg-blue-500');
                             dot.classList.add('transform', 'translate-x-4');
+                            if (textSpan) textSpan.textContent = 'Activado';
                         } else {
                             bg.classList.remove('bg-blue-500');
                             bg.classList.add('bg-gray-300', 'dark:bg-gray-600');
                             dot.classList.remove('transform', 'translate-x-4');
+                            if (textSpan) textSpan.textContent = 'Desactivado';
                         }
                     });
                 }
