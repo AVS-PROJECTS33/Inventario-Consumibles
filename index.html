@@ -252,6 +252,35 @@
         </div>
     </div>
 
+    <!-- CARTEL DE INACTIVIDAD (Z-INDEX SUPERIOR) -->
+    <div id="inactivity-overlay" class="fixed inset-0 z-[70] hidden items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-6 border border-gray-200 dark:border-gray-700 max-w-md text-center">
+            <div class="text-6xl">⏱️</div>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white">SESIÓN INACTIVA</h2>
+            <p class="text-gray-500 dark:text-gray-400 font-bold">Por seguridad y para evitar conflictos de datos con otros compañeros, la sesión se ha pausado por inactividad (5 minutos).</p>
+            <button onclick="resumeSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">
+                🔄 RECARGAR DATOS Y CONTINUAR
+            </button>
+        </div>
+    </div>
+
+    <!-- NUEVO: CARTEL DE CAMBIOS SIN GUARDAR -->
+    <div id="unsaved-changes-overlay" class="fixed inset-0 z-[80] hidden items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-6 border border-gray-200 dark:border-gray-700 max-w-md text-center">
+            <div class="text-6xl">⚠️</div>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white">CAMBIOS SIN GUARDAR</h2>
+            <p class="text-gray-500 dark:text-gray-400 font-bold">Has modificado datos en esta pestaña. ¿Estás seguro que quieres cambiar de pestaña sin guardar los cambios?</p>
+            <div class="flex flex-col sm:flex-row gap-4 w-full mt-2">
+                <button onclick="discardChangesAndSwitch()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">
+                    Continuar sin guardar
+                </button>
+                <button id="btn-save-changes-modal" onclick="saveChangesAndSwitch()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">
+                    Guardar datos
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="login-screen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
         <div
@@ -1423,10 +1452,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         window.query = query;
         window.where = where;
+        window.increment = increment; // Exponemos increment globalmente para el sistema atómico
 
         const firebaseConfig = {
             apiKey: "AIzaSyBELJgC4Hw6mxKwg0GzlTNKxgTMTspndUQ",
@@ -1448,6 +1478,108 @@
         window.getDocs = getDocs;
         window.isDataLoaded = {};
         window.hasShownLowStockAlert = false;
+
+        // --- SISTEMA ATÓMICO DE ACTUALIZACIÓN DE STOCK AL GUARDAR ---
+        window.applyAtomicStockUpdates = async function(tabId, year, week) {
+            const stockUpdates = {};
+            
+            const getDelta = (inputId, divideBy = 1, isSubtract = true) => {
+                const el = document.getElementById(inputId);
+                if (!el) return 0;
+                const newVal = Number(el.value) || 0;
+                const prevVal = Number(el.dataset.prevValue) || 0;
+                const delta = (newVal - prevVal) / divideBy;
+                if (delta !== 0) {
+                    el.dataset.prevValue = newVal; // Actualizamos para que no repita el cálculo si se guarda 2 veces
+                }
+                return isSubtract ? -delta : delta;
+            };
+
+            const addUpdate = (stockKey, delta) => {
+                if (delta !== 0) {
+                    if (!stockUpdates[stockKey]) stockUpdates[stockKey] = 0;
+                    stockUpdates[stockKey] += delta;
+                }
+            };
+
+            // Mapear los cambios según la pestaña
+            if (tabId === 'Paqueteria') {
+                addUpdate('stock-precinto-logo', getDelta('paqueteria-precinto-plataforma'));
+                addUpdate('stock-precinto-blanco', getDelta('paqueteria-precinto-blanco'));
+                addUpdate('stock-etiqueta-tienda', getDelta('paqueteria-etiqueta-tienda'));
+                addUpdate('stock-matricula-cs8', getDelta('paqueteria-matricula-cs8'));
+                addUpdate('stock-bobina-800', getDelta('paqueteria-bobina-800'));
+                addUpdate('stock-bobina-1200', getDelta('paqueteria-bobina-1200'));
+            } else if (tabId === 'Confeccion') {
+                addUpdate('stock-precinto-logo', getDelta('confeccion-precinto-logo'));
+                addUpdate('stock-precinto-blanco', getDelta('confeccion-precinto-blanco'));
+                addUpdate('stock-etiqueta-tienda', getDelta('confeccion-etiqueta-tienda'));
+                addUpdate('stock-matricula-cvc1', getDelta('confeccion-matricula-cvc1'));
+                addUpdate('stock-cola', getDelta('confeccion-cola'));
+            } else if (tabId === 'Formadoras') {
+                addUpdate('stock-caja-mediana-woman', getDelta('formadora-antigua-caja-mediana-woman', 100));
+                
+                addUpdate('stock-caja-gp-woman', getDelta('formadora-nueva-caja-gp-woman', 100));
+                addUpdate('stock-caja-gp-man', getDelta('formadora-nueva-caja-gp-man', 100));
+                addUpdate('stock-caja-mediana-woman', getDelta('formadora-nueva-caja-mediana-woman', 100));
+                addUpdate('stock-caja-grande-man', getDelta('formadora-nueva-caja-grande-man', 100));
+                
+                addUpdate('stock-caja-mediana-woman', getDelta('formadora-manual-caja-mediana-woman'));
+                addUpdate('stock-caja-gp-woman', getDelta('formadora-manual-caja-gp-woman'));
+                addUpdate('stock-caja-grande-man', getDelta('formadora-manual-caja-grande-man'));
+                addUpdate('stock-caja-gp-man', getDelta('formadora-manual-caja-gp-man'));
+                addUpdate('stock-cola', getDelta('formadora-manual-cola'));
+                addUpdate('stock-tapeta', getDelta('formadora-manual-tapetas'));
+                addUpdate('stock-bobina-800', getDelta('formadora-manual-bobina-800'));
+                addUpdate('stock-bobina-1200', getDelta('formadora-manual-bobina-1200'));
+            } else if (tabId === 'Descarga') {
+                for (let i = 0; i < 10; i++) {
+                    addUpdate('stock-caja-mediana-woman', getDelta(`descarga-mediana-${i}`, 1, false));
+                    addUpdate('stock-caja-grande-man', getDelta(`descarga-grande-${i}`, 1, false));
+                    addUpdate('stock-caja-gp-woman', getDelta(`descarga-gpw-${i}`, 1, false));
+                    addUpdate('stock-caja-gp-man', getDelta(`descarga-gp-${i}`, 1, false));
+                    addUpdate('stock-tapeta', getDelta(`descarga-tapeta-${i}`, 1, false));
+                }
+            }
+
+            // Enviar a Firebase usando increment() si hay datos que actualizar
+            if (Object.keys(stockUpdates).length > 0) {
+                const stockW = document.getElementById('week-Stock').value;
+                const stockY = document.getElementById('year-Stock').value;
+                
+                const firebaseUpdates = {};
+                for (const [key, val] of Object.entries(stockUpdates)) {
+                    firebaseUpdates[key] = window.increment(val);
+                    
+                    // Actualizar también la UI visual de Stock
+                    const stockEl = document.getElementById(key);
+                    if (stockEl) {
+                        const currentStock = Number(stockEl.value) || 0;
+                        stockEl.value = Math.round(currentStock + val);
+                        
+                        // Sincronizar visualmente con Confección si procede
+                        const itemRawName = key.replace('stock-', '');
+                        const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                        if (inventoryItems.includes(itemRawName)) {
+                            const confEl = document.getElementById(`confeccion-${itemRawName}`);
+                            if (confEl) {
+                                confEl.value = Math.round(currentStock + val);
+                                if (typeof window.calculateGastadoConfeccion === 'function') {
+                                    window.calculateGastadoConfeccion();
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                try {
+                    const docRef = window.doc(window.db, 'registros_semanales', `Stock_${stockY}_${stockW}`);
+                    await window.setDoc(docRef, firebaseUpdates, { merge: true });
+                } catch(e) {
+                    console.error("Error aplicando actualizaciones atómicas de stock:", e);
+                }
+            }
+        };
 
         window.checkLowStockAlert = function () {
             const loginScreen = document.getElementById('login-screen');
@@ -1593,17 +1725,13 @@
                     if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
                 }
                 if (parseInt(year) < activeYear || (parseInt(year) === activeYear && parseInt(week) < activeWeek)) {
-                    if (tabId === 'Descarga') {
-                        alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
-                    } else {
-                        alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS GASTOS DE SEMANAS ANTERIORES");
-                    }
+                    alert(`SEMANA FINALIZADA.\n\nNO SE PUEDEN GUARDAR CAMBIOS EN SEMANAS ANTERIORES DE ${tabId.toUpperCase()}.`);
                     return;
                 }
             }
             // --- FIN BLOQUEO ---
 
-            // Bloqueo de seguridad al intentar guardar
+            // Bloqueo de seguridad al intentar guardar semana actual fuera de plazo
             if (year == realCurrentYear && week == realCurrentWeek && !window.martesUnlocked) {
                 if ((tabId === 'Confeccion' || tabId === 'Paqueteria') && dayOfWeek !== 3) {
                     alert(`Acción denegada.\nNo se pueden guardar datos en la pestaña ${tabId} de la semana actual si no es miércoles.`);
@@ -1619,18 +1747,23 @@
             btn.innerHTML = '<span>⏳</span> Guardando...';
             btn.disabled = true;
 
+            // 1. Calcular y enviar incrementos atómicos de stock
+            if (tabId === 'Paqueteria' || tabId === 'Confeccion' || tabId === 'Descarga' || tabId === 'Formadoras') {
+                await window.applyAtomicStockUpdates(tabId, year, week);
+            }
+
+            // 2. Guardar el documento propio de la pestaña actual
             await window.saveTab(tabId);
 
-            if (tabId === 'Descarga' || tabId === 'Formadoras' || tabId === 'Paqueteria') {
-                await window.saveTab('Stock');
+            // 3. Forzamos guardado de confección en paralelo (ya que es solo UI general)
+            if (tabId === 'Stock') {
                 await window.saveTab('Confeccion');
-            } else if (tabId === 'Stock') {
-                await window.saveTab('Confeccion');
-            } else if (tabId === 'Confeccion') {
-                await window.saveTab('Stock');
             }
 
             btn.innerHTML = '<span>✅</span> ¡Guardado!';
+            
+            // SE MARCA QUE YA NO HAY CAMBIOS PENDIENTES TRAS EL GUARDADO
+            window.hasUnsavedChanges = false; 
 
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
@@ -1646,6 +1779,54 @@
             const year = document.getElementById('year-' + tabId).value;
             const week = document.getElementById('week-' + tabId).value;
             const tabEl = document.getElementById(tabId);
+
+            // --- NUEVO: BLOQUEO DE SEMANA FINALIZADA EN DESCARGA Y FORMADORAS ---
+            if (tabId === 'Descarga' || tabId === 'Formadoras') {
+                const localNow = new Date();
+                let localRealWeek = getISOWeek(localNow);
+                let localRealYear = localNow.getFullYear();
+                const localDayOfWeek = localNow.getDay(); 
+
+                let activeWeek = localRealWeek;
+                let activeYear = localRealYear;
+
+                if ((localDayOfWeek === 1 || localDayOfWeek === 2) && !window.martesUnlocked) {
+                    activeWeek -= 1;
+                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+                }
+
+                let isFinalizada = false;
+                const selectedYear = parseInt(year);
+                const selectedWeek = parseInt(week);
+
+                if (selectedYear < activeYear || (selectedYear === activeYear && selectedWeek < activeWeek)) {
+                    isFinalizada = true;
+                }
+
+                const inputsToLock = document.querySelectorAll(`#${tabId} input:not(.week-selector):not(.year-selector)`);
+                
+                if (isFinalizada) {
+                    inputsToLock.forEach(input => {
+                        input.readOnly = true;
+                        input.classList.add('cursor-not-allowed', 'opacity-70');
+                        const showMsg = function(e) {
+                            alert(`SEMANA FINALIZADA.\n\nLOS DATOS DE SEMANAS ANTERIORES NO SE PUEDEN MODIFICAR EN ${tabId.toUpperCase()}.\nSI HA LLEGADO ALGO FUERA DE TIEMPO AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES.`);
+                            e.preventDefault();
+                            if(e.target) e.target.blur();
+                        };
+                        input.onclick = showMsg;
+                        input.onkeydown = showMsg;
+                    });
+                } else {
+                    inputsToLock.forEach(input => {
+                        input.readOnly = false;
+                        input.classList.remove('cursor-not-allowed', 'opacity-70');
+                        input.onclick = null;
+                        input.onkeydown = null;
+                    });
+                }
+            }
+            // --- FIN BLOQUEO ---
 
             const inputs = Array.from(tabEl.querySelectorAll('input, select, textarea')).filter(el =>
                 !el.classList.contains('week-selector') &&
@@ -1664,17 +1845,12 @@
                     if (tabId === 'Stock' && !data._herenciaAplicada) {
                         needsInheritance = true;
                     }
-                    // Si se fuerza la herencia (botón Martes), re-ejecutar aunque ya esté marcada
                     if (tabId === 'Stock' && window.forceInheritance && data._herenciaAplicada) {
-                        // Guardar backup de los datos actuales antes de forzar la herencia
                         window._stockBackupData = JSON.parse(JSON.stringify(data));
                         window._stockBackupWeek = week;
                         window._stockBackupYear = year;
-                        console.log('💾 Backup guardado antes de forzar herencia:', window._stockBackupData);
                         needsInheritance = true;
-                        // Limpiar datos numéricos para re-heredar limpiamente
                         data = { _herenciaAplicada: false };
-                        console.log('🔧 Forzando re-herencia: limpiando datos para re-heredar desde semana anterior');
                     }
                 } else {
                     if (tabId === 'Stock') {
@@ -1686,18 +1862,11 @@
                 const now = new Date();
                 const realCurrentWeek = getISOWeek(now);
                 const realCurrentYear = now.getFullYear();
-                const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+                const dayOfWeek = now.getDay(); 
 
                 let performCopy = false;
-                // La herencia se ejecuta si:
-                // 1. Se necesita herencia (no hay doc o no tiene _herenciaAplicada)
-                // 2. Es la semana actual del año actual
-                // 3. Es miércoles o posterior (dayOfWeek >= 3) O domingo (dayOfWeek === 0) O se ha activado el modo martes
                 if (needsInheritance && year == realCurrentYear && week == realCurrentWeek && (dayOfWeek >= 3 || dayOfWeek === 0 || window.martesUnlocked)) {
                     performCopy = true;
-                    console.log('🔄 Herencia: SE VA A EJECUTAR. needsInheritance=' + needsInheritance + ', dayOfWeek=' + dayOfWeek + ', martesUnlocked=' + window.martesUnlocked + ', week=' + week + ', realCurrentWeek=' + realCurrentWeek);
-                } else if (needsInheritance) {
-                    console.log('⚠️ Herencia: NO se ejecuta. year=' + year + '/' + realCurrentYear + ', week=' + week + '/' + realCurrentWeek + ', dayOfWeek=' + dayOfWeek + ', martesUnlocked=' + window.martesUnlocked);
                 }
 
                 if (performCopy) {
@@ -1709,13 +1878,11 @@
                         const prevDocRef = window.doc(window.db, 'registros_semanales', `Stock_${prevYear}_${prevWeek}`);
                         const prevDocSnap = await window.getDoc(prevDocRef);
 
-                        // Inicializar con los datos heredados
                         let inheritedData = {};
                         if (prevDocSnap.exists()) {
                             inheritedData = prevDocSnap.data();
                         }
 
-                        // Inicializar todos los campos de stock con el stock heredado
                         inputs.forEach((input, index) => {
                             if (input.type !== 'checkbox' && input.type !== 'button') {
                                 const key = input.id || `val_${index}`;
@@ -1725,142 +1892,34 @@
                             }
                         });
 
-                        // --- SUMAR ENTRADAS DE DESCARGA DE LA SEMANA ACTUAL ---
-                        try {
-                            const descDocRef = window.doc(window.db, 'registros_semanales', `Descarga_${year}_${week}`);
-                            const descDocSnap = await window.getDoc(descDocRef);
+                        // Sumas de Descarga, Restas de Formadoras, Paqueteria, Confeccion...
+                        // (Mantenido idéntico por seguridad de la herencia actual)
+                        const sources = [
+                            { table: 'Descarga', mappings: [{ k: 'stock-caja-mediana-woman', p: 'descarga-mediana-' }, { k: 'stock-caja-grande-man', p: 'descarga-grande-' }, { k: 'stock-caja-gp-woman', p: 'descarga-gpw-' }, { k: 'stock-caja-gp-man', p: 'descarga-gp-' }, { k: 'stock-tapeta', p: 'descarga-tapeta-' }], isAdd: true },
+                            { table: 'Formadoras', mappings: [{ f: 'formadora-antigua-caja-mediana-woman', s: 'stock-caja-mediana-woman', d: 100 }, { f: 'formadora-nueva-caja-gp-woman', s: 'stock-caja-gp-woman', d: 100 }, { f: 'formadora-nueva-caja-gp-man', s: 'stock-caja-gp-man', d: 100 }, { f: 'formadora-nueva-caja-mediana-woman', s: 'stock-caja-mediana-woman', d: 100 }, { f: 'formadora-nueva-caja-grande-man', s: 'stock-caja-grande-man', d: 100 }, { f: 'formadora-manual-caja-mediana-woman', s: 'stock-caja-mediana-woman', d: 1 }, { f: 'formadora-manual-caja-gp-woman', s: 'stock-caja-gp-woman', d: 1 }, { f: 'formadora-manual-caja-grande-man', s: 'stock-caja-grande-man', d: 1 }, { f: 'formadora-manual-caja-gp-man', s: 'stock-caja-gp-man', d: 1 }, { f: 'formadora-manual-cola', s: 'stock-cola', d: 1 }, { f: 'formadora-manual-tapetas', s: 'stock-tapeta', d: 1 }, { f: 'formadora-manual-bobina-800', s: 'stock-bobina-800', d: 1 }, { f: 'formadora-manual-bobina-1200', s: 'stock-bobina-1200', d: 1 }], isAdd: false },
+                            { table: 'Paqueteria', mappings: [{ f: 'paqueteria-precinto-plataforma', s: 'stock-precinto-logo', d: 1 }, { f: 'paqueteria-precinto-blanco', s: 'stock-precinto-blanco', d: 1 }, { f: 'paqueteria-etiqueta-tienda', s: 'stock-etiqueta-tienda', d: 1 }, { f: 'paqueteria-matricula-cs8', s: 'stock-matricula-cs8', d: 1 }, { f: 'paqueteria-bobina-800', s: 'stock-bobina-800', d: 1 }, { f: 'paqueteria-bobina-1200', s: 'stock-bobina-1200', d: 1 }], isAdd: false },
+                            { table: 'Confeccion', mappings: [{ f: 'confeccion-precinto-logo', s: 'stock-precinto-logo', d: 1 }, { f: 'confeccion-precinto-blanco', s: 'stock-precinto-blanco', d: 1 }, { f: 'confeccion-etiqueta-tienda', s: 'stock-etiqueta-tienda', d: 1 }, { f: 'confeccion-matricula-cvc1', s: 'stock-matricula-cvc1', d: 1 }, { f: 'confeccion-cola', s: 'stock-cola', d: 1 }], isAdd: false }
+                        ];
 
-                            if (descDocSnap.exists()) {
-                                const descData = descDocSnap.data();
-                                console.log('🔧 Herencia: Sumando entradas de Descarga de la semana actual:', descData);
-
-                                const descargaMapping = [
-                                    { stockKey: 'stock-caja-mediana-woman', prefix: 'descarga-mediana-' },
-                                    { stockKey: 'stock-caja-grande-man', prefix: 'descarga-grande-' },
-                                    { stockKey: 'stock-caja-gp-woman', prefix: 'descarga-gpw-' },
-                                    { stockKey: 'stock-caja-gp-man', prefix: 'descarga-gp-' },
-                                    { stockKey: 'stock-tapeta', prefix: 'descarga-tapeta-' }
-                                ];
-
-                                descargaMapping.forEach(({ stockKey, prefix }) => {
-                                    let totalDescarga = 0;
-                                    for (let i = 0; i < 10; i++) {
-                                        totalDescarga += Number(descData[`${prefix}${i}`]) || 0;
+                        for (const source of sources) {
+                            try {
+                                const sDoc = await window.getDoc(window.doc(window.db, 'registros_semanales', `${source.table}_${year}_${week}`));
+                                if (sDoc.exists()) {
+                                    const sData = sDoc.data();
+                                    if (source.isAdd) {
+                                        source.mappings.forEach(({ k, p }) => {
+                                            let total = 0;
+                                            for (let i = 0; i < 10; i++) total += Number(sData[`${p}${i}`]) || 0;
+                                            if (total !== 0) data[k] = Math.round((Number(data[k]) || 0) + total);
+                                        });
+                                    } else {
+                                        source.mappings.forEach(({ f, s, d }) => {
+                                            const val = Number(sData[f]) || 0;
+                                            if (val !== 0) data[s] = Math.round((Number(data[s]) || 0) - (val / d));
+                                        });
                                     }
-                                    if (totalDescarga !== 0) {
-                                        const currentStock = Number(data[stockKey]) || 0;
-                                        data[stockKey] = Math.round(currentStock + totalDescarga);
-                                        console.log(`   📈 ${stockKey}: ${currentStock} + ${totalDescarga} (de Descarga) = ${data[stockKey]}`);
-                                    }
-                                });
-                            }
-                        } catch (descError) {
-                            console.error("Error sumando entradas de Descarga durante herencia:", descError);
-                        }
-
-                        // --- RESTAR GASTOS DE FORMADORAS DE LA SEMANA ACTUAL ---
-                        try {
-                            const formDocRef = window.doc(window.db, 'registros_semanales', `Formadoras_${year}_${week}`);
-                            const formDocSnap = await window.getDoc(formDocRef);
-
-                            if (formDocSnap.exists()) {
-                                const formData = formDocSnap.data();
-                                console.log('🔧 Herencia: Restando gastos de Formadoras de la semana actual:', formData);
-
-                                const formadorasToStock = [
-                                    // Formadora Antigua (se cuenta por cajas, dividir entre 100)
-                                    { formKey: 'formadora-antigua-caja-mediana-woman', stockKey: 'stock-caja-mediana-woman', divideBy: 100 },
-                                    // Formadora Nueva (se cuenta por cajas, dividir entre 100)
-                                    { formKey: 'formadora-nueva-caja-gp-woman', stockKey: 'stock-caja-gp-woman', divideBy: 100 },
-                                    { formKey: 'formadora-nueva-caja-gp-man', stockKey: 'stock-caja-gp-man', divideBy: 100 },
-                                    { formKey: 'formadora-nueva-caja-mediana-woman', stockKey: 'stock-caja-mediana-woman', divideBy: 100 },
-                                    { formKey: 'formadora-nueva-caja-grande-man', stockKey: 'stock-caja-grande-man', divideBy: 100 },
-                                    // Gasto Manual (se cuenta por palets, sin dividir)
-                                    { formKey: 'formadora-manual-caja-mediana-woman', stockKey: 'stock-caja-mediana-woman', divideBy: 1 },
-                                    { formKey: 'formadora-manual-caja-gp-woman', stockKey: 'stock-caja-gp-woman', divideBy: 1 },
-                                    { formKey: 'formadora-manual-caja-grande-man', stockKey: 'stock-caja-grande-man', divideBy: 1 },
-                                    { formKey: 'formadora-manual-caja-gp-man', stockKey: 'stock-caja-gp-man', divideBy: 1 },
-                                    { formKey: 'formadora-manual-cola', stockKey: 'stock-cola', divideBy: 1 },
-                                    { formKey: 'formadora-manual-tapetas', stockKey: 'stock-tapeta', divideBy: 1 },
-                                    { formKey: 'formadora-manual-bobina-800', stockKey: 'stock-bobina-800', divideBy: 1 },
-                                    { formKey: 'formadora-manual-bobina-1200', stockKey: 'stock-bobina-1200', divideBy: 1 },
-                                ];
-
-                                formadorasToStock.forEach(({ formKey, stockKey, divideBy }) => {
-                                    const gastoRaw = Number(formData[formKey]) || 0;
-                                    if (gastoRaw !== 0) {
-                                        const gasto = gastoRaw / divideBy;
-                                        const currentStock = Number(data[stockKey]) || 0;
-                                        data[stockKey] = Math.round(currentStock - gasto);
-                                        console.log(`   📉 ${stockKey}: ${currentStock} - ${gasto} (de ${formKey}) = ${data[stockKey]}`);
-                                    }
-                                });
-                            }
-                        } catch (formError) {
-                            console.error("Error restando gastos de Formadoras durante herencia:", formError);
-                        }
-
-                        // --- RESTAR GASTOS DE PAQUETERIA DE LA SEMANA ACTUAL ---
-                        try {
-                            const paqDocRef = window.doc(window.db, 'registros_semanales', `Paqueteria_${year}_${week}`);
-                            const paqDocSnap = await window.getDoc(paqDocRef);
-
-                            if (paqDocSnap.exists()) {
-                                const paqData = paqDocSnap.data();
-                                console.log('🔧 Herencia: Restando gastos de Paquetería de la semana actual:', paqData);
-
-                                const paqueteriaToStock = [
-                                    { paqKey: 'paqueteria-precinto-plataforma', stockKey: 'stock-precinto-logo', divideBy: 1 },
-                                    { paqKey: 'paqueteria-precinto-blanco', stockKey: 'stock-precinto-blanco', divideBy: 1 },
-                                    { paqKey: 'paqueteria-etiqueta-tienda', stockKey: 'stock-etiqueta-tienda', divideBy: 1 },
-                                    { paqKey: 'paqueteria-matricula-cs8', stockKey: 'stock-matricula-cs8', divideBy: 1 },
-                                    { paqKey: 'paqueteria-bobina-800', stockKey: 'stock-bobina-800', divideBy: 1 },
-                                    { paqKey: 'paqueteria-bobina-1200', stockKey: 'stock-bobina-1200', divideBy: 1 },
-                                ];
-
-                                paqueteriaToStock.forEach(({ paqKey, stockKey, divideBy }) => {
-                                    const gastoRaw = Number(paqData[paqKey]) || 0;
-                                    if (gastoRaw !== 0) {
-                                        const gasto = gastoRaw / divideBy;
-                                        const currentStock = Number(data[stockKey]) || 0;
-                                        data[stockKey] = Math.round(currentStock - gasto);
-                                        console.log(`   📉 ${stockKey}: ${currentStock} - ${gasto} (de ${paqKey}) = ${data[stockKey]}`);
-                                    }
-                                });
-                            }
-                        } catch (paqError) {
-                            console.error("Error restando gastos de Paquetería durante herencia:", paqError);
-                        }
-
-                        // --- RESTAR GASTOS DE CONFECCION DE LA SEMANA ACTUAL ---
-                        try {
-                            const confDocRef = window.doc(window.db, 'registros_semanales', `Confeccion_${year}_${week}`);
-                            const confDocSnap = await window.getDoc(confDocRef);
-
-                            if (confDocSnap.exists()) {
-                                const confData = confDocSnap.data();
-                                console.log('🔧 Herencia: Restando gastos de Confección de la semana actual:', confData);
-
-                                const confeccionToStock = [
-                                    { confKey: 'confeccion-precinto-logo', stockKey: 'stock-precinto-logo', divideBy: 1 },
-                                    { confKey: 'confeccion-precinto-blanco', stockKey: 'stock-precinto-blanco', divideBy: 1 },
-                                    { confKey: 'confeccion-etiqueta-tienda', stockKey: 'stock-etiqueta-tienda', divideBy: 1 },
-                                    { confKey: 'confeccion-matricula-cvc1', stockKey: 'stock-matricula-cvc1', divideBy: 1 },
-                                    { confKey: 'confeccion-cola', stockKey: 'stock-cola', divideBy: 1 },
-                                ];
-
-                                confeccionToStock.forEach(({ confKey, stockKey, divideBy }) => {
-                                    const gastoRaw = Number(confData[confKey]) || 0;
-                                    if (gastoRaw !== 0) {
-                                        const gasto = gastoRaw / divideBy;
-                                        const currentStock = Number(data[stockKey]) || 0;
-                                        data[stockKey] = Math.round(currentStock - gasto);
-                                        console.log(`   📉 ${stockKey}: ${currentStock} - ${gasto} (de ${confKey}) = ${data[stockKey]}`);
-                                    }
-                                });
-                            }
-                        } catch (confError) {
-                            console.error("Error restando gastos de Confección durante herencia:", confError);
+                                }
+                            } catch (err) {}
                         }
 
                         data._herenciaAplicada = true;
@@ -1885,8 +1944,10 @@
                     if (val !== undefined) {
                         if (input.type === 'checkbox') input.checked = val;
                         else {
-                            input.value = val;
-                            input.dataset.prevValue = val;
+                            let displayVal = val;
+                            if (typeof val === 'number' && val % 1 !== 0) displayVal = Math.round(val);
+                            input.value = displayVal;
+                            input.dataset.prevValue = val; // Se guarda el exacto para deltas
                         }
                     } else {
                         if (input.type !== 'checkbox' && input.type !== 'button') {
@@ -1899,13 +1960,8 @@
                 if (typeof updateApSelection === 'function') updateApSelection();
                 if (typeof updateEquipoSelection === 'function') updateEquipoSelection();
 
-                if (tabId === 'Confeccion') {
-                    if (window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
-                }
-
-                if (tabId === 'Descarga') {
-                    if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
-                }
+                if (tabId === 'Confeccion' && window.loadPreviousWeekData) await window.loadPreviousWeekData('Confeccion');
+                if (tabId === 'Descarga' && typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
 
                 if (tabId === 'Stock' || tabId === 'Confeccion') {
                     const stockW = document.getElementById('week-Stock').value;
@@ -1918,10 +1974,8 @@
                         items.forEach(item => {
                             const stockEl = document.getElementById(`stock-${item}`);
                             const confEl = document.getElementById(`confeccion-${item}`);
-                            if (stockEl && confEl) {
-                                if (stockEl.value !== '') {
-                                    confEl.value = stockEl.value;
-                                }
+                            if (stockEl && confEl && stockEl.value !== '') {
+                                confEl.value = stockEl.value;
                             }
                         });
                     }
@@ -1929,65 +1983,11 @@
 
                 window.isDataLoaded[tabId] = true;
 
-                if (tabId === 'Stock' && !window.hasShownLowStockAlert) {
-                    window.checkLowStockAlert();
-                }
+                if (tabId === 'Stock' && !window.hasShownLowStockAlert) window.checkLowStockAlert();
+                if (typeof window.updateTabLockStates === 'function') window.updateTabLockStates(tabId);
 
-                if (typeof window.updateTabLockStates === 'function') {
-                    window.updateTabLockStates(tabId);
-                }
-
-                // --- NUEVO: BLOQUEO DE SEMANA FINALIZADA EN DESCARGA Y FORMADORAS ---
-                if (tabId === 'Descarga' || tabId === 'Formadoras') {
-                    const localNow = new Date();
-                    let localRealWeek = getISOWeek(localNow);
-                    let localRealYear = localNow.getFullYear();
-                    const localDayOfWeek = localNow.getDay(); 
-
-                    let activeWeek = localRealWeek;
-                    let activeYear = localRealYear;
-
-                    if ((localDayOfWeek === 1 || localDayOfWeek === 2) && !window.martesUnlocked) {
-                        activeWeek -= 1;
-                        if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
-                    }
-
-                    let isFinalizada = false;
-                    const selectedYear = parseInt(year);
-                    const selectedWeek = parseInt(week);
-
-                    if (selectedYear < activeYear || (selectedYear === activeYear && selectedWeek < activeWeek)) {
-                        isFinalizada = true;
-                    }
-
-                    const tabInputs = document.querySelectorAll(`#${tabId} input:not(.week-selector):not(.year-selector)`);
-                    
-                    if (isFinalizada) {
-                        tabInputs.forEach(input => {
-                            input.readOnly = true;
-                            input.classList.add('cursor-not-allowed', 'opacity-70');
-                            const showMsg = function(e) {
-                                if (tabId === 'Descarga') {
-                                    alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
-                                } else {
-                                    alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS DATOS DE SEMANAS ANTERIORES");
-                                }
-                                e.preventDefault();
-                                if(e.target) e.target.blur();
-                            };
-                            input.onclick = showMsg;
-                            input.onkeydown = showMsg;
-                        });
-                    } else {
-                        tabInputs.forEach(input => {
-                            input.readOnly = false;
-                            input.classList.remove('cursor-not-allowed', 'opacity-70');
-                            input.onclick = null;
-                            input.onkeydown = null;
-                        });
-                    }
-                }
-                // --- FIN BLOQUEO ---
+                // MARCAMOS QUE AL ACABAR DE CARGAR NO HAY CAMBIOS PENDIENTES
+                if (tabId === window.currentActiveTab) window.hasUnsavedChanges = false;
 
             } catch (e) {
                 console.error("Error al cargar la pestaña:", e);
@@ -2014,9 +2014,7 @@
                     try {
                         const docRef = window.doc(window.db, 'registros_semanales', `Confeccion_${stockY}_${stockW}`);
                         await window.setDoc(docRef, { [`confeccion-${item}`]: value }, { merge: true });
-                    } catch (e) {
-                        console.error("Error sincronizando confección en segundo plano:", e);
-                    }
+                    } catch (e) {}
                 }
             }
         };
@@ -2033,28 +2031,22 @@
             }
         };
 
+        // --- LAS FUNCIONES ANTIGUAS DE STOCK AHORA SOLO BLOQUEAN (LA MATEMATICA SE HACE AL GUARDAR) ---
         window.addToStock = async function (stockId, inputEl) {
             let tabName = 'Descarga';
-            const stockW = document.getElementById('week-Stock').value;
             const currentW = document.getElementById('week-' + tabName).value;
-            const stockY = document.getElementById('year-Stock').value;
             const currentY = document.getElementById('year-' + tabName).value;
-
-            const newVal = Number(inputEl.value) || 0;
-
-            // --- NUEVO BLOQUEO ---
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
-            const dayOfWeek = now.getDay(); // Dom=0, Lun=1, Mar=2, Mié=3
+            const dayOfWeek = now.getDay();
 
             if (tabName !== 'Formadoras' && currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
                 alert(`Acción denegada.\nNo se pueden registrar entradas en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
                 inputEl.value = inputEl.dataset.prevValue || '';
                 return;
             }
-            
-            // --- BLOQUEO SEMANA FINALIZADA DESCARGA ---
+
             if (tabName === 'Descarga') {
                 let activeWeek = realCurrentWeek;
                 let activeYear = realCurrentYear;
@@ -2063,64 +2055,20 @@
                     if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
                 }
                 if (parseInt(currentY) < activeYear || (parseInt(currentY) === activeYear && parseInt(currentW) < activeWeek)) {
-                    alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
+                    alert("SEMANA FINALIZADA.\n\nSI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO, AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA.");
                     inputEl.value = inputEl.dataset.prevValue || '';
                     return;
                 }
             }
-            // --- FIN BLOQUEO ---
-
-            const prevVal = Number(inputEl.dataset.prevValue) || 0;
-            const delta = newVal - prevVal;
-
-            if (delta === 0) return;
-
-            if (stockW === currentW && stockY === currentY) {
-                const stockEl = document.getElementById(stockId);
-                if (stockEl) {
-                    const currentStock = Number(stockEl.value) || 0;
-                    const newStockVal = Math.round(currentStock + delta);
-                    stockEl.value = newStockVal;
-
-                    const itemRawName = stockId.replace('stock-', '');
-                    const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
-
-                    if (inventoryItems.includes(itemRawName)) {
-                        const confEl = document.getElementById(`confeccion-${itemRawName}`);
-                        if (confEl) {
-                            confEl.value = newStockVal;
-                            if (typeof window.calculateGastadoConfeccion === 'function') {
-                                window.calculateGastadoConfeccion();
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (window.db && window.doc && window.getDoc && window.setDoc) {
-                    try {
-                        const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
-                        const docSnap = await window.getDoc(docRef);
-                        const currentStock = docSnap.exists() ? (Number(docSnap.data()[stockId]) || 0) : 0;
-                        await window.setDoc(docRef, { [stockId]: Math.round(currentStock + delta) }, { merge: true });
-                    } catch (e) {
-                        console.error("Error actualizando stock en segundo plano (suma):", e);
-                    }
-                }
-            }
-
-            inputEl.dataset.prevValue = newVal;
+            // NO ACTUALIZAR STOCK AQUI. SE HARÁ AUTOMÁTICAMENTE AL GUARDAR.
         };
 
         window.subtractFromStock = async function (stockId, inputEl, divideBy = 1) {
             let tabName = 'Confeccion';
             if (inputEl.id.startsWith('paqueteria')) tabName = 'Paqueteria';
             else if (inputEl.id.startsWith('formadora')) tabName = 'Formadoras';
-            const stockW = document.getElementById('week-Stock').value;
             const currentW = document.getElementById('week-' + tabName).value;
-            const stockY = document.getElementById('year-Stock').value;
             const currentY = document.getElementById('year-' + tabName).value;
-
-            // --- NUEVO BLOQUEO ---
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
@@ -2155,46 +2103,7 @@
             }
             // --- FIN BLOQUEO ---
 
-            const newVal = Number(inputEl.value) || 0;
-            const prevVal = Number(inputEl.dataset.prevValue) || 0;
-            const delta = (newVal - prevVal) / divideBy;
-
-            if (delta === 0) return;
-
-            if (stockW === currentW && stockY === currentY) {
-                const stockEl = document.getElementById(stockId);
-                if (stockEl) {
-                    const currentStock = Number(stockEl.value) || 0;
-                    const newStockVal = Math.round(currentStock - delta);
-                    stockEl.value = newStockVal;
-
-                    const itemRawName = stockId.replace('stock-', '');
-                    const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
-
-                    if (inventoryItems.includes(itemRawName)) {
-                        const confEl = document.getElementById(`confeccion-${itemRawName}`);
-                        if (confEl) {
-                            confEl.value = newStockVal;
-                            if (typeof window.calculateGastadoConfeccion === 'function') {
-                                window.calculateGastadoConfeccion();
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (window.db && window.doc && window.getDoc && window.setDoc) {
-                    try {
-                        const docRef = window.doc(window.db, 'registros_semanales', `Stock_${currentY}_${currentW}`);
-                        const docSnap = await window.getDoc(docRef);
-                        const currentStock = docSnap.exists() ? (Number(docSnap.data()[stockId]) || 0) : 0;
-                        await window.setDoc(docRef, { [stockId]: Math.round(currentStock - delta) }, { merge: true });
-                    } catch (e) {
-                        console.error("Error actualizando stock en segundo plano:", e);
-                    }
-                }
-            }
-
-            inputEl.dataset.prevValue = newVal;
+            // NO ACTUALIZAR STOCK AQUI. SE HARÁ AUTOMÁTICAMENTE AL GUARDAR.
         };
 
         window.calculateGastadoConfeccion = async function () {
@@ -2227,57 +2136,183 @@
                         if (docSnap.exists()) {
                             data = docSnap.data();
                         }
-                    } catch (e) {
-                        console.error("Error fetching Formadoras para Confeccion:", e);
-                    }
+                    } catch (e) { }
                 }
             }
 
             const faMediana = (Number(data['formadora-antigua-caja-mediana-woman']) || 0) / 100;
-
             const fnGpWoman = (Number(data['formadora-nueva-caja-gp-woman']) || 0) / 100;
             const fnGpMan = (Number(data['formadora-nueva-caja-gp-man']) || 0) / 100;
             const fnMediana = (Number(data['formadora-nueva-caja-mediana-woman']) || 0) / 100;
             const fnGrandeMan = (Number(data['formadora-nueva-caja-grande-man']) || 0) / 100;
-
             const manMediana = Number(data['formadora-manual-caja-mediana-woman']) || 0;
             const manGpWoman = Number(data['formadora-manual-caja-gp-woman']) || 0;
             const manGrandeMan = Number(data['formadora-manual-caja-grande-man']) || 0;
             const manGpMan = Number(data['formadora-manual-caja-gp-man']) || 0;
             const manTapetas = Number(data['formadora-manual-tapetas']) || 0;
 
-            const gastadoMedianaInput = document.getElementById('confeccion-gastado-mediana-woman');
-            if (gastadoMedianaInput) gastadoMedianaInput.value = Math.round(faMediana + fnMediana + manMediana);
-
-            const gastadoGpWomanInput = document.getElementById('confeccion-gastado-gp-woman');
-            if (gastadoGpWomanInput) gastadoGpWomanInput.value = Math.round(fnGpWoman + manGpWoman);
-
-            const gastadoGrandeManInput = document.getElementById('confeccion-gastado-grande-man');
-            if (gastadoGrandeManInput) gastadoGrandeManInput.value = Math.round(fnGrandeMan + manGrandeMan);
-
-            const gastadoGpManInput = document.getElementById('confeccion-gastado-gp-man');
-            if (gastadoGpManInput) gastadoGpManInput.value = Math.round(fnGpMan + manGpMan);
-
-            const gastadoTapetaInput = document.getElementById('confeccion-gastado-tapeta');
-            if (gastadoTapetaInput) gastadoTapetaInput.value = Math.round(manTapetas);
+            if (document.getElementById('confeccion-gastado-mediana-woman')) document.getElementById('confeccion-gastado-mediana-woman').value = Math.round(faMediana + fnMediana + manMediana);
+            if (document.getElementById('confeccion-gastado-gp-woman')) document.getElementById('confeccion-gastado-gp-woman').value = Math.round(fnGpWoman + manGpWoman);
+            if (document.getElementById('confeccion-gastado-grande-man')) document.getElementById('confeccion-gastado-grande-man').value = Math.round(fnGrandeMan + manGrandeMan);
+            if (document.getElementById('confeccion-gastado-gp-man')) document.getElementById('confeccion-gastado-gp-man').value = Math.round(fnGpMan + manGpMan);
+            if (document.getElementById('confeccion-gastado-tapeta')) document.getElementById('confeccion-gastado-tapeta').value = Math.round(manTapetas);
         };
     </script>
 
     <script>
         /* --- FUNCIONES UI GENERALES --- */
-        document.addEventListener('keydown', function (e) {
-            if (e.target && e.target.type === 'number') {
-                if (e.key === '.' || e.key === ',') {
-                    e.preventDefault();
+        
+        // --- SISTEMA DE INACTIVIDAD ---
+        let inactivityTimer;
+        const INACTIVITY_TIME = 5 * 60 * 1000; // 5 minutos
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            const loginScreen = document.getElementById('login-screen');
+            const inactivityScreen = document.getElementById('inactivity-overlay');
+            if (loginScreen && loginScreen.classList.contains('hidden') && inactivityScreen && inactivityScreen.classList.contains('hidden')) {
+                inactivityTimer = setTimeout(showInactivityScreen, INACTIVITY_TIME);
+            }
+        }
+
+        function showInactivityScreen() {
+            const overlay = document.getElementById('inactivity-overlay');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+        }
+
+        window.resumeSession = async function() {
+            const overlay = document.getElementById('inactivity-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+            await window.forceReloadData();
+            resetInactivityTimer();
+        };
+
+        ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => 
+            document.addEventListener(evt, resetInactivityTimer)
+        );
+        // ------------------------------
+
+        // --- SISTEMA DE DETECCIÓN DE CAMBIOS Y PESTAÑAS ---
+        window.currentActiveTab = 'Paqueteria';
+        window.hasUnsavedChanges = false;
+        window.pendingTabSwitch = null;
+        window.pendingTabEvent = null;
+
+        // Detecta si se teclea o se cambia algún selector (salvo los botones de ajustes y fechas de arriba)
+        document.addEventListener('input', function (e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {
+                if (!e.target.classList.contains('week-selector') && 
+                    !e.target.classList.contains('year-selector') && 
+                    e.target.id !== 'slider-main-opacity' && 
+                    e.target.id !== 'slider-card-opacity' && 
+                    e.target.id !== 'slider-brightness' &&
+                    e.target.id !== 'login-password' &&
+                    !e.target.id.startsWith('worker-')) {
+                    window.hasUnsavedChanges = true;
+                }
+            }
+        });
+        document.addEventListener('change', function (e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {
+                if (!e.target.classList.contains('week-selector') && 
+                    !e.target.classList.contains('year-selector') && 
+                    e.target.id !== 'slider-main-opacity' && 
+                    e.target.id !== 'slider-card-opacity' && 
+                    e.target.id !== 'slider-brightness' &&
+                    e.target.id !== 'login-password' &&
+                    !e.target.id.startsWith('worker-')) {
+                    window.hasUnsavedChanges = true;
                 }
             }
         });
 
-        document.addEventListener('input', function (e) {
-            if (e.target && e.target.type === 'number') {
-                if (e.target.value !== '' && e.target.value % 1 !== 0) {
-                    e.target.value = Math.round(parseFloat(e.target.value));
+        // Esta es la función original del cambio de pestañas renombrada
+        window.executeTabSwitch = function(evt, tabName) {
+            window.hasUnsavedChanges = false;
+            window.currentActiveTab = tabName;
+            const tabcontents = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontents.length; i++) tabcontents[i].style.display = "none";
+            const tablinks = document.getElementsByClassName("tablink");
+            for (let i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+
+            document.getElementById(tabName).style.display = "block";
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+            else document.getElementById("defaultOpen").classList.add("active");
+
+            if (tabName === 'GastoPromedio' && typeof updateChart === 'function') {
+                updateChart();
+            }
+        };
+
+        // Esta es la nueva función que intercepta los clics en los botones de pestañas
+        function openTab(evt, tabName) {
+            if (window.hasUnsavedChanges && window.currentActiveTab !== tabName) {
+                window.pendingTabSwitch = tabName;
+                window.pendingTabEvent = evt;
+                const overlay = document.getElementById('unsaved-changes-overlay');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
                 }
+                return;
+            }
+            window.executeTabSwitch(evt, tabName);
+        }
+
+        window.discardChangesAndSwitch = async function() {
+            const overlay = document.getElementById('unsaved-changes-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+            window.hasUnsavedChanges = false;
+            
+            // Recargar la pestaña actual borra los números sucios antes de irnos
+            if (window.currentActiveTab) {
+                await window.loadTab(window.currentActiveTab);
+            }
+            
+            window.executeTabSwitch(window.pendingTabEvent, window.pendingTabSwitch);
+        };
+
+        window.saveChangesAndSwitch = async function() {
+            const overlay = document.getElementById('unsaved-changes-overlay');
+            const currentTabId = window.currentActiveTab;
+            
+            // Buscamos el botón de guardar de la pestaña actual para poder llamarlo
+            const saveBtn = document.querySelector(`#${currentTabId} button[onclick^="saveCurrentTab"]`);
+            
+            if (saveBtn) {
+                const modalBtn = document.getElementById('btn-save-changes-modal');
+                const originalText = modalBtn.innerHTML;
+                modalBtn.innerHTML = '⏳ Guardando...';
+                modalBtn.disabled = true;
+                
+                await window.saveCurrentTab(currentTabId, saveBtn);
+                
+                modalBtn.innerHTML = originalText;
+                modalBtn.disabled = false;
+            }
+            
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+            
+            window.hasUnsavedChanges = false;
+            window.executeTabSwitch(window.pendingTabEvent, window.pendingTabSwitch);
+        };
+        // ------------------------------
+
+        document.addEventListener('keydown', function (e) {
+            if (e.target && e.target.type === 'number') {
+                if (e.key === '.' || e.key === ',') e.preventDefault();
             }
         });
 
@@ -2349,7 +2384,6 @@
             if (mainSlider) mainSlider.value = 95;
             if (cardSlider) cardSlider.value = 100;
             if (brightnessSlider) brightnessSlider.value = 100;
-
             updateOpacities();
         }
 
@@ -2361,13 +2395,10 @@
             if (mainSlider && cardSlider) {
                 const mainOp = mainSlider.value / 100;
                 const cardOp = cardSlider.value / 100;
-
                 document.documentElement.style.setProperty('--main-alpha', mainOp);
                 document.documentElement.style.setProperty('--card-alpha', cardOp);
-
                 document.getElementById('val-main-opacity').textContent = mainSlider.value + '%';
                 document.getElementById('val-card-opacity').textContent = cardSlider.value + '%';
-
                 localStorage.setItem('mainOpacity', mainSlider.value);
                 localStorage.setItem('cardOpacity', cardSlider.value);
             }
@@ -2406,14 +2437,12 @@
             }
         }
 
-        // --- BOTÓN MARTES (MODO FESTIVO) ---
         window.martesUnlocked = false;
         window.forceInheritance = false;
         window._stockBackupData = null;
         window._stockBackupWeek = null;
         window._stockBackupYear = null;
 
-        // --- FUNCIÓN PARA BLOQUEAR/DESBLOQUEAR PESTAÑAS (MIÉRCOLES/MARTES) ---
         window.updateTabLockStates = function (tabId) {
             if (tabId !== 'Confeccion' && tabId !== 'Paqueteria') return;
 
@@ -2428,24 +2457,15 @@
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
 
-            // Bloquear si es la semana y año actual, hoy no es miércoles (3) y no se ha desbloqueado el martes
             const isLocked = (year == realCurrentYear && week == realCurrentWeek && dayOfWeek !== 3 && !window.martesUnlocked);
 
-            // Elementos de Confección que son fórmulas automáticas y siempre deben estar bloqueados
             const alwaysLockedIds = [
-                'confeccion-caja-mediana-woman',
-                'confeccion-caja-gp-woman',
-                'confeccion-caja-grande-man',
-                'confeccion-caja-gp-man',
-                'confeccion-tapeta',
-                'confeccion-gastado-mediana-woman',
-                'confeccion-gastado-gp-woman',
-                'confeccion-gastado-grande-man',
-                'confeccion-gastado-gp-man',
+                'confeccion-caja-mediana-woman', 'confeccion-caja-gp-woman', 'confeccion-caja-grande-man',
+                'confeccion-caja-gp-man', 'confeccion-tapeta', 'confeccion-gastado-mediana-woman',
+                'confeccion-gastado-gp-woman', 'confeccion-gastado-grande-man', 'confeccion-gastado-gp-man',
                 'confeccion-gastado-tapeta'
             ];
 
-            // Inputs, selects y textareas (excluyendo selectores y elementos siempre bloqueados)
             const inputs = Array.from(tabEl.querySelectorAll('input, select, textarea')).filter(el =>
                 !el.classList.contains('week-selector') &&
                 !el.classList.contains('year-selector') &&
@@ -2455,11 +2475,8 @@
             inputs.forEach(input => {
                 if (input.type === 'checkbox' || input.tagName === 'SELECT') {
                     input.disabled = isLocked;
-                    if (isLocked) {
-                        input.classList.add('cursor-not-allowed', 'opacity-60');
-                    } else {
-                        input.classList.remove('cursor-not-allowed', 'opacity-60');
-                    }
+                    if (isLocked) input.classList.add('cursor-not-allowed', 'opacity-60');
+                    else input.classList.remove('cursor-not-allowed', 'opacity-60');
                 } else {
                     if (isLocked) {
                         input.readOnly = true;
@@ -2471,29 +2488,20 @@
                 }
             });
 
-            // Trigger multiselect
             const multiselectTrigger = tabEl.querySelector('.custom-multiselect > .modern-input, .custom-multiselect-equipo > .modern-input');
             if (multiselectTrigger) {
-                if (isLocked) {
-                    multiselectTrigger.classList.add('opacity-60', 'cursor-not-allowed', 'pointer-events-none');
-                } else {
-                    multiselectTrigger.classList.remove('opacity-60', 'cursor-not-allowed', 'pointer-events-none');
-                }
+                if (isLocked) multiselectTrigger.classList.add('opacity-60', 'cursor-not-allowed', 'pointer-events-none');
+                else multiselectTrigger.classList.remove('opacity-60', 'cursor-not-allowed', 'pointer-events-none');
             }
 
-            // Deshabilitar botón de guardar
             const saveBtn = tabEl.querySelector('button[onclick^="saveCurrentTab"]');
             if (saveBtn) {
                 saveBtn.disabled = isLocked;
-                if (isLocked) {
-                    saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+                if (isLocked) saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                else saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         };
 
-        // --- BOTÓN REVERTIR ---
         window.revertMartes = async function () {
             if (!window._stockBackupData) {
                 alert('No hay datos para revertir. No se ha forzado ninguna herencia en esta sesión.');
@@ -2510,11 +2518,9 @@
                 const week = window._stockBackupWeek;
                 const docRef = window.doc(window.db, 'registros_semanales', `Stock_${year}_${week}`);
 
-                // Restaurar el documento completo con los datos de backup
                 await window.setDoc(docRef, window._stockBackupData);
                 console.log('↩️ Datos de Stock revertidos a backup para semana ' + week + '/' + year);
 
-                // Desactivar modo martes
                 window.martesUnlocked = false;
                 const btnMartes = document.getElementById('btn-martes');
                 if (btnMartes) {
@@ -2523,34 +2529,29 @@
                     btnMartes.innerHTML = '<span>📅</span> Martes';
                 }
 
-                // Ocultar botón revertir
                 const btnRevertir = document.getElementById('btn-revertir-martes');
                 if (btnRevertir) btnRevertir.classList.add('hidden');
 
-                // Limpiar backup
                 window._stockBackupData = null;
                 window._stockBackupWeek = null;
                 window._stockBackupYear = null;
 
-                // Recargar todas las pestañas
                 await window.loadTab('Stock');
                 await Promise.all([
-                    window.loadTab('Confeccion'),
-                    window.loadTab('Descarga'),
-                    window.loadTab('Formadoras'),
-                    window.loadTab('Paqueteria')
+                    window.loadTab('Confeccion'), window.loadTab('Descarga'),
+                    window.loadTab('Formadoras'), window.loadTab('Paqueteria')
                 ]);
                 if (typeof window.calculateGastadoConfeccion === 'function') await window.calculateGastadoConfeccion();
                 if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
 
                 alert('✅ Datos revertidos correctamente al estado anterior.');
             } catch (e) {
-                console.error('Error al revertir:', e);
                 alert('❌ Error al revertir: ' + e.message);
             } finally {
                 window.hideLoading();
             }
         };
+
         window.unlockMartes = async function () {
             if (!window.martesUnlocked) {
                 const pwd = prompt("Introduce la contraseña para habilitar el martes:");
@@ -2570,29 +2571,21 @@
                 btn.classList.replace('bg-purple-600', 'bg-green-600');
                 btn.classList.replace('hover:bg-purple-700', 'hover:bg-green-700');
                 btn.innerHTML = '<span>✅</span> Martes Abierto';
-                // Mostrar botón de revertir
                 const btnRevertir = document.getElementById('btn-revertir-martes');
                 if (btnRevertir) btnRevertir.classList.remove('hidden');
                 alert("¡Modo festivo activado!\nRecargando datos para aplicar herencia...");
-                // Recargar PRIMERO Stock (donde vive la herencia) y luego todo lo demás
                 try {
                     window.showLoading();
-                    // Activar flag para forzar re-herencia aunque ya se haya aplicado
                     window.forceInheritance = true;
                     await window.loadTab('Stock');
                     window.forceInheritance = false;
                     await Promise.all([
-                        window.loadTab('Confeccion'),
-                        window.loadTab('Descarga'),
-                        window.loadTab('Formadoras'),
-                        window.loadTab('Paqueteria')
+                        window.loadTab('Confeccion'), window.loadTab('Descarga'),
+                        window.loadTab('Formadoras'), window.loadTab('Paqueteria')
                     ]);
                     if (typeof window.calculateGastadoConfeccion === 'function') await window.calculateGastadoConfeccion();
                     if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
-                } catch (e) {
-                    window.forceInheritance = false;
-                    console.error('Error recargando tras activar martes:', e);
-                } finally {
+                } catch (e) {} finally {
                     window.hideLoading();
                 }
             } else {
@@ -2608,7 +2601,7 @@
             }
         };
 
-        // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
+        // --- SISTEMA DE LOGIN DE PANTALLA INICIAL ---
         async function checkLogin(isAuto = false) {
             const pwd = isAuto ? localStorage.getItem('inventario_login_pwd') : document.getElementById('login-password').value;
             const errorMsg = document.getElementById('login-error');
@@ -2637,24 +2630,6 @@
             }
         }
 
-        window.currentActiveTab = 'Paqueteria';
-
-        function openTab(evt, tabName) {
-            window.currentActiveTab = tabName;
-            const tabcontents = document.getElementsByClassName("tabcontent");
-            for (let i = 0; i < tabcontents.length; i++) tabcontents[i].style.display = "none";
-            const tablinks = document.getElementsByClassName("tablink");
-            for (let i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
-
-            document.getElementById(tabName).style.display = "block";
-            if (evt) evt.currentTarget.classList.add("active");
-            else document.getElementById("defaultOpen").classList.add("active");
-
-            if (tabName === 'GastoPromedio' && typeof updateChart === 'function') {
-                updateChart();
-            }
-        }
-
         function initDescargaTable() {
             const tbody = document.getElementById('tabla-descarga-body');
             if (!tbody) return;
@@ -2679,7 +2654,6 @@
             tbody.innerHTML = html;
         }
 
-        // --- GESTIÓN DINÁMICA DE TRABAJADORES ---
         let workers = [];
 
         function initWorkers() {
@@ -2687,7 +2661,6 @@
             if (storedWorkers) {
                 workers = JSON.parse(storedWorkers);
             } else {
-                // Trabajadores por defecto
                 workers = [
                     { id: 'val_7', name: 'ALBERTO', active: true },
                     { id: 'val_8', name: 'LUIS', active: true },
@@ -2698,7 +2671,7 @@
                     { id: 'val_13', name: 'NATALIA', active: true },
                     { id: 'val_14', name: 'IVAN', active: true },
                     { id: 'val_15', name: 'CRISTINA', active: true },
-                    { id: 'val_16', name: '', active: false } // Hueco extra
+                    { id: 'val_16', name: '', active: false } 
                 ];
                 localStorage.setItem('inventario_workers', JSON.stringify(workers));
             }
@@ -2729,7 +2702,6 @@
             });
             container.innerHTML = html;
 
-            // Añadir event listeners para los toggles para que cambien de color visualmente y actualicen el texto
             workers.forEach((_, index) => {
                 const checkbox = document.getElementById(`worker-active-${index}`);
                 const textSpan = document.getElementById(`worker-active-text-${index}`);
@@ -2760,7 +2732,7 @@
                 const activeInput = document.getElementById(`worker-active-${index}`);
                 if (nameInput && activeInput) {
                     newWorkers.push({
-                        id: worker.id, // Keep the old ID or generate a generic one
+                        id: worker.id,
                         name: nameInput.value.trim().toUpperCase(),
                         active: activeInput.checked
                     });
@@ -2804,7 +2776,6 @@
                 equipoContainer.innerHTML = eqHtml;
             }
         }
-        // --- FIN GESTIÓN DINÁMICA DE TRABAJADORES ---
 
         window.onload = async function () {
             initDescargaTable();
@@ -2813,8 +2784,12 @@
             initChart();
             initOpacities();
             initWorkers();
-            openTab(null, 'Paqueteria');
+            
+            // Usamos la nueva función interna para cargar la pestaña sin activar el popup la primera vez
+            window.executeTabSwitch(null, 'Paqueteria');
             window.appInitialized = true;
+
+            resetInactivityTimer();
 
             if (localStorage.getItem('inventario_login_pwd') === 'APS') {
                 checkLogin(true);
@@ -3003,9 +2978,7 @@
                             }
                         }
                     });
-                } catch (e) {
-                    console.error("Error consultando Firebase para el gráfico:", e);
-                }
+                } catch (e) { }
             }
 
             const bgColors = {
@@ -3192,20 +3165,17 @@
             const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
 
             const data = [
-                // Paquetería
                 { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('paqueteria-precinto-plataforma'), sec: "Paquetería", agrupado: "CAJA" },
                 { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('paqueteria-precinto-blanco'), sec: "Paquetería", agrupado: "CAJA" },
                 { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('paqueteria-etiqueta-tienda'), sec: "Paquetería", agrupado: "CAJA" },
                 { nombre: "ETIQUETAS MATRICULAS CS8", ref: "150027886", cant: getVal('paqueteria-matricula-cs8'), sec: "Paquetería", agrupado: "CAJA" },
                 { nombre: "BOBINA FILM HORNOS 800", ref: "740437", cant: getVal('paqueteria-bobina-800'), sec: "Paquetería", agrupado: "UNIDAD" },
                 { nombre: "BOBINA FILM HORNOS 1200", ref: "736423", cant: getVal('paqueteria-bobina-1200'), sec: "Paquetería", agrupado: "UNIDAD" },
-                // Confección (Consumibles)
                 { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('confeccion-precinto-logo'), sec: "Confección", agrupado: "CAJA" },
                 { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('confeccion-precinto-blanco'), sec: "Confección", agrupado: "CAJA" },
                 { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('confeccion-etiqueta-tienda'), sec: "Confección", agrupado: "CAJA" },
                 { nombre: "ETIQUETAS MATRICULAS CVC1 CONF.", ref: "734659", cant: getVal('confeccion-matricula-cvc1'), sec: "Confección", agrupado: "CAJA" },
                 { nombre: "COLA FORMADORAS", ref: "736438", cant: getVal('confeccion-cola'), sec: "Confección", agrupado: "UNIDAD" },
-                // Confección (Cajas)
                 { nombre: "CAJA MEDIANA WOMAN", ref: "150293818", cant: getVal('confeccion-gastado-mediana-woman'), sec: "Confección", agrupado: "PALET" },
                 { nombre: "CAJA G/P/W (WOMAN)", ref: "150260852", cant: getVal('confeccion-gastado-gp-woman'), sec: "Confección", agrupado: "PALET" },
                 { nombre: "CAJA GRANDE MAN", ref: "150260856", cant: getVal('confeccion-gastado-grande-man'), sec: "Confección", agrupado: "PALET" },
