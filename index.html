@@ -1584,6 +1584,25 @@
             const year = document.getElementById('year-' + tabId).value;
             const week = document.getElementById('week-' + tabId).value;
 
+            // --- BLOQUEO SEMANA FINALIZADA DESCARGA Y FORMADORAS ---
+            if (tabId === 'Descarga' || tabId === 'Formadoras') {
+                let activeWeek = realCurrentWeek;
+                let activeYear = realCurrentYear;
+                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
+                    activeWeek -= 1;
+                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+                }
+                if (parseInt(year) < activeYear || (parseInt(year) === activeYear && parseInt(week) < activeWeek)) {
+                    if (tabId === 'Descarga') {
+                        alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
+                    } else {
+                        alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS GASTOS DE SEMANAS ANTERIORES");
+                    }
+                    return;
+                }
+            }
+            // --- FIN BLOQUEO ---
+
             // Bloqueo de seguridad al intentar guardar
             if (year == realCurrentYear && week == realCurrentWeek && !window.martesUnlocked) {
                 if ((tabId === 'Confeccion' || tabId === 'Paqueteria') && dayOfWeek !== 3) {
@@ -1917,6 +1936,59 @@
                 if (typeof window.updateTabLockStates === 'function') {
                     window.updateTabLockStates(tabId);
                 }
+
+                // --- NUEVO: BLOQUEO DE SEMANA FINALIZADA EN DESCARGA Y FORMADORAS ---
+                if (tabId === 'Descarga' || tabId === 'Formadoras') {
+                    const localNow = new Date();
+                    let localRealWeek = getISOWeek(localNow);
+                    let localRealYear = localNow.getFullYear();
+                    const localDayOfWeek = localNow.getDay(); 
+
+                    let activeWeek = localRealWeek;
+                    let activeYear = localRealYear;
+
+                    if ((localDayOfWeek === 1 || localDayOfWeek === 2) && !window.martesUnlocked) {
+                        activeWeek -= 1;
+                        if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+                    }
+
+                    let isFinalizada = false;
+                    const selectedYear = parseInt(year);
+                    const selectedWeek = parseInt(week);
+
+                    if (selectedYear < activeYear || (selectedYear === activeYear && selectedWeek < activeWeek)) {
+                        isFinalizada = true;
+                    }
+
+                    const tabInputs = document.querySelectorAll(`#${tabId} input:not(.week-selector):not(.year-selector)`);
+                    
+                    if (isFinalizada) {
+                        tabInputs.forEach(input => {
+                            input.readOnly = true;
+                            input.classList.add('cursor-not-allowed', 'opacity-70');
+                            const showMsg = function(e) {
+                                if (tabId === 'Descarga') {
+                                    alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
+                                } else {
+                                    alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS DATOS DE SEMANAS ANTERIORES");
+                                }
+                                e.preventDefault();
+                                if(e.target) e.target.blur();
+                            };
+                            input.onclick = showMsg;
+                            input.onkeydown = showMsg;
+                        });
+                    } else {
+                        tabInputs.forEach(input => {
+                            input.readOnly = false;
+                            input.classList.remove('cursor-not-allowed', 'opacity-70');
+                            input.onclick = null;
+                            input.onkeydown = null;
+                        });
+                    }
+                }
+                // --- FIN BLOQUEO ---
+
             } catch (e) {
                 console.error("Error al cargar la pestaña:", e);
                 window.isDataLoaded[tabId] = true;
@@ -1980,6 +2052,21 @@
                 alert(`Acción denegada.\nNo se pueden registrar entradas en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
                 inputEl.value = inputEl.dataset.prevValue || '';
                 return;
+            }
+            
+            // --- BLOQUEO SEMANA FINALIZADA DESCARGA ---
+            if (tabName === 'Descarga') {
+                let activeWeek = realCurrentWeek;
+                let activeYear = realCurrentYear;
+                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
+                    activeWeek -= 1;
+                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+                }
+                if (parseInt(currentY) < activeYear || (parseInt(currentY) === activeYear && parseInt(currentW) < activeWeek)) {
+                    alert("SEMANA FINALIZADA , SI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO , AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES DE ( SEMANA ANTERIOR)");
+                    inputEl.value = inputEl.dataset.prevValue || '';
+                    return;
+                }
             }
             // --- FIN BLOQUEO ---
 
@@ -2047,6 +2134,21 @@
                 }
                 if (tabName !== 'Confeccion' && tabName !== 'Paqueteria' && dayOfWeek < 3) {
                     alert(`Acción denegada.\nNo se pueden registrar consumos en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
+                    inputEl.value = inputEl.dataset.prevValue || '';
+                    return;
+                }
+            }
+            
+            // --- BLOQUEO SEMANA FINALIZADA FORMADORAS ---
+            if (tabName === 'Formadoras') {
+                let activeWeek = realCurrentWeek;
+                let activeYear = realCurrentYear;
+                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
+                    activeWeek -= 1;
+                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+                }
+                if (parseInt(currentY) < activeYear || (parseInt(currentY) === activeYear && parseInt(currentW) < activeWeek)) {
+                    alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS DATOS DE SEMANAS ANTERIORES");
                     inputEl.value = inputEl.dataset.prevValue || '';
                     return;
                 }
@@ -2507,11 +2609,12 @@
         };
 
         // --- SISTEMA DE LOGIN Y BLOQUEO DE STOCK ---
-        async function checkLogin() {
-            const pwd = document.getElementById('login-password').value;
+        async function checkLogin(isAuto = false) {
+            const pwd = isAuto ? localStorage.getItem('inventario_login_pwd') : document.getElementById('login-password').value;
             const errorMsg = document.getElementById('login-error');
 
             if (pwd === 'APS') {
+                if (!isAuto) localStorage.setItem('inventario_login_pwd', 'APS');
                 if (typeof window.forceReloadData === 'function') {
                     await window.forceReloadData();
                 }
@@ -2527,8 +2630,10 @@
                     }
                 }, 300);
             } else {
-                errorMsg.classList.remove('opacity-0');
-                setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+                if (!isAuto) {
+                    errorMsg.classList.remove('opacity-0');
+                    setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+                }
             }
         }
 
@@ -2710,6 +2815,10 @@
             initWorkers();
             openTab(null, 'Paqueteria');
             window.appInitialized = true;
+
+            if (localStorage.getItem('inventario_login_pwd') === 'APS') {
+                checkLogin(true);
+            }
         };
 
         let gastoChartInstance = null;
