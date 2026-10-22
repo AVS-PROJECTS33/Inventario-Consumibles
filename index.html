@@ -7,6 +7,8 @@
     <title>Panel de Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -1060,9 +1062,9 @@
                             class="bg-[#ED7D31] hover:bg-[#d66f2a] text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
                             <span>💾</span> Guardar
                         </button>
-                        <button id="btn-download-csv" onclick="downloadCSVReport()"
+                        <button id="btn-download-info" onclick="downloadInformacionPDF()"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors w-full sm:w-auto justify-center shadow-md">
-                            <span>📥</span> Descargar CSV
+                            <span>📄</span> Descarga Información
                         </button>
                         <button id="btn-unlock-stock" onclick="toggleStockLock()"
                             class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 w-full sm:w-auto justify-center">
@@ -1716,11 +1718,19 @@
             const year = document.getElementById('year-' + tabId).value;
             const week = document.getElementById('week-' + tabId).value;
 
-            // --- BLOQUEO SEMANA FINALIZADA DESCARGA Y FORMADORAS ---
-            if (tabId === 'Descarga' || tabId === 'Formadoras') {
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+
+            // 1. Bloqueo de seguridad: la semana actual empieza el miércoles, hasta el miércoles no se puede escribir ni guardar en ningún sitio
+            if (year == realCurrentYear && week == realCurrentWeek && isBeforeWednesday) {
+                alert(`Acción denegada.\n\nLa semana actual comienza el miércoles.\nNo se pueden guardar datos en la pestaña ${tabId.toUpperCase()} de la semana actual hasta el miércoles.`);
+                return;
+            }
+
+            // 2. Bloqueo de semanas anteriores (finalizadas) en todas las pestañas de registro
+            if (tabId === 'Descarga' || tabId === 'Formadoras' || tabId === 'Paqueteria' || tabId === 'Confeccion') {
                 let activeWeek = realCurrentWeek;
                 let activeYear = realCurrentYear;
-                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
+                if (isBeforeWednesday) {
                     activeWeek -= 1;
                     if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
                 }
@@ -1729,18 +1739,11 @@
                     return;
                 }
             }
-            // --- FIN BLOQUEO ---
 
-            // Bloqueo de seguridad al intentar guardar semana actual fuera de plazo
-            if (year == realCurrentYear && week == realCurrentWeek && !window.martesUnlocked) {
-                if ((tabId === 'Confeccion' || tabId === 'Paqueteria') && dayOfWeek !== 3) {
-                    alert(`Acción denegada.\nNo se pueden guardar datos en la pestaña ${tabId} de la semana actual si no es miércoles.`);
-                    return;
-                }
-                if (tabId !== 'Formadoras' && tabId !== 'Confeccion' && tabId !== 'Paqueteria' && dayOfWeek < 3) {
-                    alert(`Acción denegada.\nNo se pueden guardar datos en la pestaña ${tabId} de la semana actual hasta el miércoles.`);
-                    return;
-                }
+            // 3. Bloqueo de semanas futuras
+            if (parseInt(year) > realCurrentYear || (parseInt(year) === realCurrentYear && parseInt(week) > realCurrentWeek)) {
+                alert(`Acción denegada.\n\nNo se pueden guardar datos de semanas futuras en la pestaña ${tabId.toUpperCase()}.`);
+                return;
             }
 
             const originalHTML = btn.innerHTML;
@@ -1780,37 +1783,45 @@
             const week = document.getElementById('week-' + tabId).value;
             const tabEl = document.getElementById(tabId);
 
-            // --- NUEVO: BLOQUEO DE SEMANA FINALIZADA EN DESCARGA Y FORMADORAS ---
+            // --- BLOQUEO SEMANA FINALIZADA Y SEMANA ACTUAL FUERA DE PLAZO EN DESCARGA Y FORMADORAS ---
             if (tabId === 'Descarga' || tabId === 'Formadoras') {
                 const localNow = new Date();
                 let localRealWeek = getISOWeek(localNow);
                 let localRealYear = localNow.getFullYear();
                 const localDayOfWeek = localNow.getDay(); 
+                const isBeforeWednesday = (localDayOfWeek === 1 || localDayOfWeek === 2) && !window.martesUnlocked;
 
                 let activeWeek = localRealWeek;
                 let activeYear = localRealYear;
-
-                if ((localDayOfWeek === 1 || localDayOfWeek === 2) && !window.martesUnlocked) {
+                if (isBeforeWednesday) {
                     activeWeek -= 1;
                     if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
                 }
 
-                let isFinalizada = false;
+                let isBlocked = false;
+                let blockMsg = '';
                 const selectedYear = parseInt(year);
                 const selectedWeek = parseInt(week);
 
-                if (selectedYear < activeYear || (selectedYear === activeYear && selectedWeek < activeWeek)) {
-                    isFinalizada = true;
+                if (selectedYear === localRealYear && selectedWeek === localRealWeek && isBeforeWednesday) {
+                    isBlocked = true;
+                    blockMsg = `SEMANA NO INICIADA.\n\nLa semana actual comienza el miércoles. No se pueden registrar datos en ${tabId.toUpperCase()} hasta el miércoles.`;
+                } else if (selectedYear < activeYear || (selectedYear === activeYear && selectedWeek < activeWeek)) {
+                    isBlocked = true;
+                    blockMsg = `SEMANA FINALIZADA.\n\nLOS DATOS DE SEMANAS ANTERIORES NO SE PUEDEN MODIFICAR EN ${tabId.toUpperCase()}.\nSI HA LLEGADO ALGO FUERA DE TIEMPO AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES.`;
+                } else if (selectedYear > localRealYear || (selectedYear === localRealYear && selectedWeek > localRealWeek)) {
+                    isBlocked = true;
+                    blockMsg = `SEMANA FUTURA.\n\nNo se pueden registrar datos de semanas futuras en ${tabId.toUpperCase()}.`;
                 }
 
                 const inputsToLock = document.querySelectorAll(`#${tabId} input:not(.week-selector):not(.year-selector)`);
                 
-                if (isFinalizada) {
+                if (isBlocked) {
                     inputsToLock.forEach(input => {
                         input.readOnly = true;
                         input.classList.add('cursor-not-allowed', 'opacity-70');
                         const showMsg = function(e) {
-                            alert(`SEMANA FINALIZADA.\n\nLOS DATOS DE SEMANAS ANTERIORES NO SE PUEDEN MODIFICAR EN ${tabId.toUpperCase()}.\nSI HA LLEGADO ALGO FUERA DE TIEMPO AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA EN OBSERVACIONES.`);
+                            alert(blockMsg);
                             e.preventDefault();
                             if(e.target) e.target.blur();
                         };
@@ -1824,6 +1835,13 @@
                         input.onclick = null;
                         input.onkeydown = null;
                     });
+                }
+
+                const saveBtn = document.querySelector(`#${tabId} button[onclick^="saveCurrentTab"]`);
+                if (saveBtn) {
+                    saveBtn.disabled = isBlocked;
+                    if (isBlocked) saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    else saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             }
             // --- FIN BLOQUEO ---
@@ -1983,7 +2001,10 @@
 
                 window.isDataLoaded[tabId] = true;
 
-                if (tabId === 'Stock' && !window.hasShownLowStockAlert) window.checkLowStockAlert();
+                if (tabId === 'Stock') {
+                    if (!window.hasShownLowStockAlert) window.checkLowStockAlert();
+                    if (typeof window.updateDownloadInfoButtonState === 'function') window.updateDownloadInfoButtonState();
+                }
                 if (typeof window.updateTabLockStates === 'function') window.updateTabLockStates(tabId);
 
                 // MARCAMOS QUE AL ACABAR DE CARGAR NO HAY CAMBIOS PENDIENTES
@@ -2041,19 +2062,21 @@
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
 
-            if (tabName !== 'Formadoras' && currentY == realCurrentYear && currentW == realCurrentWeek && dayOfWeek < 3 && !window.martesUnlocked) {
-                alert(`Acción denegada.\nNo se pueden registrar entradas en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+            let activeWeek = realCurrentWeek;
+            let activeYear = realCurrentYear;
+            if (isBeforeWednesday) {
+                activeWeek -= 1;
+                if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+            }
+
+            if (currentY == realCurrentYear && currentW == realCurrentWeek && isBeforeWednesday) {
+                alert(`Acción denegada.\n\nLa semana actual comienza el miércoles.\nNo se pueden registrar entradas en la pestaña ${tabName} hasta el miércoles.`);
                 inputEl.value = inputEl.dataset.prevValue || '';
                 return;
             }
 
             if (tabName === 'Descarga') {
-                let activeWeek = realCurrentWeek;
-                let activeYear = realCurrentYear;
-                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
-                    activeWeek -= 1;
-                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
-                }
                 if (parseInt(currentY) < activeYear || (parseInt(currentY) === activeYear && parseInt(currentW) < activeWeek)) {
                     alert("SEMANA FINALIZADA.\n\nSI HA LLEGADO UN CAMIÓN FUERA DE TIEMPO, AÑADIRLO EN LA SEMANA ACTUAL CON UNA NOTA.");
                     inputEl.value = inputEl.dataset.prevValue || '';
@@ -2067,39 +2090,33 @@
             let tabName = 'Confeccion';
             if (inputEl.id.startsWith('paqueteria')) tabName = 'Paqueteria';
             else if (inputEl.id.startsWith('formadora')) tabName = 'Formadoras';
-            const currentW = document.getElementById('week-' + tabName).value;
-            const currentY = document.getElementById('year-' + tabName).value;
+            const currentW = parseInt(document.getElementById('week-' + tabName).value);
+            const currentY = parseInt(document.getElementById('year-' + tabName).value);
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
 
-            if (tabName !== 'Formadoras' && currentY == realCurrentYear && currentW == realCurrentWeek && !window.martesUnlocked) {
-                if ((tabName === 'Confeccion' || tabName === 'Paqueteria') && dayOfWeek !== 3) {
-                    alert(`Acción denegada.\nNo se pueden registrar consumos en la pestaña ${tabName} de la semana actual si no es miércoles.`);
-                    inputEl.value = inputEl.dataset.prevValue || '';
-                    return;
-                }
-                if (tabName !== 'Confeccion' && tabName !== 'Paqueteria' && dayOfWeek < 3) {
-                    alert(`Acción denegada.\nNo se pueden registrar consumos en la pestaña ${tabName} de la semana actual hasta el miércoles.`);
-                    inputEl.value = inputEl.dataset.prevValue || '';
-                    return;
-                }
+            let activeWeek = realCurrentWeek;
+            let activeYear = realCurrentYear;
+            if (isBeforeWednesday) {
+                activeWeek -= 1;
+                if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
             }
-            
-            // --- BLOQUEO SEMANA FINALIZADA FORMADORAS ---
-            if (tabName === 'Formadoras') {
-                let activeWeek = realCurrentWeek;
-                let activeYear = realCurrentYear;
-                if ((dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked) {
-                    activeWeek -= 1;
-                    if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
-                }
-                if (parseInt(currentY) < activeYear || (parseInt(currentY) === activeYear && parseInt(currentW) < activeWeek)) {
-                    alert("SEMANA FINALIZADA , NO SE PUEDEN MODIFICAR LOS DATOS DE SEMANAS ANTERIORES");
-                    inputEl.value = inputEl.dataset.prevValue || '';
-                    return;
-                }
+
+            // Bloqueo semana actual antes del miércoles en cualquier pestaña
+            if (currentY === realCurrentYear && currentW === realCurrentWeek && isBeforeWednesday) {
+                alert(`Acción denegada.\n\nLa semana actual comienza el miércoles.\nNo se pueden registrar datos en la pestaña ${tabName} hasta el miércoles.`);
+                inputEl.value = inputEl.dataset.prevValue || '';
+                return;
+            }
+
+            // --- BLOQUEO SEMANA FINALIZADA (SEMANAS ANTERIORES) ---
+            if (currentY < activeYear || (currentY === activeYear && currentW < activeWeek)) {
+                alert(`SEMANA FINALIZADA.\n\nNO SE PUEDEN MODIFICAR LOS DATOS DE SEMANAS ANTERIORES EN ${tabName.toUpperCase()}.`);
+                inputEl.value = inputEl.dataset.prevValue || '';
+                return;
             }
             // --- FIN BLOQUEO ---
 
@@ -2245,6 +2262,14 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
             else document.getElementById("defaultOpen").classList.add("active");
 
+            if (typeof window.updateTabLockStates === 'function' && (tabName === 'Confeccion' || tabName === 'Paqueteria')) {
+                window.updateTabLockStates(tabName);
+            }
+
+            if (tabName === 'Stock' && typeof window.updateDownloadInfoButtonState === 'function') {
+                window.updateDownloadInfoButtonState();
+            }
+
             if (tabName === 'GastoPromedio' && typeof updateChart === 'function') {
                 updateChart();
             }
@@ -2352,6 +2377,7 @@
                 select.innerHTML = optionsHTML;
             });
             updateRangoSemana(currentWeek);
+            if (typeof window.updateDownloadInfoButtonState === 'function') window.updateDownloadInfoButtonState();
         }
 
         function initYears() {
@@ -2449,15 +2475,36 @@
             const tabEl = document.getElementById(tabId);
             if (!tabEl) return;
 
-            const year = document.getElementById('year-' + tabId).value;
-            const week = document.getElementById('week-' + tabId).value;
+            const year = parseInt(document.getElementById('year-' + tabId).value);
+            const week = parseInt(document.getElementById('week-' + tabId).value);
 
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
 
-            const isLocked = (year == realCurrentYear && week == realCurrentWeek && dayOfWeek !== 3 && !window.martesUnlocked);
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+
+            let activeWeek = realCurrentWeek;
+            let activeYear = realCurrentYear;
+            if (isBeforeWednesday) {
+                activeWeek -= 1;
+                if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+            }
+
+            let isLocked = false;
+            let lockMsg = '';
+
+            if (year === realCurrentYear && week === realCurrentWeek && isBeforeWednesday) {
+                isLocked = true;
+                lockMsg = `SEMANA NO INICIADA.\n\nLa semana actual comienza el miércoles. No se pueden modificar ni guardar datos en ${tabId.toUpperCase()} hasta el miércoles.`;
+            } else if (year < activeYear || (year === activeYear && week < activeWeek)) {
+                isLocked = true;
+                lockMsg = `SEMANA FINALIZADA.\n\nLOS DATOS DE SEMANAS ANTERIORES NO SE PUEDEN MODIFICAR EN ${tabId.toUpperCase()}.`;
+            } else if (year > realCurrentYear || (year === realCurrentYear && week > realCurrentWeek)) {
+                isLocked = true;
+                lockMsg = `SEMANA FUTURA.\n\nNo se pueden modificar ni guardar datos de semanas futuras en ${tabId.toUpperCase()}.`;
+            }
 
             const alwaysLockedIds = [
                 'confeccion-caja-mediana-woman', 'confeccion-caja-gp-woman', 'confeccion-caja-grande-man',
@@ -2481,9 +2528,18 @@
                     if (isLocked) {
                         input.readOnly = true;
                         input.classList.add('cursor-not-allowed', 'opacity-60');
+                        const showMsg = function (e) {
+                            alert(lockMsg);
+                            e.preventDefault();
+                            if (e.target) e.target.blur();
+                        };
+                        input.onclick = showMsg;
+                        input.onkeydown = showMsg;
                     } else {
                         input.readOnly = false;
                         input.classList.remove('cursor-not-allowed', 'opacity-60');
+                        input.onclick = null;
+                        input.onkeydown = null;
                     }
                 }
             });
@@ -2587,6 +2643,7 @@
                     if (typeof window.calculateFaltaPorLlegar === 'function') window.calculateFaltaPorLlegar();
                 } catch (e) {} finally {
                     window.hideLoading();
+                    if (typeof window.updateDownloadInfoButtonState === 'function') window.updateDownloadInfoButtonState();
                 }
             } else {
                 btn.classList.replace('bg-green-600', 'bg-purple-600');
@@ -2597,6 +2654,9 @@
                 if (typeof window.updateTabLockStates === 'function') {
                     window.updateTabLockStates('Confeccion');
                     window.updateTabLockStates('Paqueteria');
+                }
+                if (typeof window.updateDownloadInfoButtonState === 'function') {
+                    window.updateDownloadInfoButtonState();
                 }
             }
         };
@@ -3018,13 +3078,22 @@
         }
 
         function toggleApDropdown(event) {
-            const year = document.getElementById('year-Paqueteria').value;
-            const week = document.getElementById('week-Paqueteria').value;
+            const year = parseInt(document.getElementById('year-Paqueteria').value);
+            const week = parseInt(document.getElementById('week-Paqueteria').value);
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
-            if (year == realCurrentYear && week == realCurrentWeek && dayOfWeek !== 3 && !window.martesUnlocked) {
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+            let activeWeek = realCurrentWeek;
+            let activeYear = realCurrentYear;
+            if (isBeforeWednesday) {
+                activeWeek -= 1;
+                if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+            }
+            if ((year === realCurrentYear && week === realCurrentWeek && isBeforeWednesday) ||
+                (year < activeYear || (year === activeYear && week < activeWeek)) ||
+                (year > realCurrentYear || (year === realCurrentYear && week > realCurrentWeek))) {
                 return;
             }
             document.getElementById('ap-dropdown').classList.toggle('hidden');
@@ -3044,13 +3113,22 @@
         }
 
         function toggleEquipoDropdown(event) {
-            const year = document.getElementById('year-Confeccion').value;
-            const week = document.getElementById('week-Confeccion').value;
+            const year = parseInt(document.getElementById('year-Confeccion').value);
+            const week = parseInt(document.getElementById('week-Confeccion').value);
             const now = new Date();
             const realCurrentWeek = getISOWeek(now);
             const realCurrentYear = now.getFullYear();
             const dayOfWeek = now.getDay();
-            if (year == realCurrentYear && week == realCurrentWeek && dayOfWeek !== 3 && !window.martesUnlocked) {
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+            let activeWeek = realCurrentWeek;
+            let activeYear = realCurrentYear;
+            if (isBeforeWednesday) {
+                activeWeek -= 1;
+                if (activeWeek < 1) { activeWeek = 52; activeYear -= 1; }
+            }
+            if ((year === realCurrentYear && week === realCurrentWeek && isBeforeWednesday) ||
+                (year < activeYear || (year === activeYear && week < activeWeek)) ||
+                (year > realCurrentYear || (year === realCurrentYear && week > realCurrentWeek))) {
                 return;
             }
             document.getElementById('equipo-dropdown').classList.toggle('hidden');
@@ -3152,67 +3230,474 @@
             });
         }
 
-        window.downloadCSVReport = function () {
-            const getVal = (id) => {
-                const el = document.getElementById(id);
-                return el && el.value !== '' ? el.value : "0";
-            };
+        window.updateDownloadInfoButtonState = function () {
+            const btn = document.getElementById('btn-download-info');
+            if (!btn) return;
 
-            const semana = document.getElementById('week-Stock') ? document.getElementById('week-Stock').value : '';
-            const ano = document.getElementById('year-Stock') ? document.getElementById('year-Stock').value : new Date().getFullYear();
+            const weekEl = document.getElementById('week-Stock');
+            const yearEl = document.getElementById('year-Stock');
+            const week = weekEl ? parseInt(weekEl.value) : (typeof getISOWeek === 'function' ? getISOWeek(new Date()) : 1);
+            const year = yearEl ? parseInt(yearEl.value) : new Date().getFullYear();
 
-            const ahora = new Date();
-            const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+            const now = new Date();
+            const realCurrentWeek = typeof getISOWeek === 'function' ? getISOWeek(now) : 1;
+            const realCurrentYear = now.getFullYear();
+            const dayOfWeek = now.getDay();
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
 
-            const data = [
-                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('paqueteria-precinto-plataforma'), sec: "Paquetería", agrupado: "CAJA" },
-                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('paqueteria-precinto-blanco'), sec: "Paquetería", agrupado: "CAJA" },
-                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('paqueteria-etiqueta-tienda'), sec: "Paquetería", agrupado: "CAJA" },
-                { nombre: "ETIQUETAS MATRICULAS CS8", ref: "150027886", cant: getVal('paqueteria-matricula-cs8'), sec: "Paquetería", agrupado: "CAJA" },
-                { nombre: "BOBINA FILM HORNOS 800", ref: "740437", cant: getVal('paqueteria-bobina-800'), sec: "Paquetería", agrupado: "UNIDAD" },
-                { nombre: "BOBINA FILM HORNOS 1200", ref: "736423", cant: getVal('paqueteria-bobina-1200'), sec: "Paquetería", agrupado: "UNIDAD" },
-                { nombre: "PRECINTO CARRUSEL PLATAFORMA LOGO", ref: "700288", cant: getVal('confeccion-precinto-logo'), sec: "Confección", agrupado: "CAJA" },
-                { nombre: "PRECINTO BLANCO", ref: "150022299", cant: getVal('confeccion-precinto-blanco'), sec: "Confección", agrupado: "CAJA" },
-                { nombre: "ETIQUETAS BLANCAS (120X70)", ref: "700292", cant: getVal('confeccion-etiqueta-tienda'), sec: "Confección", agrupado: "CAJA" },
-                { nombre: "ETIQUETAS MATRICULAS CVC1 CONF.", ref: "734659", cant: getVal('confeccion-matricula-cvc1'), sec: "Confección", agrupado: "CAJA" },
-                { nombre: "COLA FORMADORAS", ref: "736438", cant: getVal('confeccion-cola'), sec: "Confección", agrupado: "UNIDAD" },
-                { nombre: "CAJA MEDIANA WOMAN", ref: "150293818", cant: getVal('confeccion-gastado-mediana-woman'), sec: "Confección", agrupado: "PALET" },
-                { nombre: "CAJA G/P/W (WOMAN)", ref: "150260852", cant: getVal('confeccion-gastado-gp-woman'), sec: "Confección", agrupado: "PALET" },
-                { nombre: "CAJA GRANDE MAN", ref: "150260856", cant: getVal('confeccion-gastado-grande-man'), sec: "Confección", agrupado: "PALET" },
-                { nombre: "CAJA GP MAN", ref: "150260855", cant: getVal('confeccion-gastado-gp-man'), sec: "Confección", agrupado: "PALET" },
-                { nombre: "TAPETA", ref: "150260862", cant: getVal('confeccion-gastado-tapeta'), sec: "Confección", agrupado: "PALET" }
-            ];
+            let isLocked = false;
+            let lockTitle = 'Descargar informe semanal en PDF';
 
-            let csvContent = "hora;semana;nombre articulo;referencia;movimiento;cantidad;agrupado por:;sección;usuario;año\n";
+            if (year === realCurrentYear && week === realCurrentWeek && isBeforeWednesday) {
+                isLocked = true;
+                lockTitle = 'El informe de la semana actual se habilitará el miércoles.';
+            } else if (year > realCurrentYear || (year === realCurrentYear && week > realCurrentWeek)) {
+                isLocked = true;
+                lockTitle = 'Semana futura: informe no disponible.';
+            }
 
-            data.forEach(row => {
-                csvContent += `${hora};${semana};${row.nombre};${row.ref};SALIDA DE STOCK;${row.cant};${row.agrupado};${row.sec};APS;${ano}\n`;
-            });
-
-            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Gasto_Consumibles_Semana_${semana}.csv`);
-            link.style.visibility = 'hidden';
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            const btn = document.getElementById('btn-download-csv');
-            if (btn) {
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<span>✅</span> ¡Descargado!';
-                btn.classList.replace('bg-indigo-600', 'bg-green-600');
-                btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.classList.replace('bg-green-600', 'bg-indigo-600');
-                    btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
-                }, 2000);
+            btn.disabled = isLocked;
+            if (isLocked) {
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.title = lockTitle;
+            } else {
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.title = lockTitle;
             }
         };
+
+        window.downloadInformacionPDF = async function () {
+            const btn = document.getElementById('btn-download-info');
+            if (btn && btn.disabled) {
+                alert("⚠️ SEMANA NO INICIADA.\n\nEl informe de la semana actual se habilitará el miércoles.");
+                return;
+            }
+
+            const weekEl = document.getElementById('week-Stock');
+            const yearEl = document.getElementById('year-Stock');
+            const semana = weekEl ? parseInt(weekEl.value) : (typeof getISOWeek === 'function' ? getISOWeek(new Date()) : 1);
+            const ano = yearEl ? parseInt(yearEl.value) : new Date().getFullYear();
+
+            const now = new Date();
+            const realCurrentWeek = typeof getISOWeek === 'function' ? getISOWeek(now) : 1;
+            const realCurrentYear = now.getFullYear();
+            const dayOfWeek = now.getDay();
+            const isBeforeWednesday = (dayOfWeek === 1 || dayOfWeek === 2) && !window.martesUnlocked;
+
+            if (ano === realCurrentYear && semana === realCurrentWeek && isBeforeWednesday) {
+                alert("⚠️ SEMANA NO INICIADA.\n\nEl informe de la semana actual se habilitará el miércoles.");
+                return;
+            }
+            if (ano > realCurrentYear || (ano === realCurrentYear && semana > realCurrentWeek)) {
+                alert("⚠️ SEMANA FUTURA.\n\nNo se puede generar un informe de una semana futura.");
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert("La librería jsPDF no está disponible en este momento. Comprueba la conexión a Internet.");
+                return;
+            }
+
+            const originalBtnHTML = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<span>⏳</span> Generando PDF...';
+                btn.disabled = true;
+            }
+
+            try {
+                if (typeof window.calculateGastadoConfeccion === 'function') {
+                    await window.calculateGastadoConfeccion();
+                }
+                if (typeof window.calculateFaltaPorLlegar === 'function') {
+                    window.calculateFaltaPorLlegar();
+                }
+
+                // Cargar datos remotos de Firestore por si acaso la pestaña no está activa en el DOM
+                let dbConfeccion = null, dbDescarga = null, dbStock = null, dbPaqueteria = null;
+                if (window.db && window.doc && window.getDoc) {
+                    try {
+                        const [cSnap, dSnap, sSnap, pSnap] = await Promise.all([
+                            window.getDoc(window.doc(window.db, 'registros_semanales', `Confeccion_${ano}_${semana}`)),
+                            window.getDoc(window.doc(window.db, 'registros_semanales', `Descarga_${ano}_${semana}`)),
+                            window.getDoc(window.doc(window.db, 'registros_semanales', `Stock_${ano}_${semana}`)),
+                            window.getDoc(window.doc(window.db, 'registros_semanales', `Paqueteria_${ano}_${semana}`))
+                        ]);
+                        if (cSnap.exists()) dbConfeccion = cSnap.data();
+                        if (dSnap.exists()) dbDescarga = dSnap.data();
+                        if (sSnap.exists()) dbStock = sSnap.data();
+                        if (pSnap.exists()) dbPaqueteria = pSnap.data();
+                    } catch (e) {
+                        console.warn("No se pudieron consultar datos remotos de Firestore:", e);
+                    }
+                }
+
+                const getVal = (id, dbData, fallbackKey) => {
+                    const el = document.getElementById(id);
+                    if (el && el.value !== '' && !isNaN(Number(el.value))) return Number(el.value);
+                    if (dbData) {
+                        if (dbData[id] !== undefined && !isNaN(Number(dbData[id]))) return Number(dbData[id]);
+                        if (fallbackKey && dbData[fallbackKey] !== undefined && !isNaN(Number(dbData[fallbackKey]))) return Number(dbData[fallbackKey]);
+                    }
+                    return 0;
+                };
+
+                const sumDescarga = (tipo) => {
+                    let sum = 0;
+                    for (let i = 0; i < 10; i++) {
+                        const el = document.getElementById(`descarga-${tipo}-${i}`);
+                        let val = (el && el.value !== '' && !isNaN(Number(el.value))) ? Number(el.value) : null;
+                        if (val === null && dbDescarga && dbDescarga[`descarga-${tipo}-${i}`] !== undefined) {
+                            val = Number(dbDescarga[`descarga-${tipo}-${i}`]) || 0;
+                        }
+                        sum += (val || 0);
+                    }
+                    return sum;
+                };
+
+                const semanaAnterior = semana === 1 ? 52 : semana - 1;
+
+                // Datos estructurados de Cajas y Tapetas
+                const boxes = [
+                    {
+                        nombre: "CAJA MEDIANA WOMAN",
+                        ref: "150293818",
+                        gastado: getVal('confeccion-gastado-mediana-woman', dbConfeccion),
+                        llegado: sumDescarga('mediana'),
+                        stockActual: getVal('stock-caja-mediana-woman', dbStock, 'val_10'),
+                        unidad: "PALET"
+                    },
+                    {
+                        nombre: "CAJA G/P/W (WOMAN)",
+                        ref: "150260852",
+                        gastado: getVal('confeccion-gastado-gp-woman', dbConfeccion),
+                        llegado: sumDescarga('gpw'),
+                        stockActual: getVal('stock-caja-gp-woman', dbStock, 'val_4'),
+                        unidad: "PALET"
+                    },
+                    {
+                        nombre: "CAJA GRANDE MAN",
+                        ref: "150260856",
+                        gastado: getVal('confeccion-gastado-grande-man', dbConfeccion),
+                        llegado: sumDescarga('grande'),
+                        stockActual: getVal('stock-caja-grande-man', dbStock, 'val_7'),
+                        unidad: "PALET"
+                    },
+                    {
+                        nombre: "CAJA GP MAN",
+                        ref: "150260855",
+                        gastado: getVal('confeccion-gastado-gp-man', dbConfeccion),
+                        llegado: sumDescarga('gp'),
+                        stockActual: getVal('stock-caja-gp-man', dbStock, 'val_1'),
+                        unidad: "PALET"
+                    },
+                    {
+                        nombre: "TAPETA",
+                        ref: "150260862",
+                        gastado: getVal('confeccion-gastado-tapeta', dbConfeccion),
+                        llegado: sumDescarga('tapeta'),
+                        stockActual: getVal('stock-tapeta', dbStock),
+                        unidad: "PALET"
+                    }
+                ];
+
+                boxes.forEach(b => {
+                    b.stockAnterior = Math.max(0, b.stockActual + b.gastado - b.llegado);
+                });
+
+                // Consumibles
+                const consumibles = [
+                    {
+                        nombre: "PRECINTO BLANCO",
+                        ref: "150022299",
+                        sec: "Paquetería / Confección",
+                        gastado: getVal('paqueteria-precinto-blanco', dbPaqueteria) + getVal('confeccion-precinto-blanco', dbConfeccion),
+                        stockActual: getVal('stock-precinto-blanco', dbStock, 'val_13'),
+                        unidad: "CAJA"
+                    },
+                    {
+                        nombre: "PRECINTO PLATAFORMA / LOGO",
+                        ref: "700288",
+                        sec: "Paquetería / Confección",
+                        gastado: getVal('paqueteria-precinto-plataforma', dbPaqueteria) + getVal('confeccion-precinto-logo', dbConfeccion),
+                        stockActual: getVal('stock-precinto-logo', dbStock, 'val_16'),
+                        unidad: "CAJA"
+                    },
+                    {
+                        nombre: "ETIQUETAS BLANCAS (120X70)",
+                        ref: "700292",
+                        sec: "Paquetería / Confección",
+                        gastado: getVal('paqueteria-etiqueta-tienda', dbPaqueteria) + getVal('confeccion-etiqueta-tienda', dbConfeccion),
+                        stockActual: getVal('stock-etiqueta-tienda', dbStock, 'val_19'),
+                        unidad: "CAJA"
+                    },
+                    {
+                        nombre: "ETIQUETAS MATRÍCULAS CVC1 CONF.",
+                        ref: "734659",
+                        sec: "Confección",
+                        gastado: getVal('confeccion-matricula-cvc1', dbConfeccion),
+                        stockActual: getVal('stock-matricula-cvc1', dbStock, 'val_22'),
+                        unidad: "CAJA"
+                    },
+                    {
+                        nombre: "MATRÍCULAS CS8",
+                        ref: "150027886",
+                        sec: "Paquetería",
+                        gastado: getVal('paqueteria-matricula-cs8', dbPaqueteria),
+                        stockActual: getVal('stock-matricula-cs8', dbStock, 'val_25'),
+                        unidad: "CAJA"
+                    },
+                    {
+                        nombre: "BOBINA FILM HORNOS 800",
+                        ref: "740437",
+                        sec: "Paquetería",
+                        gastado: getVal('paqueteria-bobina-800', dbPaqueteria),
+                        stockActual: getVal('stock-bobina-800', dbStock, 'val_28'),
+                        unidad: "UNIDAD"
+                    },
+                    {
+                        nombre: "BOBINA FILM HORNOS 1200",
+                        ref: "736423",
+                        sec: "Paquetería",
+                        gastado: getVal('paqueteria-bobina-1200', dbPaqueteria),
+                        stockActual: getVal('stock-bobina-1200', dbStock, 'val_31'),
+                        unidad: "UNIDAD"
+                    },
+                    {
+                        nombre: "COLA FORMADORAS",
+                        ref: "736438",
+                        sec: "Confección",
+                        gastado: getVal('confeccion-cola', dbConfeccion),
+                        stockActual: getVal('stock-cola', dbStock),
+                        unidad: "UNIDAD"
+                    }
+                ];
+
+                const ahora = new Date();
+                const fechaStr = ahora.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const horaStr = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const cNavy = [15, 23, 42];      // #0F172A
+                const cOrange = [237, 125, 49];  // #ED7D31
+                const cGrayText = [100, 116, 139];
+
+                // 1. BANNER DE CABECERA
+                doc.setFillColor(...cNavy);
+                doc.rect(0, 0, 210, 30, 'F');
+
+                doc.setFillColor(...cOrange);
+                doc.rect(0, 30, 210, 2, 'F');
+
+                // Badge APS
+                doc.setFillColor(...cOrange);
+                doc.roundedRect(14, 6, 18, 18, 3, 3, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.text('APS', 23, 17.5, { align: 'center' });
+
+                // Títulos
+                doc.setFontSize(14);
+                doc.setTextColor(255, 255, 255);
+                doc.text('INFORME DE MOVIMIENTO Y STOCK SEMANAL', 36, 14);
+
+                doc.setFontSize(9.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(226, 232, 240);
+                doc.text(`Resultado Ciclo Semanal: Semana ${semanaAnterior}-${semana}  |  Año ${ano}`, 36, 21);
+
+                // Tarjeta fecha derecha
+                doc.setFillColor(30, 41, 59);
+                doc.roundedRect(148, 6, 48, 18, 2, 2, 'F');
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(237, 125, 49);
+                doc.text(`SEMANA ${semanaAnterior} - ${semana}`, 172, 12.5, { align: 'center' });
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(203, 213, 225);
+                doc.text(`${fechaStr} - ${horaStr}`, 172, 18.5, { align: 'center' });
+
+                let currentY = 38;
+
+                // 2. CAJA RESUMEN EXPLICATIVO (Solicitado por el usuario)
+                doc.setFillColor(248, 250, 252);
+                doc.setDrawColor(226, 232, 240);
+                doc.roundedRect(14, currentY, 182, 38, 3, 3, 'FD');
+
+                // Barra lateral naranja
+                doc.setFillColor(...cOrange);
+                doc.roundedRect(14, currentY, 3.5, 38, 1.5, 1.5, 'F');
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...cNavy);
+                doc.text(`Resultado Semana ${semanaAnterior}-${semana}:`, 21, currentY + 6.5);
+
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(51, 65, 85);
+
+                const tGastos = `• Esta semana se ha gastado: ${boxes[0].gastado} de Caja Mediana Woman, ${boxes[1].gastado} de Caja GP Woman, ${boxes[2].gastado} de Caja Grande Man, ${boxes[3].gastado} de Caja GP Man y ${boxes[4].gastado} de Tapeta.`;
+                const tDescarga = `• Han llegado en descarga de camiones: ${boxes[0].llegado} de Caja Mediana Woman, ${boxes[1].llegado} de Caja GP Woman, ${boxes[2].llegado} de Caja Grande Man, ${boxes[3].llegado} de Caja GP Man y ${boxes[4].llegado} de Tapeta.`;
+                const tStock = `• Stock total actual disponible: ${boxes[0].stockActual} de Caja Mediana Woman, ${boxes[1].stockActual} de Caja GP Woman, ${boxes[2].stockActual} de Caja Grande Man, ${boxes[3].stockActual} de Caja GP Man y ${boxes[4].stockActual} de Tapeta.`;
+
+                doc.text(doc.splitTextToSize(tGastos, 172), 21, currentY + 14);
+                doc.text(doc.splitTextToSize(tDescarga, 172), 21, currentY + 22);
+                doc.text(doc.splitTextToSize(tStock, 172), 21, currentY + 30);
+
+                currentY += 45;
+
+                // 3. TABLA 1: CAJAS Y TAPETAS (CONFECCIÓN)
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...cNavy);
+                doc.text('1. Balance Detallado de Cajas y Tapetas (Confección)', 14, currentY);
+
+                const table1Rows = boxes.map(b => [
+                    b.nombre,
+                    b.ref,
+                    b.stockAnterior.toString(),
+                    b.llegado > 0 ? `+${b.llegado}` : `${b.llegado}`,
+                    b.gastado > 0 ? `-${b.gastado}` : `${b.gastado}`,
+                    b.stockActual.toString(),
+                    b.unidad
+                ]);
+
+                const autoTableFn = (doc.autoTable || (window.jspdf && window.jspdf.autoTable));
+                if (typeof autoTableFn === 'function') {
+                    doc.autoTable({
+                        startY: currentY + 3,
+                        head: [['Artículo', 'Referencia', `Stock Sem. ${semanaAnterior}`, 'Entradas Camiones', 'Gastado Semana', 'Stock Total Actual', 'Unidad']],
+                        body: table1Rows,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: cOrange,
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 8,
+                            halign: 'center'
+                        },
+                        columnStyles: {
+                            0: { fontStyle: 'bold', halign: 'left', cellWidth: 46 },
+                            1: { halign: 'center', cellWidth: 22 },
+                            2: { halign: 'center', cellWidth: 23 },
+                            3: { halign: 'center', cellWidth: 25, textColor: [16, 120, 50], fontStyle: 'bold' },
+                            4: { halign: 'center', cellWidth: 24, textColor: [180, 40, 40], fontStyle: 'bold' },
+                            5: { halign: 'center', cellWidth: 26, fontStyle: 'bold', fillColor: [255, 247, 237] },
+                            6: { halign: 'center', cellWidth: 16 }
+                        },
+                        styles: {
+                            fontSize: 7.5,
+                            cellPadding: 2,
+                            textColor: [30, 41, 59]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 250, 252]
+                        },
+                        margin: { left: 14, right: 14 }
+                    });
+
+                    currentY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : currentY + 40) + 8;
+                }
+
+                // 4. TABLA 2: CONSUMIBLES (PAQUETERÍA Y CONFECCIÓN)
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...cNavy);
+                doc.text('2. Stock Total Actual y Consumo de Otros Materiales', 14, currentY);
+
+                const table2Rows = consumibles.map(c => [
+                    c.nombre,
+                    c.ref,
+                    c.sec,
+                    c.gastado > 0 ? `-${c.gastado}` : `${c.gastado}`,
+                    c.stockActual.toString(),
+                    c.unidad
+                ]);
+
+                if (typeof autoTableFn === 'function') {
+                    doc.autoTable({
+                        startY: currentY + 3,
+                        head: [['Consumible', 'Referencia', 'Sección', 'Gastado Semana', 'Stock Total Actual', 'Unidad']],
+                        body: table2Rows,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: cNavy,
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 8,
+                            halign: 'center'
+                        },
+                        columnStyles: {
+                            0: { fontStyle: 'bold', halign: 'left', cellWidth: 54 },
+                            1: { halign: 'center', cellWidth: 24 },
+                            2: { halign: 'center', cellWidth: 42 },
+                            3: { halign: 'center', cellWidth: 24, textColor: [180, 40, 40], fontStyle: 'bold' },
+                            4: { halign: 'center', cellWidth: 24, fontStyle: 'bold', fillColor: [241, 245, 249] },
+                            5: { halign: 'center', cellWidth: 14 }
+                        },
+                        styles: {
+                            fontSize: 7.5,
+                            cellPadding: 1.8,
+                            textColor: [30, 41, 59]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 250, 252]
+                        },
+                        margin: { left: 14, right: 14 }
+                    });
+                }
+
+                // 5. PIE DE PÁGINA
+                const pageHeight = doc.internal.pageSize.getHeight();
+                doc.setDrawColor(203, 213, 225);
+                doc.line(14, pageHeight - 12, 196, pageHeight - 12);
+
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(...cGrayText);
+                doc.text(`Documento generado por el Sistema de Control de Inventario APS. Semana ${semanaAnterior}-${semana} / Año ${ano}.`, 14, pageHeight - 7);
+                doc.text(`Página 1 de 1`, 196, pageHeight - 7, { align: 'right' });
+
+                // Descarga de archivo PDF
+                const nombreArchivo = `Informe_Semanal_Stock_${semanaAnterior}-${semana}_Ano_${ano}.pdf`;
+                doc.save(nombreArchivo);
+
+                if (btn) {
+                    btn.innerHTML = '<span>✅</span> ¡Descargado!';
+                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                    setTimeout(() => {
+                        btn.innerHTML = originalBtnHTML;
+                        btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                        btn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                        btn.disabled = false;
+                        if (typeof window.updateDownloadInfoButtonState === 'function') {
+                            window.updateDownloadInfoButtonState();
+                        }
+                    }, 2500);
+                }
+
+            } catch (err) {
+                console.error("Error al generar PDF de información:", err);
+                alert("Ocurrió un error al generar el PDF: " + err.message);
+                if (btn) {
+                    btn.innerHTML = originalBtnHTML;
+                    btn.disabled = false;
+                    if (typeof window.updateDownloadInfoButtonState === 'function') {
+                        window.updateDownloadInfoButtonState();
+                    }
+                }
+            }
+        };
+
+        window.downloadCSVReport = window.downloadInformacionPDF;
     </script>
 </body>
 
