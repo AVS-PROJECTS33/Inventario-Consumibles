@@ -1546,36 +1546,70 @@
 
             // Enviar a Firebase usando increment() si hay datos que actualizar
             if (Object.keys(stockUpdates).length > 0) {
-                const stockW = document.getElementById('week-Stock').value;
-                const stockY = document.getElementById('year-Stock').value;
+                const targetYear = year || document.getElementById('year-' + tabId)?.value || document.getElementById('year-Stock').value;
+                const targetWeek = week || document.getElementById('week-' + tabId)?.value || document.getElementById('week-Stock').value;
                 
-                const firebaseUpdates = {};
-                for (const [key, val] of Object.entries(stockUpdates)) {
-                    firebaseUpdates[key] = window.increment(val);
+                try {
+                    const docRef = window.doc(window.db, 'registros_semanales', `Stock_${targetYear}_${targetWeek}`);
+                    const docSnap = await window.getDoc(docRef);
+                    const docData = docSnap.exists() ? docSnap.data() : {};
                     
-                    // Actualizar también la UI visual de Stock
-                    const stockEl = document.getElementById(key);
-                    if (stockEl) {
-                        const currentStock = Number(stockEl.value) || 0;
-                        stockEl.value = Math.round(currentStock + val);
+                    const firebaseUpdates = {};
+                    for (const [key, val] of Object.entries(stockUpdates)) {
+                        const currentDbVal = docData[key];
+                        const stockEl = document.getElementById(key);
+                        const uiStock = stockEl ? (Number(stockEl.value) || 0) : 0;
                         
-                        // Sincronizar visualmente con Confección si procede
-                        const itemRawName = key.replace('stock-', '');
-                        const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
-                        if (inventoryItems.includes(itemRawName)) {
-                            const confEl = document.getElementById(`confeccion-${itemRawName}`);
-                            if (confEl) {
-                                confEl.value = Math.round(currentStock + val);
-                                if (typeof window.calculateGastadoConfeccion === 'function') {
-                                    window.calculateGastadoConfeccion();
+                        // Si en la base de datos el valor es un String o no existe, convertimos a Number para no machacarlo
+                        if (currentDbVal === undefined) {
+                            // No existe en BD aún: usamos el valor actual de pantalla + delta
+                            firebaseUpdates[key] = Math.round(uiStock + val);
+                        } else if (typeof currentDbVal === 'string') {
+                            const parsed = Number(currentDbVal);
+                            const baseNum = !isNaN(parsed) ? parsed : uiStock;
+                            firebaseUpdates[key] = Math.round(baseNum + val);
+                        } else {
+                            // Es un número real en BD: increment() atómico seguro
+                            firebaseUpdates[key] = window.increment(val);
+                        }
+                        
+                        // Actualizar también la UI visual de Stock
+                        if (stockEl) {
+                            stockEl.value = Math.round(uiStock + val);
+                            stockEl.dataset.prevValue = stockEl.value;
+                            
+                            // Sincronizar visualmente con Confección si procede
+                            const itemRawName = key.replace('stock-', '');
+                            const inventoryItems = ['caja-mediana-woman', 'caja-gp-woman', 'caja-grande-man', 'caja-gp-man', 'tapeta'];
+                            if (inventoryItems.includes(itemRawName)) {
+                                const confEl = document.getElementById(`confeccion-${itemRawName}`);
+                                if (confEl) {
+                                    confEl.value = Math.round(uiStock + val);
+                                    confEl.dataset.prevValue = confEl.value;
+                                    if (typeof window.calculateGastadoConfeccion === 'function') {
+                                        window.calculateGastadoConfeccion();
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-                try {
-                    const docRef = window.doc(window.db, 'registros_semanales', `Stock_${stockY}_${stockW}`);
+                    
+                    // Si el documento de Stock no existía en BD, salvaguardamos metadatos y el resto de artículos de la UI para no dejarlo vacío
+                    if (!docSnap.exists()) {
+                        firebaseUpdates['_ano'] = targetYear;
+                        firebaseUpdates['_semana'] = targetWeek;
+                        firebaseUpdates['_seccion'] = 'Stock';
+                        firebaseUpdates['_herenciaAplicada'] = true;
+                        
+                        // Rellenar los otros artículos de stock desde la UI si están disponibles
+                        const allStockInputs = document.querySelectorAll('#Stock input[id^="stock-"]');
+                        allStockInputs.forEach(input => {
+                            if (firebaseUpdates[input.id] === undefined && input.value !== '') {
+                                firebaseUpdates[input.id] = Number(input.value) || 0;
+                            }
+                        });
+                    }
+                    
                     await window.setDoc(docRef, firebaseUpdates, { merge: true });
                 } catch(e) {
                     console.error("Error aplicando actualizaciones atómicas de stock:", e);
@@ -1694,13 +1728,27 @@
                 const data = {};
                 inputs.forEach((input, index) => {
                     const key = input.id || `val_${index}`;
-                    if (input.type === 'checkbox') data[key] = input.checked;
-                    else data[key] = input.value;
+                    if (input.type === 'checkbox') {
+                        data[key] = input.checked;
+                    } else {
+                        const val = input.value !== undefined ? String(input.value).trim() : '';
+                        if (val === '') {
+                            data[key] = '';
+                        } else if (input.type === 'number' || (!isNaN(val) && !isNaN(parseFloat(val)) && !key.includes('password') && !key.includes('worker') && !key.includes('responsable'))) {
+                            data[key] = Number(val);
+                        } else {
+                            data[key] = input.value;
+                        }
+                    }
                 });
 
                 data['_ano'] = year;
                 data['_semana'] = week;
                 data['_seccion'] = tabId;
+
+                if (tabId === 'Stock') {
+                    data['_herenciaAplicada'] = true;
+                }
 
                 const docRef = doc(db, 'registros_semanales', `${tabId}_${year}_${week}`);
                 await setDoc(docRef, data, { merge: true });
@@ -1905,8 +1953,9 @@
                             if (input.type !== 'checkbox' && input.type !== 'button') {
                                 const key = input.id || `val_${index}`;
                                 const fallbackKey = input.getAttribute('data-old-id') || `val_${index}`;
+                                let existingVal = (data[key] !== undefined && data[key] !== '') ? Number(data[key]) : undefined;
                                 let inheritedVal = Number(inheritedData[key] !== undefined ? inheritedData[key] : (inheritedData[fallbackKey] || 0));
-                                data[key] = inheritedVal;
+                                data[key] = (existingVal !== undefined && !isNaN(existingVal)) ? existingVal : inheritedVal;
                             }
                         });
 
@@ -1959,13 +2008,14 @@
                     let val = data[key];
                     if (val === undefined || val === '') val = data[fallbackKey];
 
-                    if (val !== undefined) {
+                    if (val !== undefined && val !== '') {
                         if (input.type === 'checkbox') input.checked = val;
                         else {
-                            let displayVal = val;
-                            if (typeof val === 'number' && val % 1 !== 0) displayVal = Math.round(val);
+                            let numVal = Number(val);
+                            let isNum = !isNaN(numVal) && (input.type === 'number' || typeof val === 'number');
+                            let displayVal = isNum ? (numVal % 1 !== 0 ? Math.round(numVal) : numVal) : val;
                             input.value = displayVal;
-                            input.dataset.prevValue = val; // Se guarda el exacto para deltas
+                            input.dataset.prevValue = isNum ? numVal : val; // Se guarda el exacto para deltas
                         }
                     } else {
                         if (input.type !== 'checkbox' && input.type !== 'button') {
